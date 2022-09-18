@@ -16,7 +16,7 @@
 		<maven.compiler.target>18</maven.compiler.target>
 
 		<imgscalr-version>4.2</imgscalr-version>
-		<telegram-bot-version>6.2.0</telegram-bot-version>
+		<telegrambots-version>6.1.0</telegrambots-version>
 	</properties>
 
 	<dependencies>
@@ -26,9 +26,9 @@
 			<version>${imgscalr-version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.github.pengrad</groupId>
-			<artifactId>java-telegram-bot-api</artifactId>
-			<version>${telegram-bot-version}</version>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots</artifactId>
+			<version>${telegrambots-version}</version>
 		</dependency>
 	</dependencies>
 

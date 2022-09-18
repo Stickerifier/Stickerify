@@ -27,7 +27,7 @@ public class ImageHelper {
 		try {
 			return createPngFile(resizeImage(ImageIO.read(imageFile)));
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			return imageFile;
 		}
 	}
 
@@ -53,7 +53,7 @@ public class ImageHelper {
 	 * @throws IOException
 	 */
 	private static File createPngFile(BufferedImage image) throws IOException {
-		File pngImage = new File(UUID.randomUUID() + "." + PNG_EXTENSION);
+		var pngImage = new File(UUID.randomUUID() + "." + PNG_EXTENSION);
 		ImageIO.write(image, PNG_EXTENSION, pngImage);
 
 		return pngImage;
