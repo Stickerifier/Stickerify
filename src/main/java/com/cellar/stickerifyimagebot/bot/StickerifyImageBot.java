@@ -2,6 +2,7 @@ package com.cellar.stickerifyimagebot.bot;
 
 import com.cellar.stickerifyimagebot.image.ImageHelper;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
@@ -38,8 +39,11 @@ public class StickerifyImageBot extends TelegramLongPollingBot {
 		response.setChatId(update.getMessage().getChatId());
 		response.setCaption(CAPTION);
 
+		GetFile getFile = new GetFile(bestImage.getFileId());
+
 		try {
-			File pngFile = ImageHelper.convertToPng(downloadFile(bestImage.getFilePath()));
+			String filePath = execute(getFile).getFilePath();
+			File pngFile = ImageHelper.convertToPng(downloadFile(filePath));
 			response.setDocument(new InputFile(pngFile));
 
 			execute(response);
