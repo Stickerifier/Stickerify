@@ -13,7 +13,7 @@ public class ImageHelper {
 
 	private static final String PNG_EXTENSION = "png";
 	/**
-	 * {@see <a href="https://core.telegram.org/stickers#static-stickers-and-emoji">Telegram documentation</a>}
+	 * @see <a href="https://core.telegram.org/stickers#static-stickers-and-emoji">Telegram documentation</a>
 	 */
 	private static final int MAX_ALLOWED_SIZE = 512;
 
