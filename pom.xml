@@ -17,6 +17,7 @@
 
 		<imgscalr-version>4.2</imgscalr-version>
 		<telegrambots-version>6.1.0</telegrambots-version>
+		<slf4j.version>2.0.1</slf4j.version>
 	</properties>
 
 	<dependencies>
@@ -30,6 +31,16 @@
 			<artifactId>telegrambots</artifactId>
 			<version>${telegrambots-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -41,6 +52,35 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.10.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.4.2</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<finalName>${project.name}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<archive>
+								<manifestEntries>
+									<Multi-Release>true</Multi-Release>
+								</manifestEntries>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<mainClass>com.cellar.stickerifyimagebot.Main</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
