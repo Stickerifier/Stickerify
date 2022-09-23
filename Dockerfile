@@ -4,4 +4,4 @@ COPY pom.xml /usr/src/app
 ARG STICKERIFY_TOKEN
 ENV STICKERIFY_TOKEN $STICKERIFY_TOKEN
 RUN mvn -f /usr/src/app/pom.xml clean package
-RUN	java -jar /usr/src/app/target/StickerifyImageBot.jar
+CMD	["java","-jar","/usr/src/app/target/StickerifyImageBot.jar"]
