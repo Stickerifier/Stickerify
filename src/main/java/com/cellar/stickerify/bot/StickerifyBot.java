@@ -67,20 +67,31 @@ public class StickerifyBot extends TelegramLongPollingBot {
 		response.setChatId(request.getChatId());
 		response.setCaption(TextMessage.FILE_READY.getText());
 		response.setParseMode(ParseMode.MARKDOWN);
+		response.setReplyToMessageId(request.getMessageId());
 
 		GetFile getFile = new GetFile(request.getFileId());
 
+		File pngFile = null;
+
 		try {
 			String filePath = execute(getFile).getFilePath();
-			File pngFile = ImageHelper.convertToPng(downloadFile(filePath));
+			pngFile = ImageHelper.convertToPng(downloadFile(filePath));
 			response.setDocument(new InputFile(pngFile));
 
 			execute(response);
-
-			Files.deleteIfExists(pngFile.toPath());
-		} catch (TelegramApiException | IOException e) {
+		} catch (TelegramApiException e) {
 			LOGGER.severe("Unable to send the message: " + e);
 			answerText(TextMessage.ERROR, request.getChatId());
+		} finally {
+			if (pngFile != null) deleteTempFile(pngFile);
+		}
+	}
+
+	private static void deleteTempFile(File file) {
+		try {
+			Files.deleteIfExists(file.toPath());
+		} catch (IOException e) {
+			LOGGER.severe("An error occurred trying to delete generated image: " + e);
 		}
 	}
 }

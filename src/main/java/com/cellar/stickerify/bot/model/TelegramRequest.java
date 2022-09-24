@@ -25,4 +25,7 @@ public record TelegramRequest(Message message) {
 		return message.getChatId();
 	}
 
+	public Integer getMessageId() {
+		return message.getMessageId();
+	}
 }
