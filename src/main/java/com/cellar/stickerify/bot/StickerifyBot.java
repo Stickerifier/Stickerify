@@ -1,5 +1,7 @@
 package com.cellar.stickerify.bot;
 
+import com.cellar.stickerify.bot.model.TelegramRequest;
+import com.cellar.stickerify.bot.model.TextMessage;
 import com.cellar.stickerify.image.ImageHelper;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
@@ -11,22 +13,13 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.logging.Logger;
 
 public class StickerifyBot extends TelegramLongPollingBot {
 
 	private static final Logger LOGGER = Logger.getLogger(StickerifyBot.class.getSimpleName());
-
-	private static final String FILE_READY_CAPTION = "Your sticker file is ready!";
-	private static final String ABOUT_TEXT = """
-			This bot is open source, you can check it out on [Github](https://github.com/rob93c/Stickerify)\\.
-			
-			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
-			""";
-	private static final String ERROR_TEXT = """
-            The file conversion was unsuccessful, only __valid image formats__ are supported \\(also `gif` and `webp` are not supported\\)\\.
-            If you think it should have worked, please report the issue on [Github](https://github.com/rob93c/Stickerify/issues/new/choose)\\.
-            """;
 
 	@Override
 	public String getBotUsername() {
@@ -40,37 +33,40 @@ public class StickerifyBot extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(Update update) {
-		TelegramRequest request = new TelegramRequest(update.getMessage());
+		if (update.getMessage() != null) {
+			TelegramRequest request = new TelegramRequest(update.getMessage());
 
-		answer(request);
+			answer(request);
+		}
 	}
 
 	private void answer(TelegramRequest request) {
 		if (request.getFileId() == null) {
-			answerText(ABOUT_TEXT, request.getChatId());
+			answerText(TextMessage.ABOUT, request.getChatId());
 		} else {
 			answerWithDocument(request);
 		}
 	}
 
-	private void answerText(String text, Long chatId) {
+	private void answerText(TextMessage textMessage, Long chatId) {
 		SendMessage response = new SendMessage();
 		response.setChatId(chatId);
-		response.setText(text);
+		response.setText(textMessage.getText());
 		response.setParseMode(ParseMode.MARKDOWNV2);
+		response.setDisableWebPagePreview(textMessage.isDisableWebPreview());
 
 		try {
 			execute(response);
 		} catch (TelegramApiException e) {
 			LOGGER.severe("Unable to send the message: " + e);
-			answerText(ERROR_TEXT, chatId);
+			answerText(TextMessage.ERROR, chatId);
 		}
 	}
 
 	private void answerWithDocument(TelegramRequest request) {
 		SendDocument response = new SendDocument();
 		response.setChatId(request.getChatId());
-		response.setCaption(FILE_READY_CAPTION);
+		response.setCaption(TextMessage.FILE_READY.getText());
 
 		GetFile getFile = new GetFile(request.getFileId());
 
@@ -80,9 +76,11 @@ public class StickerifyBot extends TelegramLongPollingBot {
 			response.setDocument(new InputFile(pngFile));
 
 			execute(response);
-		} catch (TelegramApiException e) {
+
+			Files.deleteIfExists(pngFile.toPath());
+		} catch (TelegramApiException | IOException e) {
 			LOGGER.severe("Unable to send the message: " + e);
-			answerText(ERROR_TEXT, request.getChatId());
+			answerText(TextMessage.ERROR, request.getChatId());
 		}
 	}
 }

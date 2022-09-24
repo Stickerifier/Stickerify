@@ -1,4 +1,4 @@
-package com.cellar.stickerify.bot;
+package com.cellar.stickerify.bot.model;
 
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
@@ -7,7 +7,7 @@ import static java.util.Comparator.comparing;
 
 public record TelegramRequest(Message message) {
 
-	String getFileId() {
+	public String getFileId() {
 		String fileId = null;
 
 		if (message.hasPhoto()) {
@@ -21,7 +21,7 @@ public record TelegramRequest(Message message) {
 		return fileId;
 	}
 
-	Long getChatId() {
+	public Long getChatId() {
 		return message.getChatId();
 	}
 
