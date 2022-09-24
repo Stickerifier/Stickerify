@@ -52,14 +52,13 @@ public class StickerifyBot extends TelegramLongPollingBot {
 		SendMessage response = new SendMessage();
 		response.setChatId(chatId);
 		response.setText(textMessage.getText());
-		response.setParseMode(ParseMode.MARKDOWNV2);
+		response.setParseMode(ParseMode.MARKDOWN);
 		response.setDisableWebPagePreview(textMessage.isDisableWebPreview());
 
 		try {
 			execute(response);
 		} catch (TelegramApiException e) {
 			LOGGER.severe("Unable to send the message: " + e);
-			answerText(TextMessage.ERROR, chatId);
 		}
 	}
 
