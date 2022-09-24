@@ -66,6 +66,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 		SendDocument response = new SendDocument();
 		response.setChatId(request.getChatId());
 		response.setCaption(TextMessage.FILE_READY.getText());
+		response.setParseMode(ParseMode.MARKDOWN);
 
 		GetFile getFile = new GetFile(request.getFileId());
 
