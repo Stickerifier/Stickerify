@@ -1,5 +1,6 @@
 package com.cellar.stickerify.image;
 
+import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Mode;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -8,7 +9,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -26,17 +26,17 @@ public class ImageHelper {
 	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
 	 *
-	 * @param imageFile the file to convert to png
+	 * @param file the file to convert to png
 	 * @return a resized and converted png image
 	 * @throws TelegramApiException if passed-in file doesn't represent an image
 	 */
-	public static File convertToPng(File imageFile) throws TelegramApiException {
-		if (!isSupportedFormat(imageFile)) throw new TelegramApiException("Passed-in file is not a valid image");
+	public static File convertToPng(File file) throws TelegramApiException {
+		if (!isValidImage(file)) throw new TelegramApiException("Passed-in file is not a valid image");
 
 		try {
-			return createPngFile(resizeImage(ImageIO.read(imageFile)));
+			return createPngFile(resizeImage(ImageIO.read(file)));
 		} catch (IOException e) {
-			return imageFile;
+			return file;
 		}
 	}
 
@@ -46,19 +46,19 @@ public class ImageHelper {
 	 * @param file the file sent to the bot
 	 * @return true if {@code file} is an image
 	 */
-	private static boolean isSupportedFormat(File file) {
-		boolean isSupported = false;
+	private static boolean isValidImage(File file) {
+		boolean isValid = false;
 
 		try {
-			String mimeType = Files.probeContentType(file.toPath());
-			isSupported = mimeType.startsWith(MIME_TYPE_IMAGE);
+			String mimeType = new Tika().detect(file);
+			isValid = mimeType != null && mimeType.startsWith(MIME_TYPE_IMAGE);
 
-			LOGGER.fine("The file has MIME type " + mimeType);
+			LOGGER.info("The file has " + mimeType + " MIME type");
 		} catch (IOException e) {
 			LOGGER.severe("Unable to retrieve mime type for file " + file.getName());
 		}
 
-		return isSupported;
+		return isValid;
 	}
 
 	/**

@@ -19,11 +19,14 @@ public class StickerifyBot extends TelegramLongPollingBot {
 
 	private static final String FILE_READY_CAPTION = "Your sticker file is ready!";
 	private static final String ABOUT_TEXT = """
-			This bot is open source, you can check it out on [Github](https://github.com/rob93c/StickerifyImageBot).
+			This bot is open source, you can check it out on [Github](https://github.com/rob93c/StickerifyImageBot)\\.
 			
-			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)!
+			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
 			""";
-	private static final String ERROR_TEXT = "An error occurred, please try again or report the issue in [Github](https://github.com/rob93c/StickerifyImageBot/issues/new/choose).";
+	private static final String ERROR_TEXT = """
+            The file conversion was unsuccessful, only __valid image formats__ are supported (also `gif` and `webp` are not supported)\\.
+            If you think it should have worked, please report the issue on [Github](https://github.com/rob93c/StickerifyImageBot/issues/new/choose)\\.
+            """;
 
 	@Override
 	public String getBotUsername() {
@@ -43,9 +46,11 @@ public class StickerifyBot extends TelegramLongPollingBot {
 	}
 
 	private void answer(TelegramRequest request) {
-		if (request.getFileId() == null) answerText(ABOUT_TEXT, request.getChatId());
-
-		answerWithDocument(request);
+		if (request.getFileId() == null) {
+			answerText(ABOUT_TEXT, request.getChatId());
+		} else {
+			answerWithDocument(request);
+		}
 	}
 
 	private void answerText(String text, Long chatId) {
@@ -58,6 +63,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 			execute(response);
 		} catch (TelegramApiException e) {
 			LOGGER.severe("Unable to send the message: " + e);
+			answerText(ERROR_TEXT, chatId);
 		}
 	}
 

@@ -17,6 +17,7 @@
 
 		<imgscalr-version>4.2</imgscalr-version>
 		<telegrambots-version>6.1.0</telegrambots-version>
+		<tika-version>2.4.1</tika-version>
 		<slf4j.version>2.0.2</slf4j.version>
 	</properties>
 
@@ -30,6 +31,11 @@
 			<groupId>org.telegram</groupId>
 			<artifactId>telegrambots</artifactId>
 			<version>${telegrambots-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>${tika-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
