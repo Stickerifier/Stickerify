@@ -2,7 +2,10 @@ package com.cellar.stickerify.bot.model;
 
 public enum TextMessage {
 
-	FILE_READY("Your sticker file is ready!"),
+	FILE_READY("""
+            Your sticker file is ready!
+            Head to [Stickers](https://t.me/Stickers) to create a new sticker.
+            """),
 	ABOUT("""
 			This bot is open source, you can check it out on [Github](https://github.com/rob93c/Stickerify).
 
