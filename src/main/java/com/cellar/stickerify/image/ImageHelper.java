@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -17,12 +18,14 @@ public class ImageHelper {
 	private static final Logger LOGGER = Logger.getLogger(ImageHelper.class.getSimpleName());
 
 	private static final String MIME_TYPE_IMAGE = "image/";
+	private static final String WEBP_EXTENSION = "webp";
+	private static final String GIF_EXTENSION = "gif";
 	private static final String PNG_EXTENSION = "png";
 	/**
 	 * @see <a href="https://core.telegram.org/stickers#static-stickers-and-emoji">Telegram documentation</a>
 	 */
 	private static final int MAX_ALLOWED_SIZE = 512;
-
+	private static final List<String> UNSUPPORTED_FORMATS = List.of(WEBP_EXTENSION, GIF_EXTENSION);
 	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
 	 *
@@ -44,14 +47,14 @@ public class ImageHelper {
 	 * Checks if passed-in file represents a valid image.
 	 *
 	 * @param file the file sent to the bot
-	 * @return true if {@code file} is an image
+	 * @return {@code true} if {@code file} is an image
 	 */
 	private static boolean isValidImage(File file) {
 		boolean isValid = false;
 
 		try {
 			String mimeType = new Tika().detect(file);
-			isValid = mimeType != null && mimeType.startsWith(MIME_TYPE_IMAGE);
+			isValid = mimeType.startsWith(MIME_TYPE_IMAGE) && isSupportedImage(mimeType);
 
 			LOGGER.info("The file has " + mimeType + " MIME type");
 		} catch (IOException e) {
@@ -59,6 +62,16 @@ public class ImageHelper {
 		}
 
 		return isValid;
+	}
+
+	/**
+	 * Checks if the MIME type corresponds to a supported one.
+	 *
+	 * @param mimeType the MIME type to check
+	 * @return {@code true} if the MIME type is supported
+	 */
+	private static boolean isSupportedImage(String mimeType) {
+		return UNSUPPORTED_FORMATS.stream().noneMatch(mimeType::endsWith);
 	}
 
 	/**

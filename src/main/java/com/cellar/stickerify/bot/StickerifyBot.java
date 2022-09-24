@@ -24,7 +24,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
 			""";
 	private static final String ERROR_TEXT = """
-            The file conversion was unsuccessful, only __valid image formats__ are supported (also `gif` and `webp` are not supported)\\.
+            The file conversion was unsuccessful, only __valid image formats__ are supported \\(also `gif` and `webp` are not supported\\)\\.
             If you think it should have worked, please report the issue on [Github](https://github.com/rob93c/StickerifyImageBot/issues/new/choose)\\.
             """;
 
