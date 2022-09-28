@@ -17,15 +17,15 @@ public class ImageHelper {
 
 	private static final Logger LOGGER = Logger.getLogger(ImageHelper.class.getSimpleName());
 
-	private static final String MIME_TYPE_IMAGE = "image/";
-	private static final String WEBP_EXTENSION = "webp";
-	private static final String GIF_EXTENSION = "gif";
-	private static final String PNG_EXTENSION = "png";
 	/**
 	 * @see <a href="https://core.telegram.org/stickers#static-stickers-and-emoji">Telegram documentation</a>
 	 */
 	private static final int MAX_ALLOWED_SIZE = 512;
-	private static final List<String> UNSUPPORTED_FORMATS = List.of(WEBP_EXTENSION, GIF_EXTENSION);
+	private static final String MIME_TYPE_IMAGE = "image/";
+	private static final String PNG_EXTENSION = "png";
+
+	private static final List<String> UNSUPPORTED_FORMATS = List.of("webp", "gif", "gifv");
+
 	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
 	 *

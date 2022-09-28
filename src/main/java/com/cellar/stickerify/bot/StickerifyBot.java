@@ -17,6 +17,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.logging.Logger;
 
+/**
+ * A Telegram bot to convert images in the format required to be used as Telegram stickers (512x512 PNGs).
+ *
+ * @author Roberto Cella
+ */
 public class StickerifyBot extends TelegramLongPollingBot {
 
 	private static final Logger LOGGER = Logger.getLogger(StickerifyBot.class.getSimpleName());
