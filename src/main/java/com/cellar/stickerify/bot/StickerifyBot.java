@@ -3,6 +3,8 @@ package com.cellar.stickerify.bot;
 import com.cellar.stickerify.bot.model.TelegramRequest;
 import com.cellar.stickerify.bot.model.TextMessage;
 import com.cellar.stickerify.image.ImageHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -15,7 +17,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.logging.Logger;
 
 /**
  * A Telegram bot to convert images in the format required to be used as Telegram stickers (512x512 PNGs).
@@ -24,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class StickerifyBot extends TelegramLongPollingBot {
 
-	private static final Logger LOGGER = Logger.getLogger(StickerifyBot.class.getSimpleName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(StickerifyBot.class);
 
 	@Override
 	public String getBotUsername() {
@@ -63,7 +64,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 		try {
 			execute(response);
 		} catch (TelegramApiException e) {
-			LOGGER.severe("Unable to send the message: " + e);
+			LOGGER.error("Unable to send the message", e);
 		}
 	}
 
@@ -85,7 +86,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 
 			execute(response);
 		} catch (TelegramApiException e) {
-			LOGGER.severe("Unable to send the message: " + e);
+			LOGGER.error("Unable to send the message", e);
 			answerText(TextMessage.ERROR, request.getChatId());
 		} finally {
 			if (pngFile != null) deleteTempFile(pngFile);
@@ -96,7 +97,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 		try {
 			Files.deleteIfExists(file.toPath());
 		} catch (IOException e) {
-			LOGGER.severe("An error occurred trying to delete generated image: " + e);
+			LOGGER.error("An error occurred trying to delete generated image", e);
 		}
 	}
 }

@@ -3,6 +3,8 @@ package com.cellar.stickerify.image;
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Mode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.imageio.ImageIO;
@@ -11,11 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 public class ImageHelper {
 
-	private static final Logger LOGGER = Logger.getLogger(ImageHelper.class.getSimpleName());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
 
 	/**
 	 * @see <a href="https://core.telegram.org/stickers#static-stickers-and-emoji">Telegram documentation</a>
@@ -56,9 +57,9 @@ public class ImageHelper {
 			String mimeType = new Tika().detect(file);
 			isValid = mimeType.startsWith(MIME_TYPE_IMAGE) && isSupportedImage(mimeType);
 
-			LOGGER.info("The file has " + mimeType + " MIME type");
+			LOGGER.info("The file has {} MIME type", mimeType);
 		} catch (IOException e) {
-			LOGGER.severe("Unable to retrieve mime type for file " + file.getName());
+			LOGGER.error("Unable to retrieve mime type for file " + file.getName());
 		}
 
 		return isValid;
