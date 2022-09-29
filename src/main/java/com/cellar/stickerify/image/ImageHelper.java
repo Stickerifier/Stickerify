@@ -59,7 +59,7 @@ public final class ImageHelper {
 
 			LOGGER.info("The file has {} MIME type", mimeType);
 		} catch (IOException e) {
-			LOGGER.error("Unable to retrieve mime type for file " + file.getName());
+			LOGGER.error("Unable to retrieve MIME type for file {}", file.getName());
 		}
 
 		return isValid;
