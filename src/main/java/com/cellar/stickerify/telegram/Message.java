@@ -1,6 +1,9 @@
-package com.cellar.stickerify.bot.model;
+package com.cellar.stickerify.telegram;
 
-public enum TextMessage {
+/**
+ * Enum class containing the text responses the bot can use.
+ */
+public enum Message {
 
 	FILE_READY("""
             Your sticker file is ready!
@@ -20,12 +23,12 @@ public enum TextMessage {
 	private final String text;
 	private final boolean disableWebPreview;
 
-	TextMessage(String text) {
+	Message(String text) {
 		this.text = text;
 		this.disableWebPreview = false;
 	}
 
-	TextMessage(String text, boolean disableWebPreview) {
+	Message(String text, boolean disableWebPreview) {
 		this.text = text;
 		this.disableWebPreview = disableWebPreview;
 	}

@@ -1,4 +1,4 @@
-package com.cellar.stickerify.bot.model;
+package com.cellar.stickerify.telegram.model;
 
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;

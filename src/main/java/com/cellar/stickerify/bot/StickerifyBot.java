@@ -1,16 +1,16 @@
 package com.cellar.stickerify.bot;
 
-import com.cellar.stickerify.bot.model.TelegramRequest;
-import com.cellar.stickerify.bot.model.TextMessage;
 import com.cellar.stickerify.image.ImageHelper;
+import com.cellar.stickerify.telegram.Message;
+import com.cellar.stickerify.telegram.builder.DocumentMessageBuilder;
+import com.cellar.stickerify.telegram.builder.TextMessageBuilder;
+import com.cellar.stickerify.telegram.model.TelegramRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -43,23 +43,24 @@ public class StickerifyBot extends TelegramLongPollingBot {
 			TelegramRequest request = new TelegramRequest(update.getMessage());
 
 			answer(request);
+		} else {
+			LOGGER.info("Updated messages don't need to be handled");
 		}
 	}
 
 	private void answer(TelegramRequest request) {
 		if (request.getFileId() == null) {
-			answerText(TextMessage.ABOUT, request.getChatId());
+			answerText(Message.ABOUT, request.getChatId());
 		} else {
 			answerWithDocument(request);
 		}
 	}
 
-	private void answerText(TextMessage textMessage, Long chatId) {
-		SendMessage response = new SendMessage();
-		response.setChatId(chatId);
-		response.setText(textMessage.getText());
-		response.setParseMode(ParseMode.MARKDOWN);
-		response.setDisableWebPagePreview(textMessage.isDisableWebPreview());
+	private void answerText(Message textMessage, Long chatId) {
+		SendMessage response = new TextMessageBuilder()
+				.withChatId(chatId)
+				.withTextMessage(textMessage)
+				.build();
 
 		try {
 			execute(response);
@@ -69,25 +70,25 @@ public class StickerifyBot extends TelegramLongPollingBot {
 	}
 
 	private void answerWithDocument(TelegramRequest request) {
-		SendDocument response = new SendDocument();
-		response.setChatId(request.getChatId());
-		response.setCaption(TextMessage.FILE_READY.getText());
-		response.setParseMode(ParseMode.MARKDOWN);
-		response.setReplyToMessageId(request.getMessageId());
+		File pngFile = null;
 
 		GetFile getFile = new GetFile(request.getFileId());
-
-		File pngFile = null;
 
 		try {
 			String filePath = execute(getFile).getFilePath();
 			pngFile = ImageHelper.convertToPng(downloadFile(filePath));
-			response.setDocument(new InputFile(pngFile));
+
+			SendDocument response = new DocumentMessageBuilder()
+					.withChatId(request.getChatId())
+					.withTextMessage(Message.FILE_READY)
+					.withReplyToMessageId(request.getMessageId())
+					.withDocument(pngFile)
+					.build();
 
 			execute(response);
 		} catch (TelegramApiException e) {
 			LOGGER.error("Unable to send the message", e);
-			answerText(TextMessage.ERROR, request.getChatId());
+			answerText(Message.ERROR, request.getChatId());
 		} finally {
 			if (pngFile != null) deleteTempFile(pngFile);
 		}
