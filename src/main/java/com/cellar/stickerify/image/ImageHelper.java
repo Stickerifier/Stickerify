@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-public class ImageHelper {
+public final class ImageHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
 
@@ -35,7 +35,7 @@ public class ImageHelper {
 	 * @throws TelegramApiException if passed-in file doesn't represent an image
 	 */
 	public static File convertToPng(File file) throws TelegramApiException {
-		if (!isValidImage(file)) throw new TelegramApiException("Passed-in file is not a valid image");
+		if (!isValidImage(file)) throw new TelegramApiException("Passed-in file is not supported");
 
 		try {
 			return createPngFile(resizeImage(ImageIO.read(file)));
@@ -76,13 +76,16 @@ public class ImageHelper {
 	}
 
 	/**
-	 * Given an image, it returns its resized version with sides of max 512 pixels each.
+	 * Given an image, it returns its resized version with sides of max 512 pixels each,
+	 * unless it already is small enough.
 	 *
 	 * @param originalImage the image to be resized
 	 * @return resized image
 	 */
 	private static BufferedImage resizeImage(BufferedImage originalImage) {
-		if (originalImage.getWidth() >= originalImage.getHeight()) {
+		if (originalImage.getWidth() <= MAX_ALLOWED_SIZE && originalImage.getHeight() <= MAX_ALLOWED_SIZE) {
+			return originalImage;
+		} else if (originalImage.getWidth() >= originalImage.getHeight()) {
 			return Scalr.resize(originalImage, Mode.FIT_TO_WIDTH, MAX_ALLOWED_SIZE);
 		} else {
 			return Scalr.resize(originalImage, Mode.FIT_TO_HEIGHT, MAX_ALLOWED_SIZE);
@@ -103,5 +106,7 @@ public class ImageHelper {
 		return pngImage;
 	}
 
-	private ImageHelper() {}
+	private ImageHelper() {
+		throw new UnsupportedOperationException();
+	}
 }
