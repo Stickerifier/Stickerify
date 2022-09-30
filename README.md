@@ -4,21 +4,21 @@ A Telegram bot to convert images in the format required to be used as Telegram s
 
 ## Table of contents
 
-1. [How to use the bot](#How-to-use-the-bot)
-2. [How to create a new sticker](#How-to-create-a-new-sticker)
-3. [How to set up the project](#How-to-set-up-the-project)
-4. [How to run the bot locally](#How-to-run-the-bot-locally)
-5. [How to contribute to the project](#How-to-contribute-to-the-project)
-6. [Useful resources](#Useful-resources)
-7. [License](#License)
+* [How to use the bot](#How-to-use-the-bot)
+* [How to create a new sticker](#How-to-create-a-new-sticker)
+* [How to set up the project](#How-to-set-up-the-project)
+* [How to run the bot locally](#How-to-run-the-bot-locally)
+* [How to contribute to the project](#How-to-contribute-to-the-project)
+* [Useful resources](#Useful-resources)
+* [License](#License)
 
 ## How to use the bot
 
-The bot can be found [here](https://t.me/StickerifyImageBot): start it, and you can now send it the images you need to convert.
+You can use the bot going [here](https://t.me/StickerifyImageBot): start it, and you can now send it the images you need to convert.
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted image, if you sent a supported file (currently `.gif`s, `.gifv`s and `.webp`s are not supported)
+* the converted image, if you sent a supported file (currently `.gif`, `.gifv` and `.webp` files are not supported)
 * an error message, if you sent an unsupported file
 * an informative message for any message without a file
 
@@ -68,5 +68,5 @@ Do you have any question? Feel free to [open a new discussion](https://github.co
 See the [**LICENSE**](LICENSE) file for license rights and limitations (MIT).
 
 <div align="right">
-<sup>made with ❤️ by <a href="https://github.com/rob93c">@rob93c</a></sup>
+<sup>made with 💖 by <a href="https://github.com/rob93c">@rob93c</a></sup>
 </div>
