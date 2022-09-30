@@ -32,7 +32,7 @@ public final class ImageHelper {
 	 *
 	 * @param file the file to convert to png
 	 * @return a resized and converted png image
-	 * @throws TelegramApiException if passed-in file doesn't represent an image
+	 * @throws TelegramApiException if passed-in file doesn't represent a valid image
 	 */
 	public static File convertToPng(File file) throws TelegramApiException {
 		if (!isValidImage(file)) throw new TelegramApiException("Passed-in file is not supported");
@@ -76,16 +76,13 @@ public final class ImageHelper {
 	}
 
 	/**
-	 * Given an image, it returns its resized version with sides of max 512 pixels each,
-	 * unless it already is small enough.
+	 * Given an image, it returns its resized version with sides of max 512 pixels each.
 	 *
 	 * @param originalImage the image to be resized
 	 * @return resized image
 	 */
 	private static BufferedImage resizeImage(BufferedImage originalImage) {
-		if (originalImage.getWidth() <= MAX_ALLOWED_SIZE && originalImage.getHeight() <= MAX_ALLOWED_SIZE) {
-			return originalImage;
-		} else if (originalImage.getWidth() >= originalImage.getHeight()) {
+		if (originalImage.getWidth() >= originalImage.getHeight()) {
 			return Scalr.resize(originalImage, Mode.FIT_TO_WIDTH, MAX_ALLOWED_SIZE);
 		} else {
 			return Scalr.resize(originalImage, Mode.FIT_TO_HEIGHT, MAX_ALLOWED_SIZE);
