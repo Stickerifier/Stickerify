@@ -1,6 +1,6 @@
 package com.cellar.stickerify.telegram.builder;
 
-import com.cellar.stickerify.telegram.Message;
+import com.cellar.stickerify.telegram.AnswerMessage;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -19,10 +19,10 @@ public class TextMessageBuilder implements MessageBuilder<SendMessage> {
 	}
 
 	@Override
-	public MessageBuilder<SendMessage> withTextMessage(Message textMessage) {
-		message.setText(textMessage.getText());
+	public MessageBuilder<SendMessage> withAnswerMessage(AnswerMessage answerMessage) {
+		message.setText(answerMessage.getText());
 		message.setParseMode(ParseMode.MARKDOWN);
-		message.setDisableWebPagePreview(textMessage.isDisableWebPreview());
+		message.setDisableWebPagePreview(answerMessage.isDisableWebPreview());
 		return this;
 	}
 

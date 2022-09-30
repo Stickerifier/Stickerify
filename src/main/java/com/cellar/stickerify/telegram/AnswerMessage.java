@@ -1,10 +1,19 @@
 package com.cellar.stickerify.telegram;
 
 /**
- * Enum class containing the text responses the bot can use.
+ * Enum class containing the text answers the bot can use.
  */
-public enum Message {
+public enum AnswerMessage {
 
+	HELP("""
+			Send me the image you want to convert and I will take care of the rest.
+
+			Based on what you send, I will answer the following:
+
+			* the converted image, if you sent a supported file (currently `.gif`, `.gifv` and `.webp` files are not supported)
+			* an error message, if you sent an unsupported file
+			* an informative message for any message without a file
+			"""),
 	FILE_READY("""
             Your sticker file is ready!
             Head to [Stickers](https://t.me/Stickers) to create a new sticker.
@@ -23,12 +32,12 @@ public enum Message {
 	private final String text;
 	private final boolean disableWebPreview;
 
-	Message(String text) {
+	AnswerMessage(String text) {
 		this.text = text;
 		this.disableWebPreview = false;
 	}
 
-	Message(String text, boolean disableWebPreview) {
+	AnswerMessage(String text, boolean disableWebPreview) {
 		this.text = text;
 		this.disableWebPreview = disableWebPreview;
 	}

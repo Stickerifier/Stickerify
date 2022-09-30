@@ -1,7 +1,7 @@
 package com.cellar.stickerify.bot;
 
 import com.cellar.stickerify.image.ImageHelper;
-import com.cellar.stickerify.telegram.Message;
+import com.cellar.stickerify.telegram.AnswerMessage;
 import com.cellar.stickerify.telegram.builder.DocumentMessageBuilder;
 import com.cellar.stickerify.telegram.builder.TextMessageBuilder;
 import com.cellar.stickerify.telegram.model.TelegramRequest;
@@ -50,16 +50,16 @@ public class StickerifyBot extends TelegramLongPollingBot {
 
 	private void answer(TelegramRequest request) {
 		if (request.getFileId() == null) {
-			answerText(Message.ABOUT, request.getChatId());
+			answerText(request.getAnswerMessage(), request.getChatId());
 		} else {
 			answerWithDocument(request);
 		}
 	}
 
-	private void answerText(Message textMessage, Long chatId) {
+	private void answerText(AnswerMessage answerMessage, Long chatId) {
 		SendMessage response = new TextMessageBuilder()
 				.withChatId(chatId)
-				.withTextMessage(textMessage)
+				.withAnswerMessage(answerMessage)
 				.build();
 
 		try {
@@ -80,7 +80,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 
 			SendDocument response = new DocumentMessageBuilder()
 					.withChatId(request.getChatId())
-					.withTextMessage(Message.FILE_READY)
+					.withAnswerMessage(AnswerMessage.FILE_READY)
 					.withReplyToMessageId(request.getMessageId())
 					.withDocument(pngFile)
 					.build();
@@ -88,7 +88,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 			execute(response);
 		} catch (TelegramApiException e) {
 			LOGGER.error("Unable to send the message", e);
-			answerText(Message.ERROR, request.getChatId());
+			answerText(AnswerMessage.ERROR, request.getChatId());
 		} finally {
 			if (pngFile != null) deleteTempFile(pngFile);
 		}
