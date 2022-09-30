@@ -9,6 +9,7 @@ A Telegram bot to convert images in the format required to be used as Telegram s
 * [How to set up the project](#How-to-set-up-the-project)
 * [How to run the bot locally](#How-to-run-the-bot-locally)
 * [How to contribute to the project](#How-to-contribute-to-the-project)
+* [Hacktoberfest](#Hacktoberfest)
 * [Useful resources](#Useful-resources)
 * [License](#License)
 
@@ -55,6 +56,15 @@ After you successfully set up the project, you will have to go through the follo
 Take a look at this project's contributing guidelines [here](CONTRIBUTING.md).
 
 Do you have any question? Feel free to [open a new discussion](https://github.com/rob93c/Stickerify/discussions/new).
+
+## Hacktoberfest
+
+[Hacktoberfest](https://hacktoberfest.com/) is an event aiming to encourage people to contribute to open source projects every October.
+This project adheres to this initiative and welcomes any hacktoberfest-related improvement!
+
+If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as part of this event, first read the [contributing guidelines](CONTRIBUTING.md) and then feel free to open a new issue _and/or_ pull request.
+
+If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-approved`, therefore counting towards the 4 contributions goal.
 
 ## Useful resources
 
