@@ -3,16 +3,15 @@ package com.cellar.stickerify.telegram;
 /**
  * Enum class containing the text answers the bot can use.
  */
-public enum AnswerMessage {
+public enum Answer {
 
 	HELP("""
 			Send me the image you want to convert and I will take care of the rest.
 
 			Based on what you send, I will answer the following:
-
-			* the converted image, if you sent a supported file (currently `.gif`, `.gifv` and `.webp` files are not supported)
-			* an error message, if you sent an unsupported file
-			* an informative message for any message without a file
+			- the converted image, if you sent a supported file (currently `.gif`, `.gifv` and `.webp` files are not supported)
+			- an error message, if you sent an unsupported file
+			- an informative message for any message without a file
 			"""),
 	FILE_READY("""
             Your sticker file is ready!
@@ -32,12 +31,12 @@ public enum AnswerMessage {
 	private final String text;
 	private final boolean disableWebPreview;
 
-	AnswerMessage(String text) {
+	Answer(String text) {
 		this.text = text;
 		this.disableWebPreview = false;
 	}
 
-	AnswerMessage(String text, boolean disableWebPreview) {
+	Answer(String text, boolean disableWebPreview) {
 		this.text = text;
 		this.disableWebPreview = disableWebPreview;
 	}

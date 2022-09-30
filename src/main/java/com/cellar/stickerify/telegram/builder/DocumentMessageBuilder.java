@@ -1,6 +1,6 @@
 package com.cellar.stickerify.telegram.builder;
 
-import com.cellar.stickerify.telegram.AnswerMessage;
+import com.cellar.stickerify.telegram.Answer;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -22,8 +22,8 @@ public class DocumentMessageBuilder implements MessageBuilder<SendDocument> {
 	}
 
 	@Override
-	public MessageBuilder<SendDocument> withAnswerMessage(AnswerMessage answerMessage) {
-		message.setCaption(answerMessage.getText());
+	public MessageBuilder<SendDocument> withAnswer(Answer answer) {
+		message.setCaption(answer.getText());
 		message.setParseMode(ParseMode.MARKDOWN);
 		return this;
 	}

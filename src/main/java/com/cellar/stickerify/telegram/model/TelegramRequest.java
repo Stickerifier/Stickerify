@@ -1,6 +1,6 @@
 package com.cellar.stickerify.telegram.model;
 
-import com.cellar.stickerify.telegram.AnswerMessage;
+import com.cellar.stickerify.telegram.Answer;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 
@@ -32,8 +32,8 @@ public record TelegramRequest(Message message) {
 		return message.getMessageId();
 	}
 
-	public AnswerMessage getAnswerMessage() {
-		return isHelpCommand() ? AnswerMessage.HELP : AnswerMessage.ABOUT;
+	public Answer getAnswerMessage() {
+		return isHelpCommand() ? Answer.HELP : Answer.ABOUT;
 	}
 
 	private boolean isHelpCommand() {

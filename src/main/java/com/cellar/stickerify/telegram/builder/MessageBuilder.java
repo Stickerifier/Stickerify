@@ -1,6 +1,6 @@
 package com.cellar.stickerify.telegram.builder;
 
-import com.cellar.stickerify.telegram.AnswerMessage;
+import com.cellar.stickerify.telegram.Answer;
 import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
 
 import java.io.File;
@@ -14,7 +14,7 @@ public interface MessageBuilder<T extends PartialBotApiMethod<?>> {
 
 	MessageBuilder<T> withChatId(Long chatId);
 
-	MessageBuilder<T> withAnswerMessage(AnswerMessage answerMessage);
+	MessageBuilder<T> withAnswer(Answer answer);
 
 	default MessageBuilder<T> withReplyToMessageId(Integer messageId) {
 		return this;
