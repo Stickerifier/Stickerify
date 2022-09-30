@@ -48,7 +48,7 @@ After you successfully set up the project, you will have to go through the follo
 2. Copy the token it provided you and either:
    * set it as the value of a new environment variable named `STICKERIFY_TOKEN` 
    * use it as the return value of the method `getBotToken()` inside `StickerifyBot`
-3. Run the method `Main.main()` to start the bot, it will be now able to answer messages in Telegram
+3. Run the method [`Main.main()`](https://github.com/rob93c/Stickerify/blob/main/src/main/java/com/cellar/stickerify/runner/Main.java#L10) to start the bot, it will be now able to answer messages in Telegram
 
 ## How to contribute to the project
 
