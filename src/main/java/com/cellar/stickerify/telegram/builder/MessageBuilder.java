@@ -17,7 +17,7 @@ public interface MessageBuilder<T extends PartialBotApiMethod<?>> {
 	MessageBuilder<T> withTextMessage(Message textMessage);
 
 	default MessageBuilder<T> withReplyToMessageId(Integer messageId) {
-		throw new UnsupportedOperationException();
+		return this;
 	}
 
 	default MessageBuilder<T> withDocument(File file) {
