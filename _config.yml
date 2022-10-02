@@ -1,7 +1,10 @@
 title: Stickerify
-description: Telegram bot to convert images in the format required to be used as Telegram stickers (512x512 PNGs)
+description: Telegram bot to convert images in stickers.
 remote_theme: pages-themes/minimal
 plugins:
   - jekyll-remote-theme
 logo: src/main/resources/stickerify.svg
-show_downloads: true
+show_downloads: false
+github:
+  owner_name: Roberto Cella
+  repository_name: Telegram bot
