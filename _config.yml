@@ -7,4 +7,3 @@ logo: src/main/resources/stickerify.svg
 show_downloads: false
 github:
   owner_name: Roberto Cella
-  repository_name: Telegram bot
