@@ -1,6 +1,6 @@
 # <img src="src/main/resources/stickerify.svg" align="right" width="100">[Stickerify](https://t.me/StickerifyImageBot)
 
-A Telegram bot to convert images in the format required to be used as Telegram stickers (512x512 PNGs)
+Telegram bot to convert images in the format required to be used as Telegram stickers (512x512 PNGs)
 
 ## Table of contents
 
@@ -49,7 +49,7 @@ After you successfully set up the project, you will have to go through the follo
 2. Copy the token it provided you and either:
    * set it as the value of a new environment variable named `STICKERIFY_TOKEN` 
    * use it as the return value of the method `getBotToken()` inside `StickerifyBot`
-3. Run the method [`Main.main()`](https://github.com/rob93c/Stickerify/blob/main/src/main/java/com/cellar/stickerify/runner/Main.java#L10) to start the bot, it will be now able to answer messages in Telegram
+3. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
 ## How to contribute to the project
 
@@ -64,7 +64,7 @@ This project adheres to this initiative and welcomes any hacktoberfest-related i
 
 If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as part of this event, first read the [contributing guidelines](CONTRIBUTING.md) and then feel free to open a new issue _and/or_ pull request.
 
-If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-approved`, therefore counting towards the 4 contributions goal.
+If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-accepted`, therefore counting towards the 4 contributions goal.
 
 ## Useful resources
 
