@@ -1,4 +1,4 @@
-FROM maven:3.8-openjdk-18-slim
+FROM maven:3.8-eclipse-temurin-19-alpine
 COPY src /usr/src/app/src
 COPY pom.xml /usr/src/app
 ARG STICKERIFY_TOKEN

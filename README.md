@@ -35,11 +35,11 @@ And it's done!
 
 ## How to set up the project
 
-1. Install Maven and JDK 18 (or higher)
+1. Install Maven and JDK 19 (or higher)
 2. Clone the project and move into its folder
 3. Run the command `mvn install -DskipTests`
 4. Import the project inside your IDE as a Maven project
-5. Ensure your IDE is correctly configured to use a Java 18 (or higher) JDK
+5. Ensure your IDE is correctly configured to use a Java 19 (or higher) JDK
 
 ## How to run the bot locally
 
