@@ -24,7 +24,7 @@ public class DocumentMessageBuilder implements MessageBuilder<SendDocument> {
 	@Override
 	public MessageBuilder<SendDocument> withAnswer(Answer answer) {
 		message.setCaption(answer.getText());
-		message.setParseMode(ParseMode.MARKDOWN);
+		message.setParseMode(ParseMode.MARKDOWNV2);
 		return this;
 	}
 

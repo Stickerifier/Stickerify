@@ -21,7 +21,7 @@ public class TextMessageBuilder implements MessageBuilder<SendMessage> {
 	@Override
 	public MessageBuilder<SendMessage> withAnswer(Answer answer) {
 		message.setText(answer.getText());
-		message.setParseMode(ParseMode.MARKDOWN);
+		message.setParseMode(ParseMode.MARKDOWNV2);
 		message.setDisableWebPagePreview(answer.isDisableWebPreview());
 		return this;
 	}
