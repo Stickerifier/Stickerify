@@ -20,7 +20,7 @@ public enum Answer {
 	ABOUT("""
 			This bot is open source, check it out on [Github](https://github.com/rob93c/Stickerify)\\.
 
-			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMeminis)\\!
+			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
 			"""),
 	ERROR("""
 			The file conversion was unsuccessful, only _valid image formats_ are supported \\(currently `\\.gif`, `\\.gifv` and `\\.webp` files are not supported\\)\\.
