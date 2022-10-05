@@ -21,7 +21,7 @@ This will create a copy of this repository in your account `<your-GitHub-usernam
 
 #### Clone the repository
 
-Now clone the forked repository to your machine. Go to your GitHub account, open the forked repository, click on the code button and then click the _copy to clipboard_ icon.
+Now clone the forked repository to your machine. Go to your GitHub account, open the forked repository, and copy the link provided under `HTTPS` when you click on the green button labeled `code` on the repository page
 
 Open a terminal and run the following git command:
 
