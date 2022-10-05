@@ -64,7 +64,7 @@ This project adheres to this initiative and welcomes any hacktoberfest-related i
 
 If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as part of this event, first read the [contributing guidelines](CONTRIBUTING.md) and then feel free to open a new issue _and/or_ pull request.
 
-If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-accepted`, therefore counting towards the 4 contributions goal.
+If your pull request represents a valid contribution to the project, it will be marked as _<span style="color:#0E8A16">hacktoberfest-accepted</span>_, therefore counting towards the 4 contributions goal.
 
 ## Useful resources
 
@@ -78,5 +78,5 @@ If your pull request represents a valid contribution to the project, it will be 
 See the [**LICENSE**](LICENSE) file for license rights and limitations (MIT).
 
 <div align="right">
-<sup>made with 💖 by <a href="https://github.com/rob93c">@rob93c</a></sup>
+<sup>made with 💖 by <a href="https://github.com/rob93c">Roberto Cella</a></sup>
 </div>
