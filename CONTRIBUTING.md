@@ -10,11 +10,9 @@ If you'd like to work on an existing issue, kindly **ask** for it to be assigned
 
 Do you have any struggles with the issue you are working on? Feel free to **tag [me](https://github.com/rob93c)** in it _and/or_ open a draft pull request.
 
-## How do I make a contribution?
+### How do I make a contribution
 
 If you've never made an open source contribution before or are curious about how contributions operate in our project? Here's a quick rundown!
-
-#### If you don't have git on your machine, [install it](https://help.github.com/articles/set-up-git/).
 
 #### Fork this repository
 
@@ -45,9 +43,9 @@ git clone https://github.com/your-user-name/Stickerify.git
      $ git checkout -b <branch-name>
     ```
 
-#### Setup the project in your local by following the steps listed in the [README.md](https://github.com/rob93c/Stickerify#how-to-set-up-the-project) file.
+#### Setup the project in your local by following the steps listed in the [README.md](https://github.com/rob93c/Stickerify#how-to-set-up-the-project) file
 
-#### Open the project in a code editor and begin working on it.
+#### Open the project in a code editor and begin working on it
 #### Add the contents of the changed files to the "snapshot" git uses to manage the state of the project, also known as the index
 
     ```sh
@@ -66,4 +64,4 @@ git clone https://github.com/your-user-name/Stickerify.git
     $ git push -u origin <branch-name>
     ```
 
-#### Submit a pull request to the upstream repository.
+#### Submit a pull request to the upstream repository
