@@ -26,8 +26,7 @@ public enum Answer {
 			The file conversion was unsuccessful, only _valid image formats_ are supported \\(currently `\\.gif`, `\\.gifv` and `\\.webp` files are not supported\\)\\.
 
 			If you think it should have worked, please report the issue on [Github](https://github.com/rob93c/Stickerify/issues/new/choose)\\.
-			""",
-			true);
+			""",true);
 
 	private final String text;
 	private final boolean disableWebPreview;
