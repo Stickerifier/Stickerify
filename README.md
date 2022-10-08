@@ -56,7 +56,7 @@ After you successfully set up the project, you will have to go through the follo
 ## Launch The Bot Using Docker
 Prerequisites
 
-Make sure you have already installed both Docker Engine and Docker Compose. You don’t need to install other programs like Python  as they are provided by Docker images.
+1. Install [Docker](https://docs.docker.com/get-docker/).
 
 1. You can see how to start with docker compose here.
 2. To run the bot locally  with Docker, we need to set Passing Environment Variables Into the Dockerfile you created in 1.
