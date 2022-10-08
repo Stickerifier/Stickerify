@@ -8,11 +8,12 @@ Telegram bot to convert images in the format required to be used as Telegram sti
 * [How to create a new sticker](#How-to-create-a-new-sticker)
 * [How to set up the project](#How-to-set-up-the-project)
 * [How to run the bot locally](#How-to-run-the-bot-locally)
+* [Launch The Bot Using Docker](#How-To-launch-The-Bot-using-Docker)
 * [How to contribute to the project](#How-to-contribute-to-the-project)
 * [Hacktoberfest](#Hacktoberfest)
 * [Useful resources](#Useful-resources)
 * [License](#License)
-* [Launch The Bot Using Docker](#How-To-launch-The-Bot-using-Docker)
+
 
 ## How to use the bot
 
@@ -52,20 +53,18 @@ After you successfully set up the project, you will have to go through the follo
    * use it as the return value of the method `getBotToken()` inside `StickerifyBot`
 3. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
-
 ## Launch The Bot Using Docker
-Prerequisites
 
 1. Install [Docker](https://docs.docker.com/get-docker/).
-
-1. You can see how to start with docker compose here.
-2. To run the bot locally  with Docker, we need to set Passing Environment Variables Into the Dockerfile you created in 1.
-3. To do that, When we want to set this argument, we pass it with the –build-arg flag:
-
-docker build -t build-name --build-arg name=arg-name.
-4. Read about it in detail here  
-
-
+2. Run Docker,passing it the argument variable with the following command:
+   ```shell
+   docker build -t build-name --build-arg name=arg-name 
+   ```
+3. In our case, the specific command will be:
+   ```shell
+   docker build -t stickerify --build-arg STICKERIFY_TOKEN={{TOKEN}} 
+   docker run stickerify
+   ``` where {{TOKEN}} is the token which will be retrieved from BotFather.
 
 ## How to contribute to the project
 
@@ -96,5 +95,3 @@ See the [**LICENSE**](LICENSE) file for license rights and limitations (MIT).
 <div align="right">
 <sup>made with 💖 by <a href="https://github.com/rob93c">Roberto Cella</a></sup>
 </div>
-
-
