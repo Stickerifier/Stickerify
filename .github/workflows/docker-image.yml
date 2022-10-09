@@ -1,11 +1,10 @@
 name: Docker Image CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-      - 29-*
-  workflow_dispatch:
 
 jobs:
   build:
@@ -14,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image
-        run: docker build --build-arg STICKERIFY_TOKEN=${{ secrets.STICKERIFY_TOKEN }} . --file Dockerfile --tag rob93c/stickerify:latest
+        run: docker build --build-arg STICKERIFY_TOKEN=${{ secrets.STICKERIFY_TOKEN }} -t rob93c/stickerify:latest .
 
       - uses: actions/checkout@v3
       - name: Perform Docker login
