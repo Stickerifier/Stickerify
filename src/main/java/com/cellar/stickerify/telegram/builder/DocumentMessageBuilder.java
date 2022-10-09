@@ -1,46 +1,44 @@
 package com.cellar.stickerify.telegram.builder;
 
 import com.cellar.stickerify.telegram.Answer;
+import com.cellar.stickerify.telegram.model.TelegramRequest;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import java.io.File;
 
-public class DocumentMessageBuilder implements MessageBuilder<SendDocument> {
+/**
+ * Builder used to fluently populate a Telegram response containing a file.
+ */
+public class DocumentMessageBuilder {
 
 	private final SendDocument message;
 
+	/**
+	 * @see DocumentMessageBuilder
+	 */
 	public DocumentMessageBuilder() {
 		this.message = new SendDocument();
 	}
 
-	@Override
-	public MessageBuilder<SendDocument> withChatId(Long chatId) {
-		message.setChatId(chatId);
+	public DocumentMessageBuilder withRequest(TelegramRequest request) {
+		message.setChatId(request.getChatId());
+		message.setReplyToMessageId(request.getMessageId());
 		return this;
 	}
 
-	@Override
-	public MessageBuilder<SendDocument> withAnswer(Answer answer) {
+	public DocumentMessageBuilder withAnswer(Answer answer) {
 		message.setCaption(answer.getText());
 		message.setParseMode(ParseMode.MARKDOWNV2);
 		return this;
 	}
 
-	@Override
-	public MessageBuilder<SendDocument> withReplyToMessageId(Integer messageId) {
-		message.setReplyToMessageId(messageId);
-		return this;
-	}
-
-	@Override
-	public MessageBuilder<SendDocument> withDocument(File file) {
+	public DocumentMessageBuilder withFile(File file) {
 		message.setDocument(new InputFile(file));
 		return this;
 	}
 
-	@Override
 	public SendDocument build() {
 		return message;
 	}

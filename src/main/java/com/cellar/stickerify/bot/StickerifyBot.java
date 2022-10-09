@@ -79,10 +79,9 @@ public class StickerifyBot extends TelegramLongPollingBot {
 			pngFile = ImageHelper.convertToPng(downloadFile(filePath));
 
 			SendDocument response = new DocumentMessageBuilder()
-					.withChatId(request.getChatId())
+					.withRequest(request)
 					.withAnswer(Answer.FILE_READY)
-					.withReplyToMessageId(request.getMessageId())
-					.withDocument(pngFile)
+					.withFile(pngFile)
 					.build();
 
 			execute(response);
