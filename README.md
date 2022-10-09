@@ -8,7 +8,7 @@ Telegram bot to convert images in the format required to be used as Telegram sti
 * [How to create a new sticker](#How-to-create-a-new-sticker)
 * [How to set up the project](#How-to-set-up-the-project)
 * [How to run the bot locally](#How-to-run-the-bot-locally)
-* [Launch the bot Using Docker](#Launch-the-bot-using-Docker)
+* [Launch the bot using Docker](#Launch-the-bot-using-Docker)
 * [How to contribute to the project](#How-to-contribute-to-the-project)
 * [Hacktoberfest](#Hacktoberfest)
 * [Useful resources](#Useful-resources)
@@ -64,7 +64,7 @@ After you successfully set up the project, you will have to go through the follo
    docker build -t stickerify --build-arg STICKERIFY_TOKEN={{TOKEN}} 
    docker run stickerify
    ```
-   where {{TOKEN}} is the token which will be retrieved from [BotFather](https://t.me/BotFather)
+   where `{{TOKEN}}` is the token which will be retrieved from [BotFather](https://t.me/BotFather)
 
 ## How to contribute to the project
 
