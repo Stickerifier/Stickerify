@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import java.io.File;
 
 /**
- * Builder used to fluently populate a Telegram response containing a file.
+ * Builder used to fluently populate a Telegram reply containing a file.
  */
 public class DocumentMessageBuilder {
 

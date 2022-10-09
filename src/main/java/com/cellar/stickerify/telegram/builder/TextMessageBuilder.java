@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 /**
- * Builder used to fluently populate a text-only Telegram response.
+ * Builder used to fluently populate a text-only Telegram reply.
  */
 public class TextMessageBuilder {
 
