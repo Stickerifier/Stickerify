@@ -14,9 +14,9 @@ public enum Answer {
 			\\- an informative message for any message without a file
 			"""),
 	FILE_READY("""
-            Your sticker file is ready\\!
-            Head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
-            """),
+			Your sticker file is ready\\!
+			Head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
+			"""),
 	ABOUT("""
 			This bot is open source, check it out on [Github](https://github.com/rob93c/Stickerify)\\.
 
