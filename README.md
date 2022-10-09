@@ -8,12 +8,11 @@ Telegram bot to convert images in the format required to be used as Telegram sti
 * [How to create a new sticker](#How-to-create-a-new-sticker)
 * [How to set up the project](#How-to-set-up-the-project)
 * [How to run the bot locally](#How-to-run-the-bot-locally)
-* [Launch The Bot Using Docker](#How-To-launch-The-Bot-using-Docker)
+* [Launch the bot Using Docker](#Launch-the-bot-using-Docker)
 * [How to contribute to the project](#How-to-contribute-to-the-project)
 * [Hacktoberfest](#Hacktoberfest)
 * [Useful resources](#Useful-resources)
 * [License](#License)
-
 
 ## How to use the bot
 
@@ -53,10 +52,10 @@ After you successfully set up the project, you will have to go through the follo
    * use it as the return value of the method `getBotToken()` inside `StickerifyBot`
 3. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
-## Launch The Bot Using Docker
+## Launch the bot using Docker
 
 1. Install [Docker](https://docs.docker.com/get-docker/).
-2. Run Docker,passing it the argument variable with the following command:
+2. Run Docker, passing it the argument variable with the following command:
    ```shell
    docker build -t build-name --build-arg name=arg-name 
    ```
@@ -64,7 +63,8 @@ After you successfully set up the project, you will have to go through the follo
    ```shell
    docker build -t stickerify --build-arg STICKERIFY_TOKEN={{TOKEN}} 
    docker run stickerify
-   ``` where {{TOKEN}} is the token which will be retrieved from BotFather.
+   ```
+   where {{TOKEN}} is the token which will be retrieved from [BotFather](https://t.me/BotFather)
 
 ## How to contribute to the project
 
