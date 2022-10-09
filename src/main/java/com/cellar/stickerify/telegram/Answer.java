@@ -1,7 +1,7 @@
 package com.cellar.stickerify.telegram;
 
 /**
- * Enum class containing the text answers the bot can use.
+ * Enum class containing the text replies the bot can use.
  */
 public enum Answer {
 
