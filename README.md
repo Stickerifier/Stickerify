@@ -1,4 +1,4 @@
-# <img src="src/main/resources/stickerify.svg" align="right" width="100">[Stickerify](https://t.me/StickerifyImageBot)
+# <img src="src/main/resources/images/stickerify.svg" align="right" width="100">[Stickerify](https://t.me/StickerifyImageBot)
 
 Telegram bot to convert images in the format required to be used as Telegram stickers (512x512 PNGs)
 
@@ -8,7 +8,7 @@ Telegram bot to convert images in the format required to be used as Telegram sti
 * [How to create a new sticker](#How-to-create-a-new-sticker)
 * [How to set up the project](#How-to-set-up-the-project)
 * [How to run the bot locally](#How-to-run-the-bot-locally)
-* [Launch the bot using Docker](#Launch-the-bot-using-Docker)
+* [How to launch the bot using Docker](#How-to-launch-the-bot-using-Docker)
 * [How to contribute to the project](#How-to-contribute-to-the-project)
 * [Hacktoberfest](#Hacktoberfest)
 * [Useful resources](#Useful-resources)
@@ -52,19 +52,17 @@ After you successfully set up the project, you will have to go through the follo
    * use it as the return value of the method `getBotToken()` inside `StickerifyBot`
 3. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
-## Launch the bot using Docker
+## How to launch the bot using Docker
 
-1. Install [Docker](https://docs.docker.com/get-docker/).
-2. Run Docker, passing it the argument variable with the following command:
+1. Install [Docker](https://docs.docker.com/get-docker/)
+2. Build the Docker image passing the token (`{{TOKEN}}`) retrieved from [BotFather](https://t.me/BotFather) with the following command:
    ```shell
-   docker build -t build-name --build-arg name=arg-name 
+   docker build -t stickerify --build-arg STICKERIFY_TOKEN={{TOKEN}} .
    ```
-3. In our case, the specific command will be:
+3. Now you just need to run the Docker image:
    ```shell
-   docker build -t stickerify --build-arg STICKERIFY_TOKEN={{TOKEN}} 
    docker run stickerify
    ```
-   where `{{TOKEN}}` is the token which will be retrieved from [BotFather](https://t.me/BotFather)
 
 ## How to contribute to the project
 
@@ -79,7 +77,7 @@ This project adheres to this initiative and welcomes any hacktoberfest-related i
 
 If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as part of this event, first read the [contributing guidelines](CONTRIBUTING.md) and then feel free to open a new issue _and/or_ pull request.
 
-If your pull request represents a valid contribution to the project, it will be marked as _<span style="color:#0E8A16">hacktoberfest-accepted</span>_, therefore counting towards the 4 contributions goal.
+If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-accepted`, therefore counting towards the 4 contributions goal.
 
 ## Useful resources
 

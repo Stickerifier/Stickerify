@@ -12,4 +12,4 @@ buildNumber.properties
 .classpath
 .settings/
 .idea/
-*.png
+src/main/resources/*.png
