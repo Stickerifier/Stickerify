@@ -1,6 +1,7 @@
 package com.cellar.stickerify.telegram.builder;
 
 import com.cellar.stickerify.telegram.Answer;
+import com.cellar.stickerify.telegram.model.TelegramRequest;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -18,12 +19,12 @@ public class TextMessageBuilder {
 		this.message = new SendMessage();
 	}
 
-	public TextMessageBuilder withChatId(Long chatId) {
-		message.setChatId(chatId);
+	public TextMessageBuilder replyTo(TelegramRequest request) {
+		message.setChatId(request.getChatId());
 		return this;
 	}
 
-	public TextMessageBuilder withAnswer(Answer answer) {
+	public TextMessageBuilder withMessage(Answer answer) {
 		message.setText(answer.getText());
 		message.setParseMode(ParseMode.MARKDOWNV2);
 		message.setDisableWebPagePreview(answer.isDisableWebPreview());

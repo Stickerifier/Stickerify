@@ -22,13 +22,13 @@ public class DocumentMessageBuilder {
 		this.message = new SendDocument();
 	}
 
-	public DocumentMessageBuilder withRequest(TelegramRequest request) {
+	public DocumentMessageBuilder replyTo(TelegramRequest request) {
 		message.setChatId(request.getChatId());
 		message.setReplyToMessageId(request.getMessageId());
 		return this;
 	}
 
-	public DocumentMessageBuilder withAnswer(Answer answer) {
+	public DocumentMessageBuilder withMessage(Answer answer) {
 		message.setCaption(answer.getText());
 		message.setParseMode(ParseMode.MARKDOWNV2);
 		return this;

@@ -1,10 +1,12 @@
 package com.cellar.stickerify.telegram.model;
 
+import static com.cellar.stickerify.telegram.Answer.ABOUT;
+import static com.cellar.stickerify.telegram.Answer.HELP;
+import static java.util.Comparator.comparing;
+
 import com.cellar.stickerify.telegram.Answer;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-
-import static java.util.Comparator.comparing;
 
 public record TelegramRequest(Message message) {
 
@@ -33,7 +35,7 @@ public record TelegramRequest(Message message) {
 	}
 
 	public Answer getAnswerMessage() {
-		return isHelpCommand() ? Answer.HELP : Answer.ABOUT;
+		return isHelpCommand() ? HELP : ABOUT;
 	}
 
 	private boolean isHelpCommand() {
