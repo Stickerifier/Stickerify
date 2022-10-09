@@ -55,13 +55,18 @@ After you successfully set up the project, you will have to go through the follo
 ## How to launch the bot using Docker
 
 1. Install [Docker](https://docs.docker.com/get-docker/)
-2. Build the Docker image passing the token (`{{TOKEN}}`) retrieved from [BotFather](https://t.me/BotFather) with the following command:
-   ```shell
-   docker build -t stickerify --build-arg STICKERIFY_TOKEN={{TOKEN}} .
-   ```
+2. Prepare the Docker image either:
+   * building it passing the token (`{{TOKEN}}`) retrieved from [BotFather](https://t.me/BotFather) with the command:
+      ```shell
+      docker build -t rob93c/stickerify --build-arg STICKERIFY_TOKEN={{TOKEN}} .
+      ```
+   * pulling the image from [Docker Hub](https://hub.docker.com/):
+      ```shell
+      docker pull rob93c/stickerify
+      ```
 3. Now you just need to run the Docker image:
    ```shell
-   docker run stickerify
+   docker run rob93c/stickerify
    ```
 
 ## How to contribute to the project

@@ -87,7 +87,7 @@ public class StickerifyBot extends TelegramLongPollingBot {
 
 			execute(response);
 		} catch (TelegramApiException e) {
-			LOGGER.error("Unable to send the message", e);
+			LOGGER.warn("Unable to send the message", e);
 			answerText(Answer.ERROR, request.getChatId());
 		} finally {
 			if (pngFile != null) deleteTempFile(pngFile);

@@ -23,7 +23,7 @@ public enum Answer {
 			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
 			"""),
 	ERROR("""
-			The file conversion was unsuccessful, only _valid image formats_ are supported \\(currently `\\.gif`, `\\.gifv` and `\\.webp` files are not supported\\)\\.
+			The file conversion was unsuccessful: only _valid image formats_ are supported \\(currently `\\.gif`, `\\.gifv` and `\\.webp` files are not supported\\)\\.
 
 			If you think it should have worked, please report the issue on [Github](https://github.com/rob93c/Stickerify/issues/new/choose)\\.
 			""", true);
