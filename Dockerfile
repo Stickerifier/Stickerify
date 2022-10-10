@@ -1,7 +1,11 @@
-FROM maven:3.8-eclipse-temurin-19-alpine
-COPY src /usr/src/app/src
-COPY pom.xml /usr/src/app
+FROM gradle:7.5.1-jdk18 AS builder
+COPY . /app
+WORKDIR /app
+RUN gradle shadowJar --no-daemon
+
+FROM eclipse-temurin:19
 ARG STICKERIFY_TOKEN
 ENV STICKERIFY_TOKEN $STICKERIFY_TOKEN
-RUN mvn -f /usr/src/app/pom.xml clean package
-CMD ["java","-jar","/usr/src/app/target/Stickerify.jar"]
+COPY --from=builder /app/build/libs /app
+WORKDIR /app
+CMD ["java", "-jar", "Stickerify-shadow.jar"]
