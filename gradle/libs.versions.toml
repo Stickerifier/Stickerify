@@ -1,0 +1,16 @@
+[versions]
+logback = "1.4.3"
+
+[libraries]
+imgscalr = "org.imgscalr:imgscalr-lib:4.2"
+telegrambots = "org.telegram:telegrambots:6.1.0"
+tika = "org.apache.tika:tika-core:2.5.0"
+logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+slf4j-api = "org.slf4j:slf4j-api:2.0.3"
+
+[bundles]
+logback = ["logback-core", "logback-classic", "slf4j-api"]
+
+[plugins]
+shadow = "com.github.johnrengelman.shadow:7.1.2"

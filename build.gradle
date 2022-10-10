@@ -1,0 +1,42 @@
+plugins {
+    alias(libs.plugins.shadow)
+    id 'application'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation libs.imgscalr
+    implementation libs.telegrambots
+    implementation libs.tika
+    implementation libs.bundles.logback
+}
+
+group = 'com.cellar'
+version = '1.0-SNAPSHOT'
+description = 'Telegram bot to convert images in the format required to be used as Telegram stickers'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(19)
+    }
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = '18'
+    targetCompatibility = '19'
+    options.encoding = 'UTF-8'
+}
+
+application {
+    mainClass = 'com.cellar.stickerify.runner.Main'
+}
+
+shadowJar {
+    archiveBaseName.set('Stickerify')
+    archiveClassifier.set('shadow')
+    archiveVersion.set('')
+}
