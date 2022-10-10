@@ -1,5 +1,5 @@
 [versions]
-logback = "1.4.3"
+logback = "1.4.4"
 
 [libraries]
 imgscalr = "org.imgscalr:imgscalr-lib:4.2"
