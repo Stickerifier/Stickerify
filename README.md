@@ -73,7 +73,7 @@ After you successfully set up the project, you will have to go through the follo
 
 Take a look at this project's contributing guidelines [here](CONTRIBUTING.md).
 
-Do you have any question? Feel free to [open a new discussion](https://github.com/rob93c/Stickerify/discussions/new).
+Have any question? Feel free to [open a new discussion](https://github.com/rob93c/Stickerify/discussions/new).
 
 ## Hacktoberfest
 
