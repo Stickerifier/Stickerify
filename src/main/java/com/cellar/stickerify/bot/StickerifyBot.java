@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -75,13 +76,16 @@ public class StickerifyBot extends TelegramLongPollingBot {
 	}
 
 	private void answerFile(TelegramRequest request) {
-		List<Path> pathsToDelete = List.of();
+		List<Path> pathsToDelete = new ArrayList<>();
 
 		GetFile getFile = new GetFile(request.getFileId());
 
 		try {
-			String originalFile = execute(getFile).getFilePath();
-			File outputFile = ImageHelper.convertToPng(downloadFile(originalFile));
+			String originalFilePath = execute(getFile).getFilePath();
+			pathsToDelete.add(Path.of(originalFilePath));
+
+			File outputFile = ImageHelper.convertToPng(downloadFile(originalFilePath));
+			pathsToDelete.add(outputFile.toPath());
 
 			SendDocument response = new DocumentMessageBuilder()
 					.replyTo(request)
@@ -90,8 +94,6 @@ public class StickerifyBot extends TelegramLongPollingBot {
 					.build();
 
 			execute(response);
-
-			pathsToDelete = List.of(Path.of(originalFile), outputFile.toPath());
 		} catch (TelegramApiException e) {
 			LOGGER.warn("Unable to send the message", e);
 			answerText(ERROR, request);
@@ -101,12 +103,12 @@ public class StickerifyBot extends TelegramLongPollingBot {
 	}
 
 	private static void deleteTempFiles(List<Path> pathsToDelete) {
-		try {
-			for (Path path : pathsToDelete) {
+		for (Path path : pathsToDelete) {
+			try {
 				Files.deleteIfExists(path);
+			} catch (IOException e) {
+				LOGGER.error("An error occurred trying to delete temp file {}", path, e);
 			}
-		} catch (IOException e) {
-			LOGGER.error("An error occurred trying to delete temp file", e);
 		}
 	}
 }
