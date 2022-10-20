@@ -20,9 +20,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 /**
- * A Telegram bot to convert images in the format required to be used as Telegram stickers (512x512 PNGs).
+ * Telegram bot to convert images in the format required to be used as Telegram stickers.
  *
  * @author Roberto Cella
  */
@@ -73,34 +75,38 @@ public class StickerifyBot extends TelegramLongPollingBot {
 	}
 
 	private void answerFile(TelegramRequest request) {
-		File pngFile = null;
+		List<Path> pathsToDelete = List.of();
 
 		GetFile getFile = new GetFile(request.getFileId());
 
 		try {
-			String filePath = execute(getFile).getFilePath();
-			pngFile = ImageHelper.convertToPng(downloadFile(filePath));
+			String originalFile = execute(getFile).getFilePath();
+			File outputFile = ImageHelper.convertToPng(downloadFile(originalFile));
 
 			SendDocument response = new DocumentMessageBuilder()
 					.replyTo(request)
 					.withMessage(FILE_READY)
-					.withFile(pngFile)
+					.withFile(outputFile)
 					.build();
 
 			execute(response);
+
+			pathsToDelete = List.of(Path.of(originalFile), outputFile.toPath());
 		} catch (TelegramApiException e) {
 			LOGGER.warn("Unable to send the message", e);
 			answerText(ERROR, request);
 		} finally {
-			if (pngFile != null) deleteTempFile(pngFile);
+			deleteTempFiles(pathsToDelete);
 		}
 	}
 
-	private static void deleteTempFile(File file) {
+	private static void deleteTempFiles(List<Path> pathsToDelete) {
 		try {
-			Files.deleteIfExists(file.toPath());
+			for (Path path : pathsToDelete) {
+				Files.deleteIfExists(path);
+			}
 		} catch (IOException e) {
-			LOGGER.error("An error occurred trying to delete generated image", e);
+			LOGGER.error("An error occurred trying to delete temp file", e);
 		}
 	}
 }
