@@ -29,9 +29,9 @@ import java.util.List;
  *
  * @author Roberto Cella
  */
-public class StickerifyBot extends TelegramLongPollingBot {
+public class Stickerify extends TelegramLongPollingBot {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StickerifyBot.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 
 	@Override
 	public String getBotUsername() {
@@ -45,35 +45,18 @@ public class StickerifyBot extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(Update update) {
-		if (update.getMessage() != null) {
+		if (update.hasMessage()) {
 			TelegramRequest request = new TelegramRequest(update.getMessage());
 
 			answer(request);
-		} else {
-			LOGGER.info("Updated messages don't need to be handled");
 		}
 	}
 
 	private void answer(TelegramRequest request) {
-		if (request.getFileId() == null) {
-			answerText(request.getAnswerMessage(), request);
-		} else {
+		if (request.hasFile()) {
 			answerFile(request);
-		}
-	}
-
-	private void answerText(Answer answer, TelegramRequest request) {
-		SendMessage response = SendMessage.builder()
-				.chatId(request.getChatId())
-				.text(answer.getText())
-				.parseMode(ParseMode.MARKDOWNV2)
-				.disableWebPagePreview(answer.isDisableWebPreview())
-				.build();
-
-		try {
-			execute(response);
-		} catch (TelegramApiException e) {
-			LOGGER.error("Unable to send the message", e);
+		} else {
+			answerText(request.getAnswerMessage(), request);
 		}
 	}
 
@@ -103,6 +86,21 @@ public class StickerifyBot extends TelegramLongPollingBot {
 			answerText(ERROR, request);
 		} finally {
 			deleteTempFiles(pathsToDelete);
+		}
+	}
+
+	private void answerText(Answer answer, TelegramRequest request) {
+		SendMessage response = SendMessage.builder()
+				.chatId(request.getChatId())
+				.text(answer.getText())
+				.parseMode(ParseMode.MARKDOWNV2)
+				.disableWebPagePreview(answer.isDisableWebPreview())
+				.build();
+
+		try {
+			execute(response);
+		} catch (TelegramApiException e) {
+			LOGGER.error("Unable to send the message", e);
 		}
 	}
 

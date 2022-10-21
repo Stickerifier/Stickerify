@@ -26,6 +26,10 @@ public record TelegramRequest(Message message) {
 		return fileId;
 	}
 
+	public boolean hasFile() {
+		return getFileId() != null;
+	}
+
 	public Long getChatId() {
 		return message.getChatId();
 	}
