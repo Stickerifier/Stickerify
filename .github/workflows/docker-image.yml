@@ -19,6 +19,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - uses: docker/build-push-action@v3
         with:
+          build-args: |
+            STICKERIFY_TOKEN=${{ secrets.STICKERIFY_TOKEN }}
           context: .
           push: true
           tags: rob93c/stickerify:latest
