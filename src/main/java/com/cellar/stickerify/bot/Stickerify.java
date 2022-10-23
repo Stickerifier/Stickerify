@@ -21,8 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Telegram bot to convert images in the format required to be used as Telegram stickers.
@@ -61,15 +61,17 @@ public class Stickerify extends TelegramLongPollingBot {
 	}
 
 	private void answerFile(TelegramRequest request) {
-		List<Path> pathsToDelete = new ArrayList<>();
+		// TODO: change to HashSet.newHashSet(2) as soon as Gradle supports Java 19
+		Set<Path> pathsToDelete = new HashSet<>(2);
 
 		GetFile getFile = new GetFile(request.getFileId());
 
 		try {
 			String originalFilePath = execute(getFile).getFilePath();
-			pathsToDelete.add(Path.of(originalFilePath));
+			File originalFile = downloadFile(originalFilePath);
+			pathsToDelete.add(originalFile.toPath());
 
-			File outputFile = ImageHelper.convertToPng(downloadFile(originalFilePath));
+			File outputFile = ImageHelper.convertToPng(originalFile);
 			pathsToDelete.add(outputFile.toPath());
 
 			SendDocument response = SendDocument.builder()
@@ -82,7 +84,7 @@ public class Stickerify extends TelegramLongPollingBot {
 
 			execute(response);
 		} catch (TelegramApiException e) {
-			LOGGER.warn("Unable to send the message", e);
+			LOGGER.warn("Unable to reply with processed file", e);
 			answerText(ERROR, request);
 		} finally {
 			deleteTempFiles(pathsToDelete);
@@ -100,11 +102,11 @@ public class Stickerify extends TelegramLongPollingBot {
 		try {
 			execute(response);
 		} catch (TelegramApiException e) {
-			LOGGER.error("Unable to send the message", e);
+			LOGGER.error("Unable to reply to {} with {}", request, response, e);
 		}
 	}
 
-	private static void deleteTempFiles(List<Path> pathsToDelete) {
+	private static void deleteTempFiles(Set<Path> pathsToDelete) {
 		for (Path path : pathsToDelete) {
 			try {
 				Files.deleteIfExists(path);

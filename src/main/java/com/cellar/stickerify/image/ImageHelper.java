@@ -35,11 +35,12 @@ public final class ImageHelper {
 	 * @throws TelegramApiException if passed-in file doesn't represent a valid image
 	 */
 	public static File convertToPng(File file) throws TelegramApiException {
-		if (!isValidImage(file)) throw new TelegramApiException("Passed-in file is not supported");
+		if (!isValidImage(file)) throw new TelegramApiException("Passed-in file is not supported: " + file.getName());
 
 		try {
 			return createPngFile(resizeImage(ImageIO.read(file)));
 		} catch (IOException e) {
+			LOGGER.error("An unexpected error occurred trying to create resulting image from {} file", file.getName(), e);
 			return file;
 		}
 	}
