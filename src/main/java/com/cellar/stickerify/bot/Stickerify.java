@@ -47,6 +47,7 @@ public class Stickerify extends TelegramLongPollingBot {
 	public void onUpdateReceived(Update update) {
 		if (update.hasMessage()) {
 			TelegramRequest request = new TelegramRequest(update.getMessage());
+			LOGGER.info("Received {}", request);
 
 			answer(request);
 		}

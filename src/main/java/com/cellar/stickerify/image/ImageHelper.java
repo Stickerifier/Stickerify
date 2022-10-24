@@ -58,7 +58,7 @@ public final class ImageHelper {
 			String mimeType = new Tika().detect(file);
 			isValid = mimeType.startsWith(MIME_TYPE_IMAGE) && isSupportedImage(mimeType);
 
-			LOGGER.info("The file has {} MIME type", mimeType);
+			LOGGER.debug("The file has {} MIME type", mimeType);
 		} catch (IOException e) {
 			LOGGER.error("Unable to retrieve MIME type for file {}", file.getName());
 		}
