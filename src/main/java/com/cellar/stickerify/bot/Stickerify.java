@@ -67,8 +67,7 @@ public class Stickerify extends TelegramLongPollingBot {
 		GetFile getFile = new GetFile(request.getFileId());
 
 		try {
-			String originalFilePath = execute(getFile).getFilePath();
-			File originalFile = downloadFile(originalFilePath);
+			File originalFile = downloadFile(execute(getFile).getFilePath());
 			pathsToDelete.add(originalFile.toPath());
 
 			File outputFile = ImageHelper.convertToPng(originalFile);
@@ -84,7 +83,7 @@ public class Stickerify extends TelegramLongPollingBot {
 
 			execute(response);
 		} catch (TelegramApiException e) {
-			LOGGER.warn("Unable to reply with processed file", e);
+			LOGGER.warn("Unable to reply to {} with processed file", request, e);
 			answerText(ERROR, request);
 		} finally {
 			deleteTempFiles(pathsToDelete);

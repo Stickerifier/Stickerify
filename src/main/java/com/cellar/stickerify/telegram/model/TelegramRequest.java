@@ -7,6 +7,7 @@ import static java.util.Comparator.comparing;
 import com.cellar.stickerify.telegram.Answer;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.User;
 
 public record TelegramRequest(Message message) {
 
@@ -44,5 +45,17 @@ public record TelegramRequest(Message message) {
 
 	private boolean isHelpCommand() {
 		return HELP_COMMAND.equalsIgnoreCase(message.getText());
+	}
+
+	@Override
+	public String toString() {
+		String text = message.getText() != null ? message.getText() : message.getCaption();
+
+		return "request ["
+				+ "chat=" + getChatId()
+				+ ", from=" + message.getFrom().getUserName()
+				+ ", file=" + getFileId()
+				+ ", text=" + text
+				+ "]";
 	}
 }
