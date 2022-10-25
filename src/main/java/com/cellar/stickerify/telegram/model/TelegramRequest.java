@@ -7,11 +7,21 @@ import static java.util.Comparator.comparing;
 import com.cellar.stickerify.telegram.Answer;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.Optional;
+
+/**
+ * Data class wrapping a {@link Message} instance to represent a Telegram request.
+ *
+ * @param message the message to wrap
+ */
 public record TelegramRequest(Message message) {
 
 	private static final String HELP_COMMAND = "/help";
+
+	public boolean hasFile() {
+		return getFileId() != null;
+	}
 
 	public String getFileId() {
 		String fileId = null;
@@ -25,10 +35,6 @@ public record TelegramRequest(Message message) {
 		}
 
 		return fileId;
-	}
-
-	public boolean hasFile() {
-		return getFileId() != null;
 	}
 
 	public Long getChatId() {
@@ -49,7 +55,7 @@ public record TelegramRequest(Message message) {
 
 	@Override
 	public String toString() {
-		String text = message.getText() != null ? message.getText() : message.getCaption();
+		String text = Optional.ofNullable(message.getText()).orElse(message.getCaption());
 
 		return "request ["
 				+ "chat=" + getChatId()
