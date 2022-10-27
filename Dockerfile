@@ -40,7 +40,7 @@ RUN rm -rf /tmp/*
 WORKDIR /app
 COPY . ./
 
-RUN gradle nativeCompile --no-daemon
+RUN gradle nativeCompile --no-daemon -w
 
 RUN upx --lzma --best -o stickerify-upx build/native/nativeCompile/Stickerify
 
