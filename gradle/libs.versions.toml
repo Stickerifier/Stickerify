@@ -13,4 +13,4 @@ slf4j-api = "org.slf4j:slf4j-api:2.0.3"
 logback = ["logback-core", "logback-classic", "slf4j-api"]
 
 [plugins]
-shadow = "com.github.johnrengelman.shadow:7.1.2"
+graalvm = "org.graalvm.buildtools.native:0.9.16"
