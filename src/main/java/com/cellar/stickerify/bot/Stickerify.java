@@ -40,7 +40,7 @@ public class Stickerify extends TelegramLongPollingBot {
 
 	@Override
 	public String getBotToken() {
-		return System.getenv("STICKERIFY_TOKEN");
+		return System.getenv("STICKERIFY_TEST_TOKEN");
 	}
 
 	@Override
