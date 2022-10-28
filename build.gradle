@@ -39,8 +39,6 @@ graalvmNative {
         resources.includedPatterns.add('logback.xml')
         buildArgs.addAll('--static', '--libc=musl')
         buildArgs.add('--report-unsupported-elements-at-runtime')
-        buildArgs.add('--initialize-at-run-time=com.fasterxml.jackson')
-        buildArgs.add('--initialize-at-build-time=ch.qos,org.telegram.telegrambots')
         buildArgs.add('-H:ReflectionConfigurationFiles=../../../src/main/resources/reflection-config.json')
     }
 }
