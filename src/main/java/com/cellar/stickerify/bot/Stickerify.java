@@ -2,6 +2,7 @@ package com.cellar.stickerify.bot;
 
 import static com.cellar.stickerify.telegram.Answer.ERROR;
 import static com.cellar.stickerify.telegram.Answer.FILE_READY;
+import static java.util.HashSet.newHashSet;
 
 import com.cellar.stickerify.image.ImageHelper;
 import com.cellar.stickerify.telegram.Answer;
@@ -21,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -62,8 +62,7 @@ public class Stickerify extends TelegramLongPollingBot {
 	}
 
 	private void answerFile(TelegramRequest request) {
-		// TODO: change to HashSet.newHashSet(2) as soon as Gradle supports Java 19
-		Set<Path> pathsToDelete = new HashSet<>(2);
+		Set<Path> pathsToDelete = newHashSet(2);
 
 		GetFile getFile = new GetFile(request.getFileId());
 

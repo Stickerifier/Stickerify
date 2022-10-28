@@ -1,14 +1,16 @@
 FROM ubuntu:22.04 AS build
 
 ARG GRAALVM_VERSION=22.3.0
-ARG JAVA_VERSION=17
+ARG JAVA_VERSION=19
 ARG GRADLE_VERSION=7.5.1
 
 RUN apt update -y && apt upgrade -y && apt install -y wget unzip build-essential zlib1g-dev upx && apt autoremove --purge -y \
  && wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAALVM_VERSION}/graalvm-ce-java${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz -P /tmp \
  && tar zxvf /tmp/graalvm-ce-java${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz -C /opt \
  && wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -P /tmp \
- && unzip -d /opt /tmp/gradle-${GRADLE_VERSION}-bin.zip
+ && unzip -d /opt /tmp/gradle-${GRADLE_VERSION}-bin.zip \
+ && wget https://download.java.net/java/GA/jdk18/43f95e8614114aeaa8e8a5fcf20a682d/36/GPL/openjdk-18_linux-x64_bin.tar.gz -P /tmp \
+ && tar zxvf /tmp/openjdk-18_linux-x64_bin.tar.gz -C /opt
 
 ARG MUSL_VERSION=10.2.1
 ARG ZLIB_VERSION=1.2.13
@@ -30,7 +32,7 @@ RUN ./configure --prefix=${TOOLCHAIN_DIR} --static && make && make install
 
 ENV GRADLE_HOME=/opt/gradle-${GRADLE_VERSION}
 ENV GRAALVM_HOME=/opt/graalvm-ce-java${JAVA_VERSION}-${GRAALVM_VERSION}
-ENV JAVA_HOME=${GRAALVM_HOME}
+ENV JAVA_HOME=/opt/jdk-18
 ENV PATH=${GRAALVM_HOME}/bin:${GRADLE_HOME}/bin:${PATH}
 
 RUN gu install native-image
