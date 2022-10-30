@@ -34,11 +34,14 @@ application {
 }
 
 graalvmNative {
-    toolchainDetection = false
     binaries.configureEach {
-        resources.includedPatterns.add('logback.xml')
+        resources.autodetection {
+            enabled = true
+            restrictToProjectDependencies = false
+        }
         buildArgs.addAll('--static', '--libc=musl')
         buildArgs.add('--report-unsupported-elements-at-runtime')
-        buildArgs.add('-H:ReflectionConfigurationFiles=../../../src/main/resources/reflection-config.json')
+        buildArgs.add('-H:ReflectionConfigurationFiles=../../../reflection-config.json')
+        buildArgs.add('-H:JNIConfigurationFiles=../../../jni-config.json')
     }
 }

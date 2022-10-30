@@ -64,10 +64,8 @@ public class Stickerify extends TelegramLongPollingBot {
 	private void answerFile(TelegramRequest request) {
 		Set<Path> pathsToDelete = newHashSet(2);
 
-		GetFile getFile = new GetFile(request.getFileId());
-
 		try {
-			File originalFile = downloadFile(execute(getFile).getFilePath());
+			File originalFile = retrieveFile(request.getFileId());
 			pathsToDelete.add(originalFile.toPath());
 
 			File outputFile = ImageHelper.convertToPng(originalFile);
@@ -88,6 +86,12 @@ public class Stickerify extends TelegramLongPollingBot {
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
+	}
+
+	private File retrieveFile(String fileId) throws TelegramApiException {
+		GetFile getFile = new GetFile(fileId);
+
+		return downloadFile(execute(getFile).getFilePath());
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {

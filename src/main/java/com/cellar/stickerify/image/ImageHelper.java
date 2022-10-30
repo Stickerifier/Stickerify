@@ -40,8 +40,7 @@ public final class ImageHelper {
 		try {
 			return createPngFile(resizeImage(ImageIO.read(file)));
 		} catch (IOException e) {
-			LOGGER.error("An unexpected error occurred trying to create resulting image from {} file", file.getName(), e);
-			return file;
+			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
 		}
 	}
 
