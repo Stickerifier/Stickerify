@@ -88,17 +88,6 @@
     "allPublicClasses": true
   },
   {
-    "name": "java.awt.image.ColorModel",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true,
-    "allDeclaredFields": true,
-    "allPublicFields": true,
-    "allDeclaredClasses": true,
-    "allPublicClasses": true
-  },
-  {
     "name": "sun.java2d.cmm.lcms.LCMSProfile",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
