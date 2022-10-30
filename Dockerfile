@@ -4,7 +4,7 @@ ARG GRAALVM_VERSION=22.3.0
 ARG JAVA_VERSION=19
 ARG GRADLE_VERSION=7.6-rc-1
 
-RUN apt update -y && apt upgrade -y && apt install -y wget unzip build-essential zlib1g-dev upx && apt autoremove --purge -y \
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y wget unzip build-essential zlib1g-dev upx && apt-get autoremove --purge -y \
  && wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAALVM_VERSION}/graalvm-ce-java${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz -P /tmp \
  && tar zxvf /tmp/graalvm-ce-java${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz -C /opt \
  && wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -P /tmp \
@@ -48,4 +48,4 @@ FROM scratch
 ARG STICKERIFY_TOKEN
 ENV STICKERIFY_TOKEN $STICKERIFY_TOKEN
 COPY --from=build /app/stickerify-upx /
-ENTRYPOINT ["/stickerify-upx"]
+ENTRYPOINT ["/stickerify-upx", "-Djava.io.tmpdir=/"]
