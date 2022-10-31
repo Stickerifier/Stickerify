@@ -26,8 +26,6 @@ java {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    sourceCompatibility = '18'
-    targetCompatibility = '19'
     options.encoding = 'UTF-8'
 }
 

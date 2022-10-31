@@ -9,7 +9,7 @@ public enum Answer {
 			Send me the image you want to convert and I will take care of the rest\\.
 
 			Based on what you send, I will answer the following:
-			\\- the converted image, if you sent a supported file \\(currently `\\.gif`, `\\.gifv` and `\\.webp` files are not supported\\)
+			\\- the converted image, if you sent a supported file \\(currently only `\\.png` and `\\.jpeg` files are supported\\)
 			\\- an error message, if you sent an unsupported file
 			\\- an informative message for any message without a file
 			"""),
@@ -23,7 +23,7 @@ public enum Answer {
 			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
 			"""),
 	ERROR("""
-			The file conversion was unsuccessful: only _valid image formats_ are supported \\(currently `\\.gif`, `\\.gifv` and `\\.webp` files are not supported\\)\\.
+			The file conversion was unsuccessful: only `\\.png` and `\\.jpeg` files are supported\\.
 
 			If you think it should have worked, please report the issue on [Github](https://github.com/rob93c/Stickerify/issues/new/choose)\\.
 			""", true);

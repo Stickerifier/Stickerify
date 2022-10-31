@@ -2,6 +2,7 @@ package com.cellar.stickerify.bot;
 
 import static com.cellar.stickerify.telegram.Answer.ERROR;
 import static com.cellar.stickerify.telegram.Answer.FILE_READY;
+import static java.util.HashSet.newHashSet;
 
 import com.cellar.stickerify.image.ImageHelper;
 import com.cellar.stickerify.telegram.Answer;
@@ -21,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -35,7 +35,7 @@ public class Stickerify extends TelegramLongPollingBot {
 
 	@Override
 	public String getBotUsername() {
-		return "Stickerify";
+		return Stickerify.class.getSimpleName();
 	}
 
 	@Override
@@ -62,13 +62,10 @@ public class Stickerify extends TelegramLongPollingBot {
 	}
 
 	private void answerFile(TelegramRequest request) {
-		// TODO: change to HashSet.newHashSet(2) as soon as Gradle supports Java 19
-		Set<Path> pathsToDelete = new HashSet<>(2);
-
-		GetFile getFile = new GetFile(request.getFileId());
+		Set<Path> pathsToDelete = newHashSet(2);
 
 		try {
-			File originalFile = downloadFile(execute(getFile).getFilePath());
+			File originalFile = retrieveFile(request.getFileId());
 			pathsToDelete.add(originalFile.toPath());
 
 			File outputFile = ImageHelper.convertToPng(originalFile);
@@ -89,6 +86,12 @@ public class Stickerify extends TelegramLongPollingBot {
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
+	}
+
+	private File retrieveFile(String fileId) throws TelegramApiException {
+		GetFile getFile = new GetFile(fileId);
+
+		return downloadFile(execute(getFile).getFilePath());
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {

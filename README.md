@@ -20,7 +20,7 @@ You can use the bot going [here](https://t.me/StickerifyImageBot): start it, and
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted image, if you sent a supported file (currently `.gif`, `.gifv` and `.webp` files are not supported)
+* the converted image, if you sent a supported file (currently only `.png` and `.jpeg` files are supported)
 * an error message, if you sent an unsupported file
 * an informative message for any message without a file
 
@@ -36,7 +36,7 @@ And it's done!
 
 ## How to set up the project
 
-1. Install Maven and JDK 19 (or higher)
+1. Install Gradle and JDK 19 (or higher)
 2. Clone the project and move into its folder
 3. Run the command `./gradlew build`
 4. Import the project inside your IDE as a Gradle project
@@ -49,7 +49,7 @@ After you successfully set up the project, you will have to go through the follo
 1. Chat with [BotFather](https://t.me/BotFather) and ask it to create a new bot
 2. Copy the token it provided you and either:
    * set it as the value of a new environment variable named `STICKERIFY_TOKEN` 
-   * use it as the return value of the method `getBotToken()` inside `StickerifyBot`
+   * use it as the return value of the method `getBotToken()` inside `Stickerify`
 3. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
 ## How to launch the bot using Docker
