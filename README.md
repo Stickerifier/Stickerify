@@ -36,7 +36,7 @@ And it's done!
 
 ## How to set up the project
 
-1. Install Gradle and JDK 19 (or higher)
+1. Install JDK 19 (or higher)
 2. Clone the project and move into its folder
 3. Run the command `./gradlew build`
 4. Import the project inside your IDE as a Gradle project

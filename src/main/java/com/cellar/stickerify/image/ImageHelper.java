@@ -25,7 +25,7 @@ public final class ImageHelper {
 	private static final String MIME_TYPE_IMAGE = "image/";
 	private static final String PNG_EXTENSION = "png";
 
-	private static final List<String> SUPPORTED_FORMATS = List.of(PNG_EXTENSION, "jpeg");
+	private static final List<String> SUPPORTED_FORMATS = List.of("png", "jpeg");
 
 	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
