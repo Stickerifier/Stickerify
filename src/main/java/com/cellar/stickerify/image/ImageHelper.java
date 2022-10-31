@@ -25,7 +25,7 @@ public final class ImageHelper {
 	private static final String MIME_TYPE_IMAGE = "image/";
 	private static final String PNG_EXTENSION = "png";
 
-	private static final List<String> UNSUPPORTED_FORMATS = List.of("webp", "gif", "gifv");
+	private static final List<String> SUPPORTED_FORMATS = List.of(PNG_EXTENSION, "jpeg");
 
 	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
@@ -72,7 +72,7 @@ public final class ImageHelper {
 	 * @return {@code true} if the MIME type is supported
 	 */
 	private static boolean isSupportedImage(String mimeType) {
-		return UNSUPPORTED_FORMATS.stream().noneMatch(mimeType::endsWith);
+		return SUPPORTED_FORMATS.stream().anyMatch(mimeType::endsWith);
 	}
 
 	/**
