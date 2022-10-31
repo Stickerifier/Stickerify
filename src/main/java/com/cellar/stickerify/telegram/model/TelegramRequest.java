@@ -21,15 +21,7 @@ public record TelegramRequest(Message message) {
 	private static final String HELP_COMMAND = "/help";
 
 	public boolean hasFile() {
-		return getSafeFileId() != null;
-	}
-
-	private String getSafeFileId() {
-		try {
-			return getFileId();
-		} catch (TelegramApiException e) {
-			return null;
-		}
+		return message.hasPhoto() || message.hasDocument() || message.hasSticker() || message.hasVideo() || message.hasAudio();
 	}
 
 	public String getFileId() throws TelegramApiException {
@@ -74,5 +66,13 @@ public record TelegramRequest(Message message) {
 				+ ", file=" + getSafeFileId()
 				+ ", text=" + text
 				+ "]";
+	}
+
+	private String getSafeFileId() {
+		try {
+			return getFileId();
+		} catch (TelegramApiException e) {
+			return null;
+		}
 	}
 }
