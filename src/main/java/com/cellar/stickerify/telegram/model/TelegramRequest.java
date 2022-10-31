@@ -7,6 +7,7 @@ import static java.util.Comparator.comparing;
 import com.cellar.stickerify.telegram.Answer;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Optional;
 
@@ -20,11 +21,19 @@ public record TelegramRequest(Message message) {
 	private static final String HELP_COMMAND = "/help";
 
 	public boolean hasFile() {
-		return getFileId() != null;
+		return getSafeFileId() != null;
 	}
 
-	public String getFileId() {
-		String fileId = null;
+	private String getSafeFileId() {
+		try {
+			return getFileId();
+		} catch (TelegramApiException e) {
+			return null;
+		}
+	}
+
+	public String getFileId() throws TelegramApiException {
+		String fileId;
 
 		if (message.hasPhoto()) {
 			fileId = message.getPhoto().stream().max(comparing(PhotoSize::getFileSize)).orElseThrow().getFileId();
@@ -32,6 +41,8 @@ public record TelegramRequest(Message message) {
 			fileId = message.getDocument().getFileId();
 		} else if (message.hasSticker()) {
 			fileId = message.getSticker().getFileId();
+		} else {
+			throw new TelegramApiException("The request contains an unsupported media: " + message);
 		}
 
 		return fileId;
@@ -60,7 +71,7 @@ public record TelegramRequest(Message message) {
 		return "request ["
 				+ "chat=" + getChatId()
 				+ ", from=" + message.getFrom().getUserName()
-				+ ", file=" + getFileId()
+				+ ", file=" + getSafeFileId()
 				+ ", text=" + text
 				+ "]";
 	}
