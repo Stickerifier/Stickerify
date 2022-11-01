@@ -35,9 +35,8 @@ public class ImageHelperTest {
 	void resizeImage() throws Exception {
 		var startingImage = image(1024, 1024, "jpg");
 		result = ImageHelper.convertToPng(startingImage);
-		var image = ImageIO.read(result);
 
-		assertImageConsistency(image, 512, 512);
+		assertImageConsistency(512, 512);
 	}
 
 	private File image(int width, int height, String extension) {
@@ -53,49 +52,45 @@ public class ImageHelperTest {
 		return file;
 	}
 
-	private void assertImageConsistency(BufferedImage image, int expectedWidth, int expectedHeight) {
+	private void assertImageConsistency(int expectedWidth, int expectedHeight) throws IOException {
+		var image = ImageIO.read(result);
+		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
+
 		assertAll(
-				() -> assertEquals(".png", extension(result)),
+				() -> assertEquals(".png", actualExtension),
 				() -> assertEquals(expectedWidth, image.getWidth()),
 				() -> assertEquals(expectedHeight, image.getHeight())
 		);
-	}
-
-	private String extension(File file) {
-		var name = file.getName();
-		return name.substring(name.lastIndexOf('.'));
 	}
 
 	@Test
 	void resizeRectangularImage() throws Exception {
 		var startingImage = image(1024, 512, "jpg");
 		result = ImageHelper.convertToPng(startingImage);
-		var image = ImageIO.read(result);
 
-		assertImageConsistency(image, 512, 256);
+		assertImageConsistency(512, 256);
 	}
 
 	@Test
 	void resizeSmallImage() throws Exception {
 		var startingImage = image(256, 256, "png");
 		result = ImageHelper.convertToPng(startingImage);
-		var image = ImageIO.read(result);
 
-		assertImageConsistency(image, 512, 512);
+		assertImageConsistency(512, 512);
 	}
 
 	@Test
 	void resizeWebpImage() throws Exception {
 		var startingImage = resource("valid.webp");
 		result = ImageHelper.convertToPng(startingImage);
-		var image = ImageIO.read(result);
 
-		assertImageConsistency(image, 256, 512);
+		assertImageConsistency(256, 512);
 	}
 
 	private File resource(String filename) {
 		var resource = getClass().getClassLoader().getResource(filename);
 		assertNotNull(resource, "Test resource [%s] not found.".formatted(filename));
+
 		return new File(resource.getFile());
 	}
 
