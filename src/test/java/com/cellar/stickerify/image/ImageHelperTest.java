@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ImageHelperTest {
 
     @TempDir
-    File directory;
+    private File directory;
 
-    File result;
+    private File result;
 
     @AfterEach
     void cleanup() throws IOException {
@@ -84,27 +84,21 @@ public class ImageHelperTest {
 
         private File resource(String filename) {
             var resource = getClass().getClassLoader().getResource(filename);
-            if (resource == null) {
-                fail(() -> "Could not find resource [%s]".formatted(filename));
-            }
+            assertNotNull(resource, () -> "Test resource [%s] not found.".formatted(filename));
             return new File(resource.getFile());
         }
 
         @Test
         void notAnImage() {
-            TelegramApiException exception = assertThrows(TelegramApiException.class, () -> {
-                var document = resource("document.txt");
-                ImageHelper.convertToPng(document);
-            });
+            var document = resource("document.txt");
+            TelegramApiException exception = assertThrows(TelegramApiException.class, () -> ImageHelper.convertToPng(document));
             assertEquals("Passed-in file is not supported", exception.getMessage());
         }
 
         @Test
         void webp() {
-            TelegramApiException exception = assertThrows(TelegramApiException.class, () -> {
-                var startingImage = resource("not_supported.webp");
-                ImageHelper.convertToPng(startingImage);
-            });
+            var startingImage = resource("not_supported.webp");
+            TelegramApiException exception = assertThrows(TelegramApiException.class, () -> ImageHelper.convertToPng(startingImage));
             assertEquals("Passed-in file is not supported", exception.getMessage());
         }
 
