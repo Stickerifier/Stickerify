@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -39,15 +38,10 @@ public class ImageHelperTest {
 		assertImageConsistency(512, 512);
 	}
 
-	private File image(int width, int height, String extension) {
+	private File image(int width, int height, String extension) throws IOException {
 		var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		var file = new File(directory, "%d x %d.%s".formatted(width, height, extension));
-
-		try {
-			ImageIO.write(image, extension, file);
-		} catch (IOException e) {
-			fail("Couldn't create image for test", e);
-		}
+		ImageIO.write(image, extension, file);
 
 		return file;
 	}
