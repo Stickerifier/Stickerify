@@ -21,10 +21,8 @@ public final class ImageHelper {
 	 * @see <a href="https://core.telegram.org/stickers#static-stickers-and-emoji">Telegram documentation</a>
 	 */
 	private static final int MAX_ALLOWED_SIZE = 512;
-	private static final String MIME_TYPE_IMAGE = "image/";
-	private static final String PNG_EXTENSION = "png";
 
-	private static final List<String> SUPPORTED_FORMATS = List.of("png", "jpeg");
+	private static final List<String> SUPPORTED_FORMATS = List.of("image/jpeg", "image/png");
 
 	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
@@ -54,7 +52,7 @@ public final class ImageHelper {
 
 		try {
 			String mimeType = new Tika().detect(file);
-			isValid = mimeType.startsWith(MIME_TYPE_IMAGE) && isSupportedImage(mimeType);
+			isValid = isSupportedImage(mimeType);
 
 			LOGGER.debug("The file has {} MIME type", mimeType);
 		} catch (IOException e) {
@@ -71,7 +69,7 @@ public final class ImageHelper {
 	 * @return {@code true} if the MIME type is supported
 	 */
 	private static boolean isSupportedImage(String mimeType) {
-		return SUPPORTED_FORMATS.stream().anyMatch(mimeType::endsWith);
+		return SUPPORTED_FORMATS.stream().anyMatch(mimeType::equals);
 	}
 
 	/**
@@ -97,7 +95,7 @@ public final class ImageHelper {
 	 */
 	private static File createPngFile(BufferedImage image) throws IOException {
 		var pngImage = File.createTempFile("Stickerify-", ".png");
-		ImageIO.write(image, PNG_EXTENSION, pngImage);
+		ImageIO.write(image, "png", pngImage);
 
 		return pngImage;
 	}
