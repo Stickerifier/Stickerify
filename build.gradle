@@ -10,9 +10,9 @@ repositories {
 
 dependencies {
     implementation libs.imgscalr
+    implementation libs.bundles.logback
     implementation libs.telegrambots
     implementation libs.tika
-    implementation libs.bundles.logback
 
     testImplementation libs.junit
 }

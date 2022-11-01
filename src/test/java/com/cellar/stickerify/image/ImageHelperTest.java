@@ -1,5 +1,11 @@
 package com.cellar.stickerify.image;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,8 +17,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ImageHelperTest {
 
@@ -40,7 +44,8 @@ public class ImageHelperTest {
     }
 
     private String extension(File file) {
-        return file.getName().split("\\.")[1];
+        var name = file.getName();
+        return name.substring(name.lastIndexOf('.'));
     }
 
     @Test
@@ -49,7 +54,7 @@ public class ImageHelperTest {
         result = ImageHelper.convertToPng(startingImage);
         var image = ImageIO.read(result);
         assertAll(
-                () -> assertEquals("png", extension(result)),
+                () -> assertEquals(".png", extension(result)),
                 () -> assertEquals(512, image.getWidth()),
                 () -> assertEquals(512, image.getHeight())
         );
@@ -61,7 +66,7 @@ public class ImageHelperTest {
         result = ImageHelper.convertToPng(startingImage);
         var image = ImageIO.read(result);
         assertAll(
-                () -> assertEquals("png", extension(result)),
+                () -> assertEquals(".png", extension(result)),
                 () -> assertEquals(512, image.getWidth()),
                 () -> assertEquals(256, image.getHeight())
         );
@@ -73,7 +78,7 @@ public class ImageHelperTest {
         result = ImageHelper.convertToPng(startingImage);
         var image = ImageIO.read(result);
         assertAll(
-                () -> assertEquals("png", extension(result)),
+                () -> assertEquals(".png", extension(result)),
                 () -> assertEquals(512, image.getWidth()),
                 () -> assertEquals(512, image.getHeight())
         );
@@ -84,7 +89,7 @@ public class ImageHelperTest {
 
         private File resource(String filename) {
             var resource = getClass().getClassLoader().getResource(filename);
-            assertNotNull(resource, () -> "Test resource [%s] not found.".formatted(filename));
+            assertNotNull(resource, "Test resource [%s] not found.".formatted(filename));
             return new File(resource.getFile());
         }
 
