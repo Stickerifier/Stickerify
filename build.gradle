@@ -9,6 +9,7 @@ repositories {
 }
 
 dependencies {
+    implementation libs.imageio
     implementation libs.imgscalr
     implementation libs.bundles.logback
     implementation libs.telegrambots
