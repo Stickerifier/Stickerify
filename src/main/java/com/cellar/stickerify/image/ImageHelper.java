@@ -22,7 +22,7 @@ public final class ImageHelper {
 	 */
 	private static final int MAX_ALLOWED_SIZE = 512;
 
-	private static final List<String> SUPPORTED_FORMATS = List.of("image/jpeg", "image/png");
+	private static final List<String> SUPPORTED_FORMATS = List.of("image/jpeg", "image/png", "image/webp");
 
 	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).

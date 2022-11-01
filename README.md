@@ -20,7 +20,7 @@ You can use the bot going [here](https://t.me/StickerifyImageBot): start it, and
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted image, if you sent a supported file (currently only `.png` and `.jpeg` files are supported)
+* the converted image, if you sent a supported file (currently only `.png`, `.jpeg`, and `.webp` files are supported)
 * an error message, if you sent an unsupported file
 * an informative message for any message without a file
 
