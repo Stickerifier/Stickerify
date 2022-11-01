@@ -41,6 +41,7 @@ graalvmNative {
         }
         buildArgs.addAll('--static', '--libc=musl')
         buildArgs.add('--report-unsupported-elements-at-runtime')
+//      buildArgs.add('--initialize-at-run-time=java.awt.image.BufferedImage,java.awt.Image,sun.java2d.HeadlessGraphicsEnvironment,java.awt.GraphicsEnvironment$LocalGE,sun.java2d.SunGraphicsEnvironment,sun.java2d.SurfaceData,sun.awt.X11GraphicsEnvironment,sun.awt.X11.XToolkit,sun.awt.image.SurfaceManager,sun.awt.image.BufImgSurfaceManager,sun.awt.image.BufImgSurfaceData')
         buildArgs.add('-H:ReflectionConfigurationFiles=../../../reflection-config.json')
         buildArgs.add('-H:JNIConfigurationFiles=../../../jni-config.json')
     }
