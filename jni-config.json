@@ -11,17 +11,6 @@
     "allPublicClasses": true
   },
   {
-    "name": "sun.java2d.InvalidPipeException",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true,
-    "allDeclaredFields": true,
-    "allPublicFields": true,
-    "allDeclaredClasses": true,
-    "allPublicClasses": true
-  },
-  {
     "name": "sun.java2d.SurfaceData",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
@@ -253,17 +242,6 @@
     "allPublicClasses": true
   },
   {
-    "name": "sun.awt.image.BufImgSurfaceData",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true,
-    "allDeclaredFields": true,
-    "allPublicFields": true,
-    "allDeclaredClasses": true,
-    "allPublicClasses": true
-  },
-  {
     "name": "sun.awt.image.BufImgSurfaceData$ICMColorData",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
@@ -287,6 +265,17 @@
   },
   {
     "name": "sun.java2d.pipe.RegionIterator",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true,
+    "allPublicClasses": true
+  },
+  {
+    "name": "sun.java2d.loops.Blit",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
