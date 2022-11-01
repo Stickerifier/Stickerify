@@ -3,11 +3,12 @@ logback = "1.4.4"
 
 [libraries]
 imgscalr = "org.imgscalr:imgscalr-lib:4.2"
-telegrambots = "org.telegram:telegrambots:6.1.0"
-tika = "org.apache.tika:tika-core:2.5.0"
+junit = "org.junit.jupiter:junit-jupiter:5.9.1"
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 slf4j-api = "org.slf4j:slf4j-api:2.0.3"
+telegrambots = "org.telegram:telegrambots:6.1.0"
+tika = "org.apache.tika:tika-core:2.5.0"
 
 [bundles]
 logback = ["logback-core", "logback-classic", "slf4j-api"]
