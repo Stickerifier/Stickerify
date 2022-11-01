@@ -4,7 +4,7 @@
 .idea/
 build/
 gradle/wrapper/
-src/main/test/
+src/test/
 src/main/resources/images/
 .gitignore
 _config.yml
