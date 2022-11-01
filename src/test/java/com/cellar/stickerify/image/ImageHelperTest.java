@@ -11,7 +11,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -84,11 +83,15 @@ public class ImageHelperTest {
     class UnsupportedTypes {
 
         private File resource(String filename) {
-            return new File(Objects.requireNonNull(ImageHelperTest.class.getClassLoader().getResource(filename)).getFile());
+            var resource = getClass().getClassLoader().getResource(filename);
+            if (resource == null) {
+                fail(() -> "Could not find resource [%s]".formatted(filename));
+            }
+            return new File(resource.getFile());
         }
 
         @Test
-        void document() {
+        void notAnImage() {
             TelegramApiException exception = assertThrows(TelegramApiException.class, () -> {
                 var document = resource("document.txt");
                 ImageHelper.convertToPng(document);
