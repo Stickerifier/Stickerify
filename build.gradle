@@ -13,6 +13,8 @@ dependencies {
     implementation libs.telegrambots
     implementation libs.tika
     implementation libs.bundles.logback
+
+    testImplementation libs.junit
 }
 
 group = 'com.cellar'
@@ -27,6 +29,10 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 application {

@@ -12,7 +12,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 public final class ImageHelper {
 
@@ -97,7 +96,7 @@ public final class ImageHelper {
 	 * @throws IOException if an error occurs creating the png
 	 */
 	private static File createPngFile(BufferedImage image) throws IOException {
-		var pngImage = new File(UUID.randomUUID() + "." + PNG_EXTENSION);
+		var pngImage = File.createTempFile("Stickerify-", ".png");
 		ImageIO.write(image, PNG_EXTENSION, pngImage);
 
 		return pngImage;
