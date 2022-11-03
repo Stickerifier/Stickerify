@@ -1,9 +1,0 @@
-title: Stickerify
-description: Telegram bot to convert images in stickers.
-remote_theme: pages-themes/minimal
-plugins:
-  - jekyll-remote-theme
-logo: src/main/resources/images/small-logo.png
-show_downloads: false
-github:
-  owner_name: Roberto Cella

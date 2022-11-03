@@ -73,7 +73,7 @@ After you successfully set up the project, you will have to go through the follo
 
 Take a look at this project's contributing guidelines [here](CONTRIBUTING.md).
 
-Have any question? Feel free to [open a new discussion](https://github.com/rob93c/Stickerify/discussions/new).
+Have any question? Feel free to [open a new discussion](https://github.com/Stickerifier/Stickerify/discussions/new).
 
 ## Hacktoberfest
 
@@ -96,5 +96,5 @@ If your pull request represents a valid contribution to the project, it will be 
 See the [**LICENSE**](LICENSE) file for license rights and limitations (MIT).
 
 <div align="right">
-<sup>made with 💖 by <a href="https://github.com/rob93c">Roberto Cella</a></sup>
+    <sup>made with 💖 by <a href="https://github.com/rob93c">Roberto Cella</a></sup>
 </div>

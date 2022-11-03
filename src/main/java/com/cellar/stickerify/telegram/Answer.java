@@ -18,14 +18,14 @@ public enum Answer {
 			Head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
 			"""),
 	ABOUT("""
-			This bot is open source, check it out on [Github](https://github.com/rob93c/Stickerify)\\.
+			This bot is open source, check it out on [Github](https://github.com/Stickerifier/Stickerify)\\.
 
 			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
 			"""),
 	ERROR("""
 			The file conversion was unsuccessful: only `\\.png`, `\\.jpeg`, and `\\.webp` files are supported\\.
 
-			If you think it should have worked, please report the issue on [Github](https://github.com/rob93c/Stickerify/issues/new/choose)\\.
+			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
 			""", true);
 
 	private final String text;
