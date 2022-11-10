@@ -2,7 +2,7 @@ FROM ubuntu:22.04 AS build
 
 ARG GRAALVM_VERSION=22.3.0
 ARG JAVA_VERSION=19
-ARG GRADLE_VERSION=7.6-rc-1
+ARG GRADLE_VERSION=7.6-rc-2
 
 RUN apt-get update -y && apt-get upgrade -y && apt-get install -y wget unzip build-essential zlib1g-dev upx && apt-get autoremove --purge -y \
  && wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAALVM_VERSION}/graalvm-ce-java${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz -P /tmp \
@@ -40,7 +40,7 @@ RUN rm -rf /tmp/*
 WORKDIR /app
 COPY . ./
 
-RUN gradle nativeCompile --no-daemon -w
+RUN gradle nativeCompile --no-daemon --project-prop org.gradle.welcome=never
 
 RUN upx --lzma --best -o stickerify-upx build/native/nativeCompile/Stickerify
 
