@@ -9,7 +9,7 @@ public enum Answer {
 			Send me the image you want to convert and I will take care of the rest\\.
 
 			Based on what you send, I will answer the following:
-			\\- the converted image, if you sent a supported file \\(currently only `\\.png` and `\\.jpeg` files are supported\\)
+			\\- the converted image, if you sent a supported file \\(currently only `\\.png`, `\\.jpeg`, and `\\.webp` files are supported\\)
 			\\- an error message, if you sent an unsupported file
 			\\- an informative message for any message without a file
 			"""),
@@ -18,14 +18,14 @@ public enum Answer {
 			Head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
 			"""),
 	ABOUT("""
-			This bot is open source, check it out on [Github](https://github.com/rob93c/Stickerify)\\.
+			This bot is open source, check it out on [Github](https://github.com/Stickerifier/Stickerify)\\.
 
 			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
 			"""),
 	ERROR("""
-			The file conversion was unsuccessful: only `\\.png` and `\\.jpeg` files are supported\\.
+			The file conversion was unsuccessful: only `\\.png`, `\\.jpeg`, and `\\.webp` files are supported\\.
 
-			If you think it should have worked, please report the issue on [Github](https://github.com/rob93c/Stickerify/issues/new/choose)\\.
+			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
 			""", true);
 
 	private final String text;

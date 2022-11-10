@@ -7,7 +7,6 @@ gradle/wrapper/
 src/test/
 src/main/resources/images/
 .gitignore
-_config.yml
 *.md
 gradlew*
 LICENSE
