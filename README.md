@@ -56,17 +56,17 @@ After you successfully set up the project, you will have to go through the follo
 
 1. Install [Docker](https://docs.docker.com/get-docker/)
 2. Prepare the Docker image either:
-   * building it passing the token (`{{TOKEN}}`) retrieved from [BotFather](https://t.me/BotFather) with the command:
+   * building it with the command:
       ```shell
-      docker build -t rob93c/stickerify --build-arg STICKERIFY_TOKEN={{TOKEN}} .
+      docker build -t rob93c/stickerify .
       ```
    * pulling the image from [Docker Hub](https://hub.docker.com/):
       ```shell
       docker pull rob93c/stickerify
       ```
-3. Now you just need to run the Docker image:
+3. Now you just need to run the Docker image passing the token (`{{TOKEN}}`) retrieved from [BotFather](https://t.me/BotFather):
    ```shell
-   docker run rob93c/stickerify
+   docker run -e "STICKERIFY_TOKEN={{TOKEN}}" rob93c/stickerify
    ```
 
 ## How to contribute to the project
