@@ -15,4 +15,4 @@ tika = "org.apache.tika:tika-core:2.6.0"
 logback = ["logback-core", "logback-classic", "slf4j-api"]
 
 [plugins]
-graalvm = "org.graalvm.buildtools.native:0.9.16"
+graalvm = "org.graalvm.buildtools.native:0.9.17"

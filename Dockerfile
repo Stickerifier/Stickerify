@@ -19,7 +19,6 @@ RUN wget http://more.musl.cc/${MUSL_VERSION}/x86_64-linux-musl/x86_64-linux-musl
  && wget https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz -P /tmp \
  && tar -zxvf /tmp/zlib-${ZLIB_VERSION}.tar.gz -C /tmp
 
-# Build MUSL to static link into application
 ENV TOOLCHAIN_DIR=/opt/musl-${MUSL_VERSION}/x86_64-linux-musl-native
 
 ENV PATH=${TOOLCHAIN_DIR}/bin:${PATH}
