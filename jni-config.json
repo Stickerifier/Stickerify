@@ -408,7 +408,6 @@
   },
   {
     "name": "sun.java2d.loops.DrawGlyphList",
-    "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
     "allPublicMethods": true,
