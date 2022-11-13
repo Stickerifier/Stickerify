@@ -30,11 +30,11 @@ Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answe
         B -->|Request contains a file| C{Is file valid?}
         click B "https://t.me/StickerifyImageBot" _blank
         style B fill:#2889ba,stroke:#e0e0e0,color:#e0e0e0
-        C -->|Yes| D(Convert file) -->|Answer| J[User]
-        C -->|No| E(Error message) -->|Answer| J[User]
+        C -->|Yes| D(Convert file)
+        C -->|No| E(Error message)
         B -->|Request is text-only| F{Is help command?}
-        F -->|Yes| G(Show bot usage) -->|Answer| J[User]
-        F -->|No| H(About message) -->|Answer| J[User]
+        F -->|Yes| G(Show bot usage)
+        F -->|No| H(About message)
 ```
 
 ## How to create a new sticker
