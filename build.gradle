@@ -9,6 +9,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly libs.graalvm.svm
     implementation libs.imageio.webp
     implementation libs.imgscalr
     implementation libs.bundles.logback
@@ -48,7 +49,8 @@ graalvmNative {
         }
         buildArgs.addAll('--static', '--libc=musl')
         buildArgs.add('--report-unsupported-elements-at-runtime')
-        buildArgs.add('-H:ReflectionConfigurationFiles=../../../reflection-config.json')
-        buildArgs.add('-H:JNIConfigurationFiles=../../../jni-config.json')
+        buildArgs.add('--features=../../../src/main/java/com/cellar/stickerify/graalvm/JNIRegistrationFeature.java')
+        //buildArgs.add('-H:ReflectionConfigurationFiles=../../../reflection-config.json')
+        //buildArgs.add('-H:JNIConfigurationFiles=../../../jni-config.json')
     }
 }

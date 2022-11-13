@@ -2,6 +2,7 @@
 logback = "1.4.4"
 
 [libraries]
+graalvm-svm = "org.graalvm.nativeimage:svm:22.3.0"
 imageio-webp = "com.twelvemonkeys.imageio:imageio-webp:3.9.3"
 imgscalr = "org.imgscalr:imgscalr-lib:4.2"
 junit = "org.junit.jupiter:junit-jupiter:5.9.1"
