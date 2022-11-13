@@ -24,6 +24,19 @@ Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answe
 * an error message, if you sent an unsupported file
 * an informative message for any message without a file
 
+```mermaid
+    flowchart LR
+        A[User] -->|Message| B([Stickerify])
+        B -->|Request contains a file| C{Is file valid?}
+        click B "https://t.me/StickerifyImageBot" _blank
+        style B fill:#2889ba,stroke:#e0e0e0,color:#e0e0e0
+        C -->|Yes| D(Convert file) -->|Answer| J[User]
+        C -->|No| E(Error message) -->|Answer| J[User]
+        B -->|Request is text-only| F{Is help command?}
+        F -->|Yes| G(Show bot usage) -->|Answer| J[User]
+        F -->|No| H(About message) -->|Answer| J[User]
+```
+
 ## How to create a new sticker
 
 1. Chat with [Stickers](https://t.me/Stickers), and use it to create a sticker pack
