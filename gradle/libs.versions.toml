@@ -7,7 +7,7 @@ imgscalr = "org.imgscalr:imgscalr-lib:4.2"
 junit = "org.junit.jupiter:junit-jupiter:5.9.1"
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
-slf4j-api = "org.slf4j:slf4j-api:2.0.3"
+slf4j-api = "org.slf4j:slf4j-api:2.0.4"
 telegrambots = "org.telegram:telegrambots:6.3.0"
 tika = "org.apache.tika:tika-core:2.6.0"
 
