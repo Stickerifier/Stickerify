@@ -1,5 +1,5 @@
 [versions]
-logback = "1.4.4"
+logback = "1.4.5"
 
 [libraries]
 imageio-webp = "com.twelvemonkeys.imageio:imageio-webp:3.9.3"
