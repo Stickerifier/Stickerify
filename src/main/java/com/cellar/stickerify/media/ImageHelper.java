@@ -1,4 +1,4 @@
-package com.cellar.stickerify.image;
+package com.cellar.stickerify.media;
 
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
@@ -31,7 +31,7 @@ public final class ImageHelper {
 	 * @return a resized and converted png image
 	 * @throws TelegramApiException if passed-in file doesn't represent a valid image
 	 */
-	public static File convertToPng(File file) throws TelegramApiException {
+	static File convertToPng(File file) throws TelegramApiException {
 		if (!isValidImage(file)) throw new TelegramApiException("Passed-in file is not supported");
 
 		try {
