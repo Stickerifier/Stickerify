@@ -8,15 +8,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.io.IOException;
 
-public final class MediaHelper {
+public final class MediaConverter {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MediaConverter.class);
 
-	public static File convert(File originalFile) throws TelegramApiException {
-		if (isImage(originalFile)) {
-			return ImageHelper.convertToPng(originalFile);
+	public static File convert(File file) throws TelegramApiException {
+		if (isImage(file)) {
+			return ImageHelper.convertToPng(file);
 		} else {
-			return VideoHelper.convertToWebm(originalFile);
+			return VideoHelper.convertToWebm(file);
 		}
 	}
 
@@ -29,7 +29,7 @@ public final class MediaHelper {
 		}
 	}
 
-	private MediaHelper() {
+	private MediaConverter() {
 		throw new UnsupportedOperationException();
 	}
 }

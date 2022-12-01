@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public final class ImageHelper {
+final class ImageHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
 

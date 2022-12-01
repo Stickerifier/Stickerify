@@ -4,7 +4,7 @@ import static com.cellar.stickerify.telegram.Answer.ERROR;
 import static com.cellar.stickerify.telegram.Answer.FILE_READY;
 import static java.util.HashSet.newHashSet;
 
-import com.cellar.stickerify.media.MediaHelper;
+import com.cellar.stickerify.media.MediaConverter;
 import com.cellar.stickerify.telegram.Answer;
 import com.cellar.stickerify.telegram.model.TelegramRequest;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class Stickerify extends TelegramLongPollingBot {
 			File originalFile = retrieveFile(request.getFileId());
 			pathsToDelete.add(originalFile.toPath());
 
-			File outputFile = MediaHelper.convert(originalFile);
+			File outputFile = MediaConverter.convert(originalFile);
 			pathsToDelete.add(outputFile.toPath());
 
 			SendDocument response = SendDocument.builder()
