@@ -18,7 +18,7 @@ dependencies {
     testImplementation libs.junit
 }
 
-group = 'com.cellar'
+group = 'com.github.stickerifier'
 version = '1.0-SNAPSHOT'
 description = 'Telegram bot to convert images in the format required to be used as Telegram stickers'
 
@@ -37,7 +37,7 @@ test {
 }
 
 application {
-    mainClass = 'com.cellar.stickerify.runner.Main'
+    mainClass = 'com.github.stickerifier.stickerify.runner.Main'
 }
 
 shadowJar {

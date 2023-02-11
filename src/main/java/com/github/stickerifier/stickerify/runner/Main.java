@@ -1,6 +1,6 @@
-package com.cellar.stickerify.runner;
+package com.github.stickerifier.stickerify.runner;
 
-import com.cellar.stickerify.bot.Stickerify;
+import com.github.stickerifier.stickerify.bot.Stickerify;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
