@@ -1,6 +1,6 @@
 # <img src="src/main/resources/images/stickerify.svg" align="right" width="100">[Stickerify](https://t.me/StickerifyImageBot)
 
-Telegram bot to convert images in the format required to be used as Telegram stickers (512x512 PNGs)
+Telegram bot to convert medias in the format required to be used as Telegram stickers
 
 ## Table of contents
 
@@ -16,11 +16,11 @@ Telegram bot to convert images in the format required to be used as Telegram sti
 
 ## How to use the bot
 
-You can use the bot going [here](https://t.me/StickerifyImageBot): start it, and you can now send it the images you need to convert.
+You can use the bot going [here](https://t.me/StickerifyImageBot): start it, and you can now send it the medias you need to convert.
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted image, if you sent a supported file (currently only `.png`, `.jpeg`, and `.webp` files are supported)
+* the converted media, if you sent a supported file (images, gifs, standard and animated stickers are supported)
 * an error message, if you sent an unsupported file
 * an informative message for any message without a file
 

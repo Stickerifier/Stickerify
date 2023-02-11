@@ -6,6 +6,9 @@ import org.imgscalr.Scalr.Mode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ws.schild.jave.EncoderException;
+import ws.schild.jave.MultimediaObject;
+import ws.schild.jave.info.MultimediaInfo;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -127,10 +130,14 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
 	private static File convertToWebm(File inputFile) throws TelegramApiException {
-		File webmVideo;
+		if (isVideoCompliant(inputFile)) {
+			LOGGER.debug("The file doesn't need conversion");
+
+			return inputFile;
+		}
 
 		try {
-			webmVideo = File.createTempFile("Stickerify-", ".webm");
+			var webmVideo = File.createTempFile("Stickerify-", ".webm");
 
 			var ffmpegCommand = new String[] { "ffmpeg",
 					"-i", inputFile.getAbsolutePath(),
@@ -143,11 +150,39 @@ public final class MediaHelper {
 					"-y", webmVideo.getAbsolutePath() };
 
 			new ProcessBuilder(ffmpegCommand).start().waitFor();
+
+			return webmVideo;
 		} catch (IOException | InterruptedException e) {
 			throw new TelegramApiException("An error occurred trying to convert passed-in video", e);
 		}
+	}
 
-		return webmVideo;
+	/**
+	 * Checks if passed-in file is already compliant with Telegram's requisites.
+	 * If so, conversion won't take place and the original file will be returned to the user.
+	 *
+	 * @param inputFile the video to check
+	 * @return {@code true} if the file is compliant
+	 * @throws TelegramApiException if an error occurred encoding the video
+	 */
+	private static boolean isVideoCompliant(File inputFile) throws TelegramApiException {
+		MultimediaInfo mediaInfo;
+		try {
+			mediaInfo = new MultimediaObject(inputFile).getInfo();
+		} catch (EncoderException e) {
+			throw new TelegramApiException(e);
+		}
+
+		var videoInfo = mediaInfo.getVideo();
+		var videoSize = videoInfo.getSize();
+
+		return videoSize.getWidth() <= MAX_ALLOWED_SIZE
+				&& videoSize.getHeight() <= MAX_ALLOWED_SIZE
+				&& videoInfo.getFrameRate() <= 30F
+				&& videoInfo.getDecoder().startsWith("vp9")
+				&& mediaInfo.getDuration() <= 3_000L
+				&& mediaInfo.getAudio() == null
+				&& "matroska".equals(mediaInfo.getFormat());
 	}
 
 	private MediaHelper() {

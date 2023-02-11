@@ -6,10 +6,10 @@ package com.github.stickerifier.stickerify.telegram;
 public enum Answer {
 
 	HELP("""
-			Send me the image you want to convert and I will take care of the rest\\.
+			Send me the image or gif you want to convert and I will take care of the rest\\.
 
 			Based on what you send, I will answer the following:
-			\\- the converted image, if you sent a supported file \\(currently only `\\.png`, `\\.jpeg`, and `\\.webp` files are supported\\)
+			\\- the converted media, if you sent a supported file \\(images, gifs, standard and animated stickers are supported\\)
 			\\- an error message, if you sent an unsupported file
 			\\- an informative message for any message without a file
 			"""),
@@ -23,7 +23,7 @@ public enum Answer {
 			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
 			"""),
 	ERROR("""
-			The file conversion was unsuccessful: only `\\.png`, `\\.jpeg`, and `\\.webp` files are supported\\.
+			The file conversion was unsuccessful: only images, gifs, standard and animated stickers are supported\\.
 
 			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
 			""", true);

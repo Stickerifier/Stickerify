@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -120,10 +122,12 @@ public class MediaHelperTest {
 
 		assertAll(
 				() -> assertThat(actualExtension, is(equalTo(".webm"))),
-				() -> assertThat(sizes.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat(sizes.getHeight(), is(equalTo(expectedHeight))),
-				() -> assertThat(videoInfo.getFrameRate(), is(equalTo(30F))),
-				() -> assertThat(mediaInfo.getDuration(), is(lessThanOrEqualTo(3_000L)))
+				() -> assertThat(sizes.getWidth(), is(lessThanOrEqualTo(expectedWidth))),
+				() -> assertThat(sizes.getHeight(), is(lessThanOrEqualTo(expectedHeight))),
+				() -> assertThat(videoInfo.getFrameRate(), is(lessThanOrEqualTo(30F))),
+				() -> assertThat(videoInfo.getDecoder(), startsWith("vp9")),
+				() -> assertThat(mediaInfo.getDuration(), is(lessThanOrEqualTo(3_000L))),
+				() -> assertThat(mediaInfo.getAudio(), is(nullValue()))
 		);
 	}
 
