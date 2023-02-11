@@ -33,7 +33,7 @@ public class MediaHelperTest {
 	@Test
 	void resizeImage() throws Exception {
 		var startingImage = image(1024, 1024, "jpg");
-		result = MediaHelper.convertToPng(startingImage);
+		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(512, 512);
 	}
@@ -60,7 +60,7 @@ public class MediaHelperTest {
 	@Test
 	void resizeRectangularImage() throws Exception {
 		var startingImage = image(1024, 512, "jpg");
-		result = MediaHelper.convertToPng(startingImage);
+		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(512, 256);
 	}
@@ -68,7 +68,7 @@ public class MediaHelperTest {
 	@Test
 	void resizeSmallImage() throws Exception {
 		var startingImage = image(256, 256, "png");
-		result = MediaHelper.convertToPng(startingImage);
+		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(512, 512);
 	}
@@ -76,7 +76,7 @@ public class MediaHelperTest {
 	@Test
 	void resizeWebpImage() throws Exception {
 		var startingImage = resource("valid.webp");
-		result = MediaHelper.convertToPng(startingImage);
+		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(256, 512);
 	}
@@ -88,11 +88,10 @@ public class MediaHelperTest {
 		return new File(resource.getFile());
 	}
 
-	// FIXME
 	@Test
 	void notAnImage() {
 		var document = resource("document.txt");
-		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convertToPng(document));
+		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
 		assertEquals("Passed-in file is not supported", exception.getMessage());
 	}
 

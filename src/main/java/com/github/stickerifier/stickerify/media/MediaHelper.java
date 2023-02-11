@@ -22,7 +22,8 @@ public final class MediaHelper {
 	 */
 	private static final int MAX_ALLOWED_SIZE = 512;
 
-	private static final List<String> SUPPORTED_FORMATS = List.of("image/jpeg", "image/png", "image/webp");
+	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
+	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "application/x-matroska");
 
 	/**
 	 * Based on the type of passed-in file, it converts it into to the proper media.
@@ -32,41 +33,28 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if the file is not supported or if the conversion failed
 	 */
 	public static File convert(File inputFile) throws TelegramApiException {
-		if (isValidImage(inputFile)) {
+		if (isValidMedia(inputFile, SUPPORTED_IMAGES)) {
 			return convertToPng(inputFile);
-		} else {
-			// TODO: check if the file is a supported video, otherwise throw an exception
+		} else if (isValidMedia(inputFile, SUPPORTED_VIDEOS)) {
 			return convertToWebm(inputFile);
+		} else {
+			throw new TelegramApiException("Passed-in file is not supported");
 		}
 	}
 
 	/**
-	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
-	 *
-	 * @param file the file to convert to png
-	 * @return a resized and converted png image
-	 * @throws TelegramApiException if an error occurred processing passed-in image
-	 */
-	static File convertToPng(File file) throws TelegramApiException {
-		try {
-			return createPngFile(resizeImage(ImageIO.read(file)));
-		} catch (IOException e) {
-			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
-		}
-	}
-
-	/**
-	 * Checks if passed-in file represents a valid image.
+	 * Checks if passed-in file represents a valid media.
 	 *
 	 * @param file the file sent to the bot
-	 * @return {@code true} if {@code file} is an image
+	 * @param supportedFormats the list of the formats to check
+	 * @return {@code true} if {@code file} is a supported media
 	 */
-	private static boolean isValidImage(File file) {
+	private static boolean isValidMedia(File file, List<String> supportedFormats) {
 		boolean isValid = false;
 
 		try {
 			String mimeType = new Tika().detect(file);
-			isValid = isSupportedImage(mimeType);
+			isValid = isSupportedMedia(mimeType, supportedFormats);
 
 			LOGGER.debug("The file has {} MIME type", mimeType);
 		} catch (IOException e) {
@@ -80,10 +68,26 @@ public final class MediaHelper {
 	 * Checks if the MIME type corresponds to a supported one.
 	 *
 	 * @param mimeType the MIME type to check
+	 * @param supportedFormats the list of the formats to check
 	 * @return {@code true} if the MIME type is supported
 	 */
-	private static boolean isSupportedImage(String mimeType) {
-		return SUPPORTED_FORMATS.stream().anyMatch(mimeType::equals);
+	private static boolean isSupportedMedia(String mimeType, List<String> supportedFormats) {
+		return supportedFormats.stream().anyMatch(mimeType::equals);
+	}
+
+	/**
+	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
+	 *
+	 * @param file the file to convert to png
+	 * @return a resized and converted png image
+	 * @throws TelegramApiException if an error occurred processing passed-in image
+	 */
+	private static File convertToPng(File file) throws TelegramApiException {
+		try {
+			return createPngFile(resizeImage(ImageIO.read(file)));
+		} catch (IOException e) {
+			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
+		}
 	}
 
 	/**
