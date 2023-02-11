@@ -1,4 +1,4 @@
-package com.github.stickerifier.stickerify.image;
+package com.github.stickerifier.stickerify.media;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class ImageHelperTest {
+public class MediaHelperTest {
 
 	@TempDir
 	private File directory;
@@ -33,7 +33,7 @@ public class ImageHelperTest {
 	@Test
 	void resizeImage() throws Exception {
 		var startingImage = image(1024, 1024, "jpg");
-		result = ImageHelper.convertToPng(startingImage);
+		result = MediaHelper.convertToPng(startingImage);
 
 		assertImageConsistency(512, 512);
 	}
@@ -60,7 +60,7 @@ public class ImageHelperTest {
 	@Test
 	void resizeRectangularImage() throws Exception {
 		var startingImage = image(1024, 512, "jpg");
-		result = ImageHelper.convertToPng(startingImage);
+		result = MediaHelper.convertToPng(startingImage);
 
 		assertImageConsistency(512, 256);
 	}
@@ -68,7 +68,7 @@ public class ImageHelperTest {
 	@Test
 	void resizeSmallImage() throws Exception {
 		var startingImage = image(256, 256, "png");
-		result = ImageHelper.convertToPng(startingImage);
+		result = MediaHelper.convertToPng(startingImage);
 
 		assertImageConsistency(512, 512);
 	}
@@ -76,7 +76,7 @@ public class ImageHelperTest {
 	@Test
 	void resizeWebpImage() throws Exception {
 		var startingImage = resource("valid.webp");
-		result = ImageHelper.convertToPng(startingImage);
+		result = MediaHelper.convertToPng(startingImage);
 
 		assertImageConsistency(256, 512);
 	}
@@ -88,10 +88,11 @@ public class ImageHelperTest {
 		return new File(resource.getFile());
 	}
 
+	// FIXME
 	@Test
 	void notAnImage() {
 		var document = resource("document.txt");
-		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> ImageHelper.convertToPng(document));
+		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convertToPng(document));
 		assertEquals("Passed-in file is not supported", exception.getMessage());
 	}
 

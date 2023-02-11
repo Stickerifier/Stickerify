@@ -4,7 +4,7 @@ import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static java.util.HashSet.newHashSet;
 
-import com.github.stickerifier.stickerify.image.ImageHelper;
+import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class Stickerify extends TelegramLongPollingBot {
 		if (request.hasFile()) {
 			answerFile(request);
 		} else {
-			answerText(request.getAnswerMessage(), request);
+			answerText(request);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class Stickerify extends TelegramLongPollingBot {
 			File originalFile = retrieveFile(request.getFileId());
 			pathsToDelete.add(originalFile.toPath());
 
-			File outputFile = ImageHelper.convertToPng(originalFile);
+			File outputFile = MediaHelper.convert(originalFile);
 			pathsToDelete.add(outputFile.toPath());
 
 			SendDocument response = SendDocument.builder()
@@ -91,6 +91,10 @@ public class Stickerify extends TelegramLongPollingBot {
 		GetFile getFile = new GetFile(fileId);
 
 		return downloadFile(execute(getFile).getFilePath());
+	}
+
+	private void answerText(TelegramRequest request) {
+		answerText(request.getAnswerMessage(), request);
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {

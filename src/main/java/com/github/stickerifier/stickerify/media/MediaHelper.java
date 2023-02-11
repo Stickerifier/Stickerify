@@ -1,4 +1,4 @@
-package com.github.stickerifier.stickerify.image;
+package com.github.stickerifier.stickerify.media;
 
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
@@ -13,9 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public final class ImageHelper {
+public final class MediaHelper {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ImageHelper.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
 	/**
 	 * @see <a href="https://core.telegram.org/stickers#static-stickers-and-emoji">Telegram documentation</a>
@@ -25,15 +25,29 @@ public final class ImageHelper {
 	private static final List<String> SUPPORTED_FORMATS = List.of("image/jpeg", "image/png", "image/webp");
 
 	/**
+	 * Based on the type of passed-in file, it converts it into to the proper media.
+	 *
+	 * @param inputFile the file to convert
+	 * @return a resized and converted file
+	 * @throws TelegramApiException if the file is not supported or if the conversion failed
+	 */
+	public static File convert(File inputFile) throws TelegramApiException {
+		if (isValidImage(inputFile)) {
+			return convertToPng(inputFile);
+		} else {
+			// TODO: check if the file is a supported video, otherwise throw an exception
+			return convertToWebm(inputFile);
+		}
+	}
+
+	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
 	 *
 	 * @param file the file to convert to png
 	 * @return a resized and converted png image
-	 * @throws TelegramApiException if passed-in file doesn't represent a valid image
+	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
-	public static File convertToPng(File file) throws TelegramApiException {
-		if (!isValidImage(file)) throw new TelegramApiException("Passed-in file is not supported");
-
+	static File convertToPng(File file) throws TelegramApiException {
 		try {
 			return createPngFile(resizeImage(ImageIO.read(file)));
 		} catch (IOException e) {
@@ -100,7 +114,39 @@ public final class ImageHelper {
 		return pngImage;
 	}
 
-	private ImageHelper() {
+	/**
+	 * Given a video file, it converts it to a webm file of the proper dimension (max 512 x 512),
+	 * based on the requirements specified by <a href="https://core.telegram.org/stickers/webm-vp9-encoding">Telegram documentation</a>.
+	 *
+	 * @param inputFile the file to convert
+	 * @return converted video
+	 * @throws TelegramApiException if file conversion is not successful
+	 */
+	private static File convertToWebm(File inputFile) throws TelegramApiException {
+		File webmVideo;
+
+		try {
+			webmVideo = File.createTempFile("Stickerify-", ".webm");
+
+			var ffmpegCommand = new String[] { "ffmpeg",
+					"-i", inputFile.getAbsolutePath(),
+					"-vf", "scale = 'if(gt(iw,ih),512,-2)':'if(gt(iw,ih),-2,512)', fps = 30",
+					"-c:v", "libvpx-vp9",
+					"-b:v", "256k",
+					"-crf", "32",
+					"-g", "60",
+					"-an", "-t", "3",
+					"-y", webmVideo.getAbsolutePath() };
+
+			new ProcessBuilder(ffmpegCommand).start().waitFor();
+		} catch (IOException | InterruptedException e) {
+			throw new TelegramApiException("An error occurred trying to convert passed-in video", e);
+		}
+
+		return webmVideo;
+	}
+
+	private MediaHelper() {
 		throw new UnsupportedOperationException();
 	}
 }
