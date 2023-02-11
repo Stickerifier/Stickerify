@@ -58,15 +58,21 @@ public record TelegramRequest(Message message) {
 
 	@Override
 	public String toString() {
-		String text = Optional.ofNullable(message.getText()).orElse(message.getCaption());
 		String username = Optional.ofNullable(message.getFrom().getUserName()).orElse("<anonymous>");
+		String text = Optional.ofNullable(message.getText()).orElse(message.getCaption());
 
 		return "request ["
 				+ "chat=" + getChatId()
 				+ ", from=" + username
-				+ ", file=" + getSafeFileId()
-				+ ", text=" + text
+				+ writeIfNotEmpty("file", getSafeFileId())
+				+ writeIfNotEmpty("text", text)
 				+ "]";
+	}
+
+	private static String writeIfNotEmpty(String field, String value) {
+		return value != null && !value.isEmpty()
+				? ", " + field + "=" + value
+				: "";
 	}
 
 	private String getSafeFileId() {
