@@ -16,9 +16,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
-import ws.schild.jave.encode.AudioAttributes;
-import ws.schild.jave.encode.EncodingAttributes;
-import ws.schild.jave.encode.VideoAttributes;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -106,14 +103,7 @@ public class MediaHelperTest {
 		assertVideoConsistency(512, 288);
 	}
 
-	public void assertVideoConsistency(int expectedWidth, int expectedHeight) throws EncoderException {
-		var audio = new AudioAttributes();
-		audio.setCodec("none");
-		var video = new VideoAttributes();
-		video.setSize(null);
-		var attrs = new EncodingAttributes();
-		attrs.setAudioAttributes(audio);
-		attrs.setVideoAttributes(video);
+	private void assertVideoConsistency(int expectedWidth, int expectedHeight) throws EncoderException {
 		var mediaInfo = new MultimediaObject(result).getInfo();
 		var videoInfo = mediaInfo.getVideo();
 		var sizes = videoInfo.getSize();
