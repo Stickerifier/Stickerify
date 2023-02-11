@@ -62,7 +62,7 @@ After you successfully set up the project, you will have to go through the follo
 1. Chat with [BotFather](https://t.me/BotFather) and ask it to create a new bot
 2. Copy the token it provided you and either:
    * set it as the value of a new environment variable named `STICKERIFY_TOKEN` 
-   * use it as the value passed to the `super` constructor inside `Stickerify`
+   * use it as the value passed to the `super(botToken)` constructor inside `Stickerify`
 3. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
 ## How to launch the bot using Docker

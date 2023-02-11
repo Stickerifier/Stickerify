@@ -1,4 +1,4 @@
-package com.cellar.stickerify.image;
+package com.github.stickerifier.stickerify.image;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,10 +1,10 @@
-package com.cellar.stickerify.telegram.model;
+package com.github.stickerifier.stickerify.telegram.model;
 
-import static com.cellar.stickerify.telegram.Answer.ABOUT;
-import static com.cellar.stickerify.telegram.Answer.HELP;
+import static com.github.stickerifier.stickerify.telegram.Answer.ABOUT;
+import static com.github.stickerifier.stickerify.telegram.Answer.HELP;
 import static java.util.Comparator.comparing;
 
-import com.cellar.stickerify.telegram.Answer;
+import com.github.stickerifier.stickerify.telegram.Answer;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;

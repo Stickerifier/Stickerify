@@ -1,4 +1,4 @@
-package com.cellar.stickerify.telegram;
+package com.github.stickerifier.stickerify.telegram;
 
 /**
  * Enum class containing the text replies the bot can use.

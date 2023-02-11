@@ -1,12 +1,12 @@
-package com.cellar.stickerify.bot;
+package com.github.stickerifier.stickerify.bot;
 
-import static com.cellar.stickerify.telegram.Answer.ERROR;
-import static com.cellar.stickerify.telegram.Answer.FILE_READY;
+import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
+import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static java.util.HashSet.newHashSet;
 
-import com.cellar.stickerify.image.ImageHelper;
-import com.cellar.stickerify.telegram.Answer;
-import com.cellar.stickerify.telegram.model.TelegramRequest;
+import com.github.stickerifier.stickerify.image.ImageHelper;
+import com.github.stickerifier.stickerify.telegram.Answer;
+import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

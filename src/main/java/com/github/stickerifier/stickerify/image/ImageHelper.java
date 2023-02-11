@@ -1,4 +1,4 @@
-package com.cellar.stickerify.image;
+package com.github.stickerifier.stickerify.image;
 
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
