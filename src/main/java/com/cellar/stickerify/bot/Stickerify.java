@@ -33,14 +33,13 @@ public class Stickerify extends TelegramLongPollingBot {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 
-	@Override
-	public String getBotUsername() {
-		return Stickerify.class.getSimpleName();
+	public Stickerify() {
+		super(System.getenv("STICKERIFY_TOKEN"));
 	}
 
 	@Override
-	public String getBotToken() {
-		return System.getenv("STICKERIFY_TOKEN");
+	public String getBotUsername() {
+		return Stickerify.class.getSimpleName();
 	}
 
 	@Override
