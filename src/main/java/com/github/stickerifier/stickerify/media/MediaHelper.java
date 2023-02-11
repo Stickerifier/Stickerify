@@ -23,7 +23,7 @@ public final class MediaHelper {
 	private static final int MAX_ALLOWED_SIZE = 512;
 
 	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
-	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "application/x-matroska");
+	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "video/webm", "application/x-matroska");
 
 	/**
 	 * Based on the type of passed-in file, it converts it into to the proper media.

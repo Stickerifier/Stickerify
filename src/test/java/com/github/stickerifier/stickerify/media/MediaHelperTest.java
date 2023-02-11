@@ -1,7 +1,10 @@
 package com.github.stickerifier.stickerify.media;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,6 +12,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ws.schild.jave.EncoderException;
+import ws.schild.jave.MultimediaObject;
+import ws.schild.jave.encode.AudioAttributes;
+import ws.schild.jave.encode.EncodingAttributes;
+import ws.schild.jave.encode.VideoAttributes;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -51,9 +59,9 @@ public class MediaHelperTest {
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
 		assertAll(
-				() -> assertEquals(".png", actualExtension),
-				() -> assertEquals(expectedWidth, image.getWidth()),
-				() -> assertEquals(expectedHeight, image.getHeight())
+				() -> assertThat(actualExtension, is(equalTo(".png"))),
+				() -> assertThat(image.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat(image.getHeight(), is(equalTo(expectedHeight)))
 		);
 	}
 
@@ -89,10 +97,49 @@ public class MediaHelperTest {
 	}
 
 	@Test
+	void resizeMovVideo() throws Exception {
+		var startingVideo = resource("valid.mov");
+		result = MediaHelper.convert(startingVideo);
+
+		assertVideoConsistency(512, 288);
+	}
+
+	public void assertVideoConsistency(int expectedWidth, int expectedHeight) throws EncoderException {
+		var audio = new AudioAttributes();
+		audio.setCodec("none");
+		var video = new VideoAttributes();
+		video.setSize(null);
+		var attrs = new EncodingAttributes();
+		attrs.setAudioAttributes(audio);
+		attrs.setVideoAttributes(video);
+		var mediaInfo = new MultimediaObject(result).getInfo();
+		var videoInfo = mediaInfo.getVideo();
+		var sizes = videoInfo.getSize();
+
+		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
+
+		assertAll(
+				() -> assertThat(actualExtension, is(equalTo(".webm"))),
+				() -> assertThat(sizes.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat(sizes.getHeight(), is(equalTo(expectedHeight))),
+				() -> assertThat(videoInfo.getFrameRate(), is(equalTo(30F))),
+				() -> assertThat(mediaInfo.getDuration(), is(lessThanOrEqualTo(3_000L)))
+		);
+	}
+
+	@Test
+	void resizeWebmVideo() throws Exception {
+		var startingVideo = resource("valid.webm");
+		result = MediaHelper.convert(startingVideo);
+
+		assertVideoConsistency(512, 288);
+	}
+
+	@Test
 	void notAnImage() {
 		var document = resource("document.txt");
 		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
-		assertEquals("Passed-in file is not supported", exception.getMessage());
+		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
 	}
 
 }

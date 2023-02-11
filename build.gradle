@@ -11,10 +11,12 @@ repositories {
 dependencies {
     implementation libs.imageio.webp
     implementation libs.imgscalr
+    implementation libs.jave
     implementation libs.bundles.logback
     implementation libs.telegrambots
     implementation libs.tika
 
+    testImplementation libs.hamcrest
     testImplementation libs.junit
 }
 
