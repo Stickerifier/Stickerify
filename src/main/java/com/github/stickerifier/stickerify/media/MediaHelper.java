@@ -36,9 +36,11 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if the file is not supported or if the conversion failed
 	 */
 	public static File convert(File inputFile) throws TelegramApiException {
-		if (isValidMedia(inputFile, SUPPORTED_IMAGES)) {
+		String mimeType = detectMimeType(inputFile);
+
+		if (isSupportedMedia(mimeType, SUPPORTED_IMAGES)) {
 			return convertToPng(inputFile);
-		} else if (isValidMedia(inputFile, SUPPORTED_VIDEOS)) {
+		} else if (isSupportedMedia(mimeType, SUPPORTED_VIDEOS)) {
 			return convertToWebm(inputFile);
 		} else {
 			throw new TelegramApiException("Passed-in file is not supported");
@@ -46,25 +48,23 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Checks if passed-in file represents a valid media.
+	 * Analyses the file in order to detect its media type.
 	 *
 	 * @param file the file sent to the bot
-	 * @param supportedFormats the list of the formats to check
-	 * @return {@code true} if {@code file} is a supported media
+	 * @return the MIME type of the passed-in file
 	 */
-	private static boolean isValidMedia(File file, List<String> supportedFormats) {
-		boolean isValid = false;
+	private static String detectMimeType(File file) {
+		String mimeType = "";
 
 		try {
-			String mimeType = new Tika().detect(file);
-			isValid = isSupportedMedia(mimeType, supportedFormats);
+			mimeType = new Tika().detect(file);
 
 			LOGGER.debug("The file has {} MIME type", mimeType);
 		} catch (IOException e) {
 			LOGGER.error("Unable to retrieve MIME type for file {}", file.getName());
 		}
 
-		return isValid;
+		return mimeType;
 	}
 
 	/**
