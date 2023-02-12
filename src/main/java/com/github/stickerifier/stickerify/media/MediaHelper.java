@@ -139,28 +139,7 @@ public final class MediaHelper {
 			return file;
 		}
 
-		try {
-			var webmVideo = File.createTempFile("Stickerify-", ".webm");
-
-			var ffmpegCommand = new String[] {
-					"ffmpeg",
-					"-i", file.getAbsolutePath(),
-					"-vf", "scale = 'if(gt(iw,ih)," + MAX_SIZE + ",-2)':'if(gt(iw,ih),-2," + MAX_SIZE + ")', fps = " + MAX_FRAMES,
-					"-c:v", "libvpx-" + VP9_CODEC,
-					"-b:v", "256k",
-					"-crf", "32",
-					"-g", "60",
-					"-an",
-					"-t", MAX_DURATION_SECONDS,
-					"-y", webmVideo.getAbsolutePath()
-			};
-
-			new ProcessBuilder(ffmpegCommand).start().waitFor();
-
-			return webmVideo;
-		} catch (IOException | InterruptedException e) {
-			throw new TelegramApiException("An error occurred trying to convert passed-in video", e);
-		}
+		return convertWithFFmpeg(file);
 	}
 
 	/**
@@ -210,6 +189,38 @@ public final class MediaHelper {
 		var height = videoSize.getHeight();
 
 		return (width == MAX_SIZE && height <= MAX_SIZE) || (height == MAX_SIZE && width <= MAX_SIZE);
+	}
+
+	/**
+	 * Converts the passed-in file using FFmpeg applying Telegram's animated stickers' constraints.
+	 *
+	 * @param file the file to convert
+	 * @return converted video
+	 * @throws TelegramApiException if file conversion is not successful
+	 */
+	private static File convertWithFFmpeg(File file) throws TelegramApiException {
+		try {
+			var webmVideo = File.createTempFile("Stickerify-", ".webm");
+
+			var ffmpegCommand = new String[] {
+					"ffmpeg",
+					"-i", file.getAbsolutePath(),
+					"-vf", "scale = 'if(gt(iw,ih)," + MAX_SIZE + ",-2)':'if(gt(iw,ih),-2," + MAX_SIZE + ")', fps = " + MAX_FRAMES,
+					"-c:v", "libvpx-" + VP9_CODEC,
+					"-b:v", "256k",
+					"-crf", "32",
+					"-g", "60",
+					"-an",
+					"-t", MAX_DURATION_SECONDS,
+					"-y", webmVideo.getAbsolutePath()
+			};
+
+			new ProcessBuilder(ffmpegCommand).start().waitFor();
+
+			return webmVideo;
+		} catch (IOException | InterruptedException e) {
+			throw new TelegramApiException("An error occurred trying to convert passed-in video", e);
+		}
 	}
 
 	private MediaHelper() {
