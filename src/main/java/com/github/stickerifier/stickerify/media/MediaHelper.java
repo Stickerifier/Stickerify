@@ -2,7 +2,6 @@ package com.github.stickerifier.stickerify.media;
 
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURATION_MILLIS;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
@@ -133,33 +132,15 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
 	private static File convertToWebm(File file) throws TelegramApiException {
-		if (isVideoCompliant(file)) {
+		var mediaInfo = retrieveMultimediaInfo(file);
+
+		if (isVideoCompliant(mediaInfo)) {
 			LOGGER.debug("The file doesn't need conversion");
 
 			return file;
 		}
 
-		return convertWithFFmpeg(file);
-	}
-
-	/**
-	 * Checks if passed-in file is already compliant with Telegram's requisites.
-	 * If so, conversion won't take place and the original file will be returned to the user.
-	 *
-	 * @param file the video to check
-	 * @return {@code true} if the file is compliant
-	 * @throws TelegramApiException if an error occurred encoding the video
-	 */
-	private static boolean isVideoCompliant(File file) throws TelegramApiException {
-		var mediaInfo = retrieveMultimediaInfo(file);
-		var videoInfo = mediaInfo.getVideo();
-
-		return isSizeCompliant(videoInfo.getSize())
-				&& videoInfo.getFrameRate() <= MAX_FRAMES
-				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
-				&& mediaInfo.getDuration() <= MAX_DURATION_MILLIS
-				&& mediaInfo.getAudio() == null
-				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat());
+		return convertWithFFmpeg(file, mediaInfo);
 	}
 
 	/**
@@ -175,6 +156,24 @@ public final class MediaHelper {
 		} catch (EncoderException e) {
 			throw new TelegramApiException(e);
 		}
+	}
+
+	/**
+	 * Checks if passed-in file is already compliant with Telegram's requisites.
+	 * If so, conversion won't take place and the original file will be returned to the user.
+	 *
+	 * @param mediaInfo video's multimedia information
+	 * @return {@code true} if the file is compliant
+	 */
+	private static boolean isVideoCompliant(MultimediaInfo mediaInfo) {
+		var videoInfo = mediaInfo.getVideo();
+
+		return isSizeCompliant(videoInfo.getSize())
+				&& videoInfo.getFrameRate() <= MAX_FRAMES
+				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
+				&& mediaInfo.getDuration() <= MAX_DURATION_MILLIS
+				&& mediaInfo.getAudio() == null
+				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat());
 	}
 
 	/**
@@ -195,23 +194,27 @@ public final class MediaHelper {
 	 * Converts the passed-in file using FFmpeg applying Telegram's animated stickers' constraints.
 	 *
 	 * @param file the file to convert
+	 * @param mediaInfo video's multimedia information
 	 * @return converted video
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
-	private static File convertWithFFmpeg(File file) throws TelegramApiException {
+	private static File convertWithFFmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
+		var frameRate = Math.min(mediaInfo.getVideo().getFrameRate(), MAX_FRAMES);
+		var duration = Math.min(mediaInfo.getDuration(), MAX_DURATION_MILLIS) / 1_000L;
+
 		try {
 			var webmVideo = File.createTempFile("Stickerify-", ".webm");
 
 			var ffmpegCommand = new String[] {
 					"ffmpeg",
 					"-i", file.getAbsolutePath(),
-					"-vf", "scale = 'if(gt(iw,ih)," + MAX_SIZE + ",-2)':'if(gt(iw,ih),-2," + MAX_SIZE + ")', fps = " + MAX_FRAMES,
+					"-vf", "scale = 'if(gt(iw,ih)," + MAX_SIZE + ",-2)':'if(gt(iw,ih),-2," + MAX_SIZE + ")', fps = " + frameRate,
 					"-c:v", "libvpx-" + VP9_CODEC,
 					"-b:v", "256k",
 					"-crf", "32",
 					"-g", "60",
 					"-an",
-					"-t", MAX_DURATION_SECONDS,
+					"-t", String.valueOf(duration),
 					"-y", webmVideo.getAbsolutePath()
 			};
 

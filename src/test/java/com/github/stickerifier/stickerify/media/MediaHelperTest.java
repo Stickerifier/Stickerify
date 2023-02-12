@@ -1,18 +1,14 @@
 package com.github.stickerifier.stickerify.media;
 
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURATION_MILLIS;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.junit.jupiter.api.AfterEach;
@@ -101,36 +97,38 @@ public class MediaHelperTest {
 	}
 
 	@Test
-	void convertMovVideo() throws Exception {
-		var startingVideo = resource("valid.mov");
+	void convertLongMovVideo() throws Exception {
+		var startingVideo = resource("long.mov");
 		result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency();
+		assertVideoConsistency(512, 288, 30F, 3_000L);
 	}
 
-	private void assertVideoConsistency() throws EncoderException {
+	private void assertVideoConsistency(int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws EncoderException {
 		var mediaInfo = new MultimediaObject(result).getInfo();
 		var videoInfo = mediaInfo.getVideo();
+		var videoSize = videoInfo.getSize();
 
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
 		assertAll(
 				() -> assertThat(actualExtension, is(equalTo(".webm"))),
-				() -> assertTrue(MediaHelper.isSizeCompliant(videoInfo.getSize())),
-				() -> assertThat(videoInfo.getFrameRate(), is(lessThanOrEqualTo(MAX_FRAMES))),
+				() -> assertThat(videoSize.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat(videoSize.getHeight(), is(equalTo(expectedHeight))),
+				() -> assertThat(videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
 				() -> assertThat(videoInfo.getDecoder(), startsWith(VP9_CODEC)),
-				() -> assertThat(mediaInfo.getDuration(), is(lessThanOrEqualTo(MAX_DURATION_MILLIS))),
+				() -> assertThat(mediaInfo.getDuration(), is(equalTo(expectedDuration))),
 				() -> assertThat(mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
 				() -> assertThat(mediaInfo.getAudio(), is(nullValue()))
 		);
 	}
 
 	@Test
-	void convertWebmVideo() throws Exception {
-		var startingVideo = resource("valid.webm");
+	void convertShortAndLowFpsVideo() throws Exception {
+		var startingVideo = resource("short_low_fps.webm");
 		result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency();
+		assertVideoConsistency(512, 288, 10F, 1_200L);
 	}
 
 	@Test
@@ -138,7 +136,15 @@ public class MediaHelperTest {
 		var startingVideo = resource("small_animated_sticker.webm");
 		result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency();
+		assertVideoConsistency(512, 212, 30F, 2_000L);
+	}
+
+	@Test
+	void convertVerticalWebmVideo() throws Exception {
+		var startingVideo = resource("vertical_animated_sticker.webm");
+		result = MediaHelper.convert(startingVideo);
+
+		assertVideoConsistency(288, 512, 30F, 2_670L);
 	}
 
 	@Test
