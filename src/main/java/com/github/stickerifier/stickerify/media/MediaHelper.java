@@ -99,14 +99,14 @@ public final class MediaHelper {
 	/**
 	 * Given an image, it returns its resized version with sides of max 512 pixels each.
 	 *
-	 * @param originalImage the image to be resized
+	 * @param image the image to be resized
 	 * @return resized image
 	 */
-	private static BufferedImage resizeImage(BufferedImage originalImage) {
-		if (originalImage.getWidth() >= originalImage.getHeight()) {
-			return Scalr.resize(originalImage, Mode.FIT_TO_WIDTH, MAX_SIZE);
+	private static BufferedImage resizeImage(BufferedImage image) {
+		if (image.getWidth() >= image.getHeight()) {
+			return Scalr.resize(image, Mode.FIT_TO_WIDTH, MAX_SIZE);
 		} else {
-			return Scalr.resize(originalImage, Mode.FIT_TO_HEIGHT, MAX_SIZE);
+			return Scalr.resize(image, Mode.FIT_TO_HEIGHT, MAX_SIZE);
 		}
 	}
 
@@ -128,15 +128,15 @@ public final class MediaHelper {
 	 * Given a video file, it converts it to a webm file of the proper dimension (max 512 x 512),
 	 * based on the requirements specified by <a href="https://core.telegram.org/stickers/webm-vp9-encoding">Telegram documentation</a>.
 	 *
-	 * @param inputFile the file to convert
+	 * @param file the file to convert
 	 * @return converted video
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
-	private static File convertToWebm(File inputFile) throws TelegramApiException {
-		if (isVideoCompliant(inputFile)) {
+	private static File convertToWebm(File file) throws TelegramApiException {
+		if (isVideoCompliant(file)) {
 			LOGGER.debug("The file doesn't need conversion");
 
-			return inputFile;
+			return file;
 		}
 
 		try {
@@ -144,7 +144,7 @@ public final class MediaHelper {
 
 			var ffmpegCommand = new String[] {
 					"ffmpeg",
-					"-i", inputFile.getAbsolutePath(),
+					"-i", file.getAbsolutePath(),
 					"-vf", "scale = 'if(gt(iw,ih)," + MAX_SIZE + ",-2)':'if(gt(iw,ih),-2," + MAX_SIZE + ")', fps = " + MAX_FRAMES,
 					"-c:v", "libvpx-" + VP9_CODEC,
 					"-b:v", "256k",
@@ -167,12 +167,12 @@ public final class MediaHelper {
 	 * Checks if passed-in file is already compliant with Telegram's requisites.
 	 * If so, conversion won't take place and the original file will be returned to the user.
 	 *
-	 * @param inputFile the video to check
+	 * @param file the video to check
 	 * @return {@code true} if the file is compliant
 	 * @throws TelegramApiException if an error occurred encoding the video
 	 */
-	private static boolean isVideoCompliant(File inputFile) throws TelegramApiException {
-		var mediaInfo = retrieveMultimediaInfo(inputFile);
+	private static boolean isVideoCompliant(File file) throws TelegramApiException {
+		var mediaInfo = retrieveMultimediaInfo(file);
 		var videoInfo = mediaInfo.getVideo();
 
 		return isSizeCompliant(videoInfo.getSize())
@@ -186,13 +186,13 @@ public final class MediaHelper {
 	/**
 	 * Convenience method to retrieve multimedia information of a file.
 	 *
-	 * @param inputFile the video to check
+	 * @param file the video to check
 	 * @return passed-in video's multimedia information
 	 * @throws TelegramApiException if an error occurred encoding the video
 	 */
-	private static MultimediaInfo retrieveMultimediaInfo(File inputFile) throws TelegramApiException {
+	private static MultimediaInfo retrieveMultimediaInfo(File file) throws TelegramApiException {
 		try {
-			return new MultimediaObject(inputFile).getInfo();
+			return new MultimediaObject(file).getInfo();
 		} catch (EncoderException e) {
 			throw new TelegramApiException(e);
 		}
