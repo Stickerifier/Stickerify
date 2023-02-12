@@ -1,5 +1,12 @@
 package com.github.stickerifier.stickerify.media;
 
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURATION_MILLIS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURATION_SECONDS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FRAMES;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
+
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Mode;
@@ -9,6 +16,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 import ws.schild.jave.info.MultimediaInfo;
+import ws.schild.jave.info.VideoSize;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -20,16 +28,11 @@ public final class MediaHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
-	/**
-	 * @see <a href="https://core.telegram.org/stickers#static-stickers-and-emoji">Telegram documentation</a>
-	 */
-	private static final int MAX_ALLOWED_SIZE = 512;
-
 	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
 	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "video/webm", "application/x-matroska");
 
 	/**
-	 * Based on the type of passed-in file, it converts it into to the proper media.
+	 * Based on the type of passed-in file, it converts it into the proper media.
 	 *
 	 * @param inputFile the file to convert
 	 * @return a resized and converted file
@@ -54,7 +57,7 @@ public final class MediaHelper {
 	 * @return the MIME type of the passed-in file
 	 */
 	private static String detectMimeType(File file) {
-		String mimeType = "";
+		String mimeType = null;
 
 		try {
 			mimeType = new Tika().detect(file);
@@ -75,7 +78,7 @@ public final class MediaHelper {
 	 * @return {@code true} if the MIME type is supported
 	 */
 	private static boolean isSupportedMedia(String mimeType, List<String> supportedFormats) {
-		return supportedFormats.stream().anyMatch(mimeType::equals);
+		return supportedFormats.stream().anyMatch(format -> format.equals(mimeType));
 	}
 
 	/**
@@ -101,9 +104,9 @@ public final class MediaHelper {
 	 */
 	private static BufferedImage resizeImage(BufferedImage originalImage) {
 		if (originalImage.getWidth() >= originalImage.getHeight()) {
-			return Scalr.resize(originalImage, Mode.FIT_TO_WIDTH, MAX_ALLOWED_SIZE);
+			return Scalr.resize(originalImage, Mode.FIT_TO_WIDTH, MAX_SIZE);
 		} else {
-			return Scalr.resize(originalImage, Mode.FIT_TO_HEIGHT, MAX_ALLOWED_SIZE);
+			return Scalr.resize(originalImage, Mode.FIT_TO_HEIGHT, MAX_SIZE);
 		}
 	}
 
@@ -139,15 +142,18 @@ public final class MediaHelper {
 		try {
 			var webmVideo = File.createTempFile("Stickerify-", ".webm");
 
-			var ffmpegCommand = new String[] { "ffmpeg",
+			var ffmpegCommand = new String[] {
+					"ffmpeg",
 					"-i", inputFile.getAbsolutePath(),
-					"-vf", "scale = 'if(gt(iw,ih),512,-2)':'if(gt(iw,ih),-2,512)', fps = 30",
-					"-c:v", "libvpx-vp9",
+					"-vf", "scale = 'if(gt(iw,ih)," + MAX_SIZE + ",-2)':'if(gt(iw,ih),-2," + MAX_SIZE + ")', fps = " + MAX_FRAMES,
+					"-c:v", "libvpx-" + VP9_CODEC,
 					"-b:v", "256k",
 					"-crf", "32",
 					"-g", "60",
-					"-an", "-t", "3",
-					"-y", webmVideo.getAbsolutePath() };
+					"-an",
+					"-t", MAX_DURATION_SECONDS,
+					"-y", webmVideo.getAbsolutePath()
+			};
 
 			new ProcessBuilder(ffmpegCommand).start().waitFor();
 
@@ -166,23 +172,44 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if an error occurred encoding the video
 	 */
 	private static boolean isVideoCompliant(File inputFile) throws TelegramApiException {
-		MultimediaInfo mediaInfo;
+		var mediaInfo = retrieveMultimediaInfo(inputFile);
+		var videoInfo = mediaInfo.getVideo();
+
+		return isSizeCompliant(videoInfo.getSize())
+				&& videoInfo.getFrameRate() <= MAX_FRAMES
+				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
+				&& mediaInfo.getDuration() <= MAX_DURATION_MILLIS
+				&& mediaInfo.getAudio() == null
+				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat());
+	}
+
+	/**
+	 * Convenience method to retrieve multimedia information of a file.
+	 *
+	 * @param inputFile the video to check
+	 * @return passed-in video's multimedia information
+	 * @throws TelegramApiException if an error occurred encoding the video
+	 */
+	private static MultimediaInfo retrieveMultimediaInfo(File inputFile) throws TelegramApiException {
 		try {
-			mediaInfo = new MultimediaObject(inputFile).getInfo();
+			return new MultimediaObject(inputFile).getInfo();
 		} catch (EncoderException e) {
 			throw new TelegramApiException(e);
 		}
+	}
 
-		var videoInfo = mediaInfo.getVideo();
-		var videoSize = videoInfo.getSize();
+	/**
+	 * Checks that either video's width or height is 512 pixels
+	 * and the other is 512 pixels or fewer.
+	 *
+	 * @param videoSize the video information to be checked
+	 * @return {@code true} if the video has valid dimensions
+	 */
+	static boolean isSizeCompliant(VideoSize videoSize) {
+		var width = videoSize.getWidth();
+		var height = videoSize.getHeight();
 
-		return videoSize.getWidth() <= MAX_ALLOWED_SIZE
-				&& videoSize.getHeight() <= MAX_ALLOWED_SIZE
-				&& videoInfo.getFrameRate() <= 30F
-				&& videoInfo.getDecoder().startsWith("vp9")
-				&& mediaInfo.getDuration() <= 3_000L
-				&& mediaInfo.getAudio() == null
-				&& "matroska".equals(mediaInfo.getFormat());
+		return (width == MAX_SIZE && height <= MAX_SIZE) || (height == MAX_SIZE && width <= MAX_SIZE);
 	}
 
 	private MediaHelper() {
