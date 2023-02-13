@@ -15,7 +15,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 import ws.schild.jave.info.MultimediaInfo;
-import ws.schild.jave.info.VideoSize;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -41,7 +40,7 @@ public final class MediaHelper {
 		String mimeType = detectMimeType(inputFile);
 
 		if (isSupportedMedia(mimeType, SUPPORTED_IMAGES)) {
-			return convertToPng(inputFile);
+			return convertToPng(inputFile, mimeType);
 		} else if (isSupportedMedia(mimeType, SUPPORTED_VIDEOS)) {
 			return convertToWebm(inputFile);
 		} else {
@@ -84,14 +83,39 @@ public final class MediaHelper {
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
 	 *
 	 * @param file the file to convert to png
+	 * @param mimeType the MIME type of the file
 	 * @return a resized and converted png image
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
-	private static File convertToPng(File file) throws TelegramApiException {
+	private static File convertToPng(File file, String mimeType) throws TelegramApiException {
+		if (isImageCompliant(file, mimeType)) {
+			LOGGER.info("The image doesn't need conversion");
+
+			return file;
+		}
+
 		try {
 			return createPngFile(resizeImage(ImageIO.read(file)));
 		} catch (IOException e) {
 			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
+		}
+	}
+
+	/**
+	 * Checks if passed-in file is already compliant with Telegram's requisites.
+	 * If so, conversion won't take place and the original file will be returned to the user.
+	 *
+	 * @param file the file to check
+	 * @param mimeType the MIME type of the file
+	 * @return {@code true} if the file is compliant
+	 */
+	private static boolean isImageCompliant(File file, String mimeType) throws TelegramApiException {
+		try {
+			var image = ImageIO.read(file);
+			return ("image/png".equals(mimeType) || "image/webp".equals(mimeType))
+					&& isSizeCompliant(image.getWidth(), image.getHeight());
+		} catch (IOException e) {
+			throw new TelegramApiException("An unexpected error occurred processing input image", e);
 		}
 	}
 
@@ -135,7 +159,7 @@ public final class MediaHelper {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
 		if (isVideoCompliant(mediaInfo)) {
-			LOGGER.debug("The file doesn't need conversion");
+			LOGGER.info("The video doesn't need conversion");
 
 			return file;
 		}
@@ -167,8 +191,9 @@ public final class MediaHelper {
 	 */
 	private static boolean isVideoCompliant(MultimediaInfo mediaInfo) {
 		var videoInfo = mediaInfo.getVideo();
+		var videoSize = videoInfo.getSize();
 
-		return isSizeCompliant(videoInfo.getSize())
+		return isSizeCompliant(videoSize.getWidth(), videoSize.getHeight())
 				&& videoInfo.getFrameRate() <= MAX_FRAMES
 				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
 				&& mediaInfo.getDuration() <= MAX_DURATION_MILLIS
@@ -177,16 +202,14 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Checks that either video's width or height is 512 pixels
+	 * Checks that either width or height is 512 pixels
 	 * and the other is 512 pixels or fewer.
 	 *
-	 * @param videoSize the video information to be checked
+	 * @param width the width to be checked
+	 * @param height the width to be checked
 	 * @return {@code true} if the video has valid dimensions
 	 */
-	static boolean isSizeCompliant(VideoSize videoSize) {
-		var width = videoSize.getWidth();
-		var height = videoSize.getHeight();
-
+	private static boolean isSizeCompliant(int width, int height) {
 		return (width == MAX_SIZE && height <= MAX_SIZE) || (height == MAX_SIZE && width <= MAX_SIZE);
 	}
 
