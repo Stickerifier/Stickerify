@@ -17,6 +17,10 @@ public enum Answer {
 			Your sticker file is ready\\!
 			Head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
 			"""),
+	FILE_ALREADY_VALID("""
+			The media you sent was already suitable to be a Telegram sticker\\.
+			Send it to [Stickers](https://t.me/Stickers) to add it as a new sticker\\.
+			"""),
 	ABOUT("""
 			This bot is open source, check it out on [Github](https://github.com/Stickerifier/Stickerify)\\.
 

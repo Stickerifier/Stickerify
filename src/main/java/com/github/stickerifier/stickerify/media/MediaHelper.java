@@ -84,14 +84,14 @@ public final class MediaHelper {
 	 *
 	 * @param file the file to convert to png
 	 * @param mimeType the MIME type of the file
-	 * @return a resized and converted png image
+	 * @return converted image, {@code null} if no conversion was required
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
 	private static File convertToPng(File file, String mimeType) throws TelegramApiException {
 		if (isImageCompliant(file, mimeType)) {
 			LOGGER.info("The image doesn't need conversion");
 
-			return file;
+			return null;
 		}
 
 		try {
@@ -152,7 +152,7 @@ public final class MediaHelper {
 	 * based on the requirements specified by <a href="https://core.telegram.org/stickers/webm-vp9-encoding">Telegram documentation</a>.
 	 *
 	 * @param file the file to convert
-	 * @return converted video
+	 * @return converted video, {@code null} if no conversion was required
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
 	private static File convertToWebm(File file) throws TelegramApiException {
@@ -161,7 +161,7 @@ public final class MediaHelper {
 		if (isVideoCompliant(mediaInfo)) {
 			LOGGER.info("The video doesn't need conversion");
 
-			return file;
+			return null;
 		}
 
 		return convertWithFFmpeg(file, mediaInfo);
