@@ -120,6 +120,18 @@ public final class MediaHelper {
 	}
 
 	/**
+	 * Checks that either width or height is 512 pixels
+	 * and the other is 512 pixels or fewer.
+	 *
+	 * @param width the width to be checked
+	 * @param height the width to be checked
+	 * @return {@code true} if the video has valid dimensions
+	 */
+	private static boolean isSizeCompliant(int width, int height) {
+		return (width == MAX_SIZE && height <= MAX_SIZE) || (height == MAX_SIZE && width <= MAX_SIZE);
+	}
+
+	/**
 	 * Given an image, it returns its resized version with sides of max 512 pixels each.
 	 *
 	 * @param image the image to be resized
@@ -199,18 +211,6 @@ public final class MediaHelper {
 				&& mediaInfo.getDuration() <= MAX_DURATION_MILLIS
 				&& mediaInfo.getAudio() == null
 				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat());
-	}
-
-	/**
-	 * Checks that either width or height is 512 pixels
-	 * and the other is 512 pixels or fewer.
-	 *
-	 * @param width the width to be checked
-	 * @param height the width to be checked
-	 * @return {@code true} if the video has valid dimensions
-	 */
-	private static boolean isSizeCompliant(int width, int height) {
-		return (width == MAX_SIZE && height <= MAX_SIZE) || (height == MAX_SIZE && width <= MAX_SIZE);
 	}
 
 	/**
