@@ -26,7 +26,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 /**
- * Telegram bot to convert images in the format required to be used as Telegram stickers.
+ * Telegram bot to convert medias in the format required to be used as Telegram stickers.
  *
  * @author Roberto Cella
  */

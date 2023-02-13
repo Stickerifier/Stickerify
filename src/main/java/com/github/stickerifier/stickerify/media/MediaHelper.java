@@ -31,6 +31,7 @@ public final class MediaHelper {
 
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.
+	 * If no conversion was needed, {@code null} is returned.
 	 *
 	 * @param inputFile the file to convert
 	 * @return a resized and converted file
@@ -103,7 +104,7 @@ public final class MediaHelper {
 
 	/**
 	 * Checks if passed-in file is already compliant with Telegram's requisites.
-	 * If so, conversion won't take place and the original file will be returned to the user.
+	 * If so, conversion won't take place and no file will be returned to the user.
 	 *
 	 * @param file the file to check
 	 * @param mimeType the MIME type of the file
@@ -196,7 +197,7 @@ public final class MediaHelper {
 
 	/**
 	 * Checks if passed-in file is already compliant with Telegram's requisites.
-	 * If so, conversion won't take place and the original file will be returned to the user.
+	 * If so, conversion won't take place and no file will be returned to the user.
 	 *
 	 * @param mediaInfo video's multimedia information
 	 * @return {@code true} if the file is compliant
