@@ -20,7 +20,8 @@ You can use the bot going [here](https://t.me/StickerifyImageBot): start it, and
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted media, if you sent a supported file (images, gifs, standard and animated stickers are supported)
+* the converted media, if you sent a supported file (images, gifs, standard and video stickers are supported) that needed conversion
+* no file, if you sent a media already suiting Telegram's requirements
 * an error message, if you sent an unsupported file
 * an informative message for any message without a file
 

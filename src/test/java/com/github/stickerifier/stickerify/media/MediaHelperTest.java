@@ -128,12 +128,12 @@ public class MediaHelperTest {
 		var startingVideo = resource("short_low_fps.webm");
 		result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(512, 288, 10F, 1_200L);
+		assertVideoConsistency(512, 288, 10F, 1_000L);
 	}
 
 	@Test
 	void resizeSmallWebmVideo() throws Exception {
-		var startingVideo = resource("small_animated_sticker.webm");
+		var startingVideo = resource("small_video_sticker.webm");
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(512, 212, 30F, 2_000L);
@@ -141,10 +141,18 @@ public class MediaHelperTest {
 
 	@Test
 	void convertVerticalWebmVideo() throws Exception {
-		var startingVideo = resource("vertical_animated_sticker.webm");
+		var startingVideo = resource("vertical_video_sticker.webm");
 		result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(288, 512, 30F, 2_670L);
+		assertVideoConsistency(288, 512, 30F, 2_000L);
+	}
+
+	@Test
+	void noConversionNeeded() throws Exception {
+		var startingVideo = resource("no_conversion_needed.webm");
+		result = MediaHelper.convert(startingVideo);
+
+		assertThat(result, is(nullValue()));
 	}
 
 	@Test

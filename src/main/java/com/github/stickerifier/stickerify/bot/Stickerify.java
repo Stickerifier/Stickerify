@@ -1,6 +1,7 @@
 package com.github.stickerifier.stickerify.bot;
 
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
+import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static java.util.HashSet.newHashSet;
 
@@ -25,7 +26,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 /**
- * Telegram bot to convert images in the format required to be used as Telegram stickers.
+ * Telegram bot to convert medias in the format required to be used as Telegram stickers.
  *
  * @author Roberto Cella
  */
@@ -68,17 +69,22 @@ public class Stickerify extends TelegramLongPollingBot {
 			pathsToDelete.add(originalFile.toPath());
 
 			File outputFile = MediaHelper.convert(originalFile);
-			pathsToDelete.add(outputFile.toPath());
 
-			SendDocument response = SendDocument.builder()
-					.chatId(request.getChatId())
-					.replyToMessageId(request.getMessageId())
-					.caption(FILE_READY.getText())
-					.parseMode(ParseMode.MARKDOWNV2)
-					.document(new InputFile(outputFile))
-					.build();
+			if (outputFile == null) {
+				answerText(FILE_ALREADY_VALID, request);
+			} else {
+				pathsToDelete.add(outputFile.toPath());
 
-			execute(response);
+				SendDocument response = SendDocument.builder()
+						.chatId(request.getChatId())
+						.replyToMessageId(request.getMessageId())
+						.caption(FILE_READY.getText())
+						.parseMode(ParseMode.MARKDOWNV2)
+						.document(new InputFile(outputFile))
+						.build();
+
+				execute(response);
+			}
 		} catch (TelegramApiException e) {
 			LOGGER.warn("Unable to reply to {} with processed file", request, e);
 			answerText(ERROR, request);
