@@ -133,7 +133,7 @@ public class MediaHelperTest {
 
 	@Test
 	void resizeSmallWebmVideo() throws Exception {
-		var startingVideo = resource("small_animated_sticker.webm");
+		var startingVideo = resource("small_video_sticker.webm");
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(512, 212, 30F, 2_000L);
@@ -141,7 +141,7 @@ public class MediaHelperTest {
 
 	@Test
 	void convertVerticalWebmVideo() throws Exception {
-		var startingVideo = resource("vertical_animated_sticker.webm");
+		var startingVideo = resource("vertical_video_sticker.webm");
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(288, 512, 30F, 2_000L);

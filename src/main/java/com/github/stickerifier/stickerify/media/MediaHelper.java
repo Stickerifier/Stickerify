@@ -215,7 +215,7 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Converts the passed-in file using FFmpeg applying Telegram's animated stickers' constraints.
+	 * Converts the passed-in file using FFmpeg applying Telegram's video stickers' constraints.
 	 *
 	 * @param file the file to convert
 	 * @param mediaInfo video's multimedia information
