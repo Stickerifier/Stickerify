@@ -1,4 +1,4 @@
-FROM gradle:7.6-jdk19 AS builder
+FROM gradle:8.0-jdk19 AS builder
 COPY . /app
 WORKDIR /app
 RUN gradle shadowJar --no-daemon
