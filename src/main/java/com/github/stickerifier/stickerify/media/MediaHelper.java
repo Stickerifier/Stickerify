@@ -27,6 +27,7 @@ public final class MediaHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
+	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
 	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "video/webm", "application/x-matroska");
 
@@ -216,11 +217,7 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
 	private static File convertWithFFmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
-		var videoInfo = mediaInfo.getVideo();
-		var frameRate = Math.min(videoInfo.getFrameRate(), MAX_FRAMES);
-		var duration = Math.min(mediaInfo.getDuration(), MAX_DURATION_MILLIS) / 1_000L;
-
-		var resultingSize = new ResultingSize(videoInfo.getSize());
+		var videoDetails = getResultingVideoDetails(mediaInfo);
 
 		try {
 			var webmVideo = File.createTempFile("Stickerify-", ".webm");
@@ -228,13 +225,13 @@ public final class MediaHelper {
 			var ffmpegCommand = new String[] {
 					"ffmpeg",
 					"-i", file.getAbsolutePath(),
-					"-vf", "scale = " + resultingSize.getWidth() + ":" + resultingSize.getHeight() + ", fps = " + frameRate,
+					"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
 					"-c:v", "libvpx-" + VP9_CODEC,
 					"-b:v", "256k",
 					"-crf", "32",
 					"-g", "60",
 					"-an",
-					"-t", String.valueOf(duration),
+					"-t", videoDetails.duration(),
 					"-y", webmVideo.getAbsolutePath()
 			};
 
@@ -249,6 +246,27 @@ public final class MediaHelper {
 			throw new TelegramApiException("An error occurred trying to convert passed-in video", e);
 		}
 	}
+
+	/**
+	 * Convenience method to group resulting video's details,
+	 * calculated checking passed-in media info against Telegram's constraints.
+	 *
+	 * @param mediaInfo video's multimedia information
+	 * @return resulting video's details
+	 */
+	private static ResultingVideoDetails getResultingVideoDetails(MultimediaInfo mediaInfo) {
+		var videoInfo = mediaInfo.getVideo();
+		float frameRate = Math.min(videoInfo.getFrameRate(), MAX_FRAMES);
+		long duration = Math.min(mediaInfo.getDuration(), MAX_DURATION_MILLIS) / 1_000L;
+
+		boolean isWidthBigger = videoInfo.getSize().getWidth() >= videoInfo.getSize().getHeight();
+		int width = isWidthBigger ? MAX_SIZE : PRESERVE_ASPECT_RATIO;
+		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIZE;
+
+		return new ResultingVideoDetails(width, height, frameRate, String.valueOf(duration));
+	}
+
+	private record ResultingVideoDetails(int width, int height, float frameRate, String duration) {}
 
 	private MediaHelper() {
 		throw new UnsupportedOperationException();
