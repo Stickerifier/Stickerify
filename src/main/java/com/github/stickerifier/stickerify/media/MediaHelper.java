@@ -21,6 +21,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public final class MediaHelper {
 
@@ -89,35 +90,31 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
 	private static File convertToPng(File file, String mimeType) throws TelegramApiException {
-		if (isImageCompliant(file, mimeType)) {
-			LOGGER.info("The image doesn't need conversion");
-
-			return null;
-		}
-
 		try {
-			return createPngFile(resizeImage(ImageIO.read(file)));
+			var image = ImageIO.read(file);
+
+			if (isImageCompliant(image, mimeType)) {
+				LOGGER.info("The image doesn't need conversion");
+
+				return null;
+			}
+
+			return createPngFile(resizeImage(image));
 		} catch (IOException e) {
 			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
 		}
 	}
 
 	/**
-	 * Checks if passed-in file is already compliant with Telegram's requisites.
+	 * Checks if passed-in image is already compliant with Telegram's requisites.
 	 * If so, conversion won't take place and no file will be returned to the user.
 	 *
-	 * @param file the file to check
+	 * @param image the image to check
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
 	 */
-	private static boolean isImageCompliant(File file, String mimeType) throws TelegramApiException {
-		try {
-			var image = ImageIO.read(file);
-			return ("image/png".equals(mimeType) || "image/webp".equals(mimeType))
-					&& isSizeCompliant(image.getWidth(), image.getHeight());
-		} catch (IOException e) {
-			throw new TelegramApiException("An unexpected error occurred processing input image", e);
-		}
+	private static boolean isImageCompliant(BufferedImage image, String mimeType) {
+		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType)) && isSizeCompliant(image.getWidth(), image.getHeight());
 	}
 
 	/**
@@ -139,11 +136,7 @@ public final class MediaHelper {
 	 * @return resized image
 	 */
 	private static BufferedImage resizeImage(BufferedImage image) {
-		if (image.getWidth() >= image.getHeight()) {
-			return Scalr.resize(image, Mode.FIT_TO_WIDTH, MAX_SIZE);
-		} else {
-			return Scalr.resize(image, Mode.FIT_TO_HEIGHT, MAX_SIZE);
-		}
+		return Scalr.resize(image, Mode.AUTOMATIC, MAX_SIZE);
 	}
 
 	/**
@@ -242,7 +235,11 @@ public final class MediaHelper {
 					"-y", webmVideo.getAbsolutePath()
 			};
 
-			new ProcessBuilder(ffmpegCommand).start().waitFor();
+			var completedSuccessfully = new ProcessBuilder(ffmpegCommand).start().waitFor(1L, TimeUnit.MINUTES);
+
+			if (!completedSuccessfully) {
+				throw new TelegramApiException("FFmpeg command couldn't complete successfully");
+			}
 
 			return webmVideo;
 		} catch (IOException | InterruptedException e) {
