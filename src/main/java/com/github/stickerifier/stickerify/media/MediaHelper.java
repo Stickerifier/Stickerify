@@ -5,6 +5,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURA
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
@@ -21,7 +22,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public final class MediaHelper {
 
@@ -216,8 +216,11 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
 	private static File convertWithFFmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
-		var frameRate = Math.min(mediaInfo.getVideo().getFrameRate(), MAX_FRAMES);
+		var videoInfo = mediaInfo.getVideo();
+		var frameRate = Math.min(videoInfo.getFrameRate(), MAX_FRAMES);
 		var duration = Math.min(mediaInfo.getDuration(), MAX_DURATION_MILLIS) / 1_000L;
+
+		var resultingSize = new ResultingSize(videoInfo.getSize());
 
 		try {
 			var webmVideo = File.createTempFile("Stickerify-", ".webm");
@@ -225,7 +228,7 @@ public final class MediaHelper {
 			var ffmpegCommand = new String[] {
 					"ffmpeg",
 					"-i", file.getAbsolutePath(),
-					"-vf", "scale = 'if(gt(iw,ih)," + MAX_SIZE + ",-2)':'if(gt(iw,ih),-2," + MAX_SIZE + ")', fps = " + frameRate,
+					"-vf", "scale = " + resultingSize.getWidth() + ":" + resultingSize.getHeight() + ", fps = " + frameRate,
 					"-c:v", "libvpx-" + VP9_CODEC,
 					"-b:v", "256k",
 					"-crf", "32",
@@ -235,7 +238,7 @@ public final class MediaHelper {
 					"-y", webmVideo.getAbsolutePath()
 			};
 
-			var completedSuccessfully = new ProcessBuilder(ffmpegCommand).start().waitFor(1L, TimeUnit.MINUTES);
+			var completedSuccessfully = new ProcessBuilder(ffmpegCommand).start().waitFor(1L, MINUTES);
 
 			if (!completedSuccessfully) {
 				throw new TelegramApiException("FFmpeg command couldn't complete successfully");
