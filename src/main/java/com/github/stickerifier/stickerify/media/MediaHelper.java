@@ -5,6 +5,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURA
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
@@ -26,6 +27,7 @@ public final class MediaHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
+	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
 	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "video/webm", "application/x-matroska");
 
@@ -89,35 +91,31 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
 	private static File convertToPng(File file, String mimeType) throws TelegramApiException {
-		if (isImageCompliant(file, mimeType)) {
-			LOGGER.info("The image doesn't need conversion");
-
-			return null;
-		}
-
 		try {
-			return createPngFile(resizeImage(ImageIO.read(file)));
+			var image = ImageIO.read(file);
+
+			if (isImageCompliant(image, mimeType)) {
+				LOGGER.info("The image doesn't need conversion");
+
+				return null;
+			}
+
+			return createPngFile(resizeImage(image));
 		} catch (IOException e) {
 			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
 		}
 	}
 
 	/**
-	 * Checks if passed-in file is already compliant with Telegram's requisites.
+	 * Checks if passed-in image is already compliant with Telegram's requisites.
 	 * If so, conversion won't take place and no file will be returned to the user.
 	 *
-	 * @param file the file to check
+	 * @param image the image to check
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
 	 */
-	private static boolean isImageCompliant(File file, String mimeType) throws TelegramApiException {
-		try {
-			var image = ImageIO.read(file);
-			return ("image/png".equals(mimeType) || "image/webp".equals(mimeType))
-					&& isSizeCompliant(image.getWidth(), image.getHeight());
-		} catch (IOException e) {
-			throw new TelegramApiException("An unexpected error occurred processing input image", e);
-		}
+	private static boolean isImageCompliant(BufferedImage image, String mimeType) {
+		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType)) && isSizeCompliant(image.getWidth(), image.getHeight());
 	}
 
 	/**
@@ -139,11 +137,7 @@ public final class MediaHelper {
 	 * @return resized image
 	 */
 	private static BufferedImage resizeImage(BufferedImage image) {
-		if (image.getWidth() >= image.getHeight()) {
-			return Scalr.resize(image, Mode.FIT_TO_WIDTH, MAX_SIZE);
-		} else {
-			return Scalr.resize(image, Mode.FIT_TO_HEIGHT, MAX_SIZE);
-		}
+		return Scalr.resize(image, Mode.AUTOMATIC, MAX_SIZE);
 	}
 
 	/**
@@ -152,12 +146,28 @@ public final class MediaHelper {
 	 * @param image the image to convert to png
 	 * @return png image
 	 * @throws IOException if an error occurs creating the png
+	 * @throws TelegramApiException if an error occurs creating the temp file
 	 */
-	private static File createPngFile(BufferedImage image) throws IOException {
-		var pngImage = File.createTempFile("Stickerify-", ".png");
+	private static File createPngFile(BufferedImage image) throws IOException, TelegramApiException {
+		var pngImage = createTempFile("png");
 		ImageIO.write(image, "png", pngImage);
 
 		return pngImage;
+	}
+
+	/**
+	 * Creates a new temp file of the desired type.
+	 *
+	 * @param fileType the extension of the new file
+	 * @return a new temp file
+	 * @throws TelegramApiException if an error occurs creating the temp file
+	 */
+	private static File createTempFile(String fileType) throws TelegramApiException {
+		try {
+			return File.createTempFile("Stickerify-", "." + fileType);
+		} catch (IOException e) {
+			throw new TelegramApiException("An error occurred creating a new temp file", e);
+		}
 	}
 
 	/**
@@ -223,30 +233,69 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
 	private static File convertWithFFmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
-		var frameRate = Math.min(mediaInfo.getVideo().getFrameRate(), MAX_FRAMES);
-		var duration = Math.min(mediaInfo.getDuration(), MAX_DURATION_MILLIS) / 1_000L;
+		var webmVideo = createTempFile("webm");
+		var videoDetails = getResultingVideoDetails(mediaInfo);
 
+		var ffmpegCommand = new String[] {
+				"ffmpeg",
+				"-i", file.getAbsolutePath(),
+				"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
+				"-c:v", "libvpx-" + VP9_CODEC,
+				"-b:v", "256k",
+				"-crf", "32",
+				"-g", "60",
+				"-an",
+				"-t", videoDetails.duration(),
+				"-y", webmVideo.getAbsolutePath()
+		};
+
+		executeCommand(ffmpegCommand);
+
+		return webmVideo;
+	}
+
+	/**
+	 * Convenience method to group resulting video's details,
+	 * calculated checking passed-in media info against Telegram's constraints.
+	 *
+	 * @param mediaInfo video's multimedia information
+	 * @return resulting video's details
+	 */
+	private static ResultingVideoDetails getResultingVideoDetails(MultimediaInfo mediaInfo) {
+		var videoInfo = mediaInfo.getVideo();
+		float frameRate = Math.min(videoInfo.getFrameRate(), MAX_FRAMES);
+		long duration = Math.min(mediaInfo.getDuration(), MAX_DURATION_MILLIS) / 1_000L;
+
+		boolean isWidthBigger = videoInfo.getSize().getWidth() >= videoInfo.getSize().getHeight();
+		int width = isWidthBigger ? MAX_SIZE : PRESERVE_ASPECT_RATIO;
+		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIZE;
+
+		return new ResultingVideoDetails(width, height, frameRate, String.valueOf(duration));
+	}
+
+	private record ResultingVideoDetails(int width, int height, float frameRate, String duration) {}
+
+	/**
+	 * Executes passed-in command and ensures it completed successfully.
+	 *
+	 * @param command the command to be executed
+	 * @throws TelegramApiException either if:
+	 * <ul>
+	 *     <li>the command was unsuccessful
+	 *     <li>the waiting time elapsed
+	 *     <li>an unexpected failure happened running the command
+	 * </ul>
+	 */
+	private static void executeCommand(String[] command) throws TelegramApiException {
 		try {
-			var webmVideo = File.createTempFile("Stickerify-", ".webm");
+			var process = new ProcessBuilder(command).start();
+			var processExited = process.waitFor(1, MINUTES);
 
-			var ffmpegCommand = new String[] {
-					"ffmpeg",
-					"-i", file.getAbsolutePath(),
-					"-vf", "scale = 'if(gt(iw,ih)," + MAX_SIZE + ",-2)':'if(gt(iw,ih),-2," + MAX_SIZE + ")', fps = " + frameRate,
-					"-c:v", "libvpx-" + VP9_CODEC,
-					"-b:v", "256k",
-					"-crf", "32",
-					"-g", "60",
-					"-an",
-					"-t", String.valueOf(duration),
-					"-y", webmVideo.getAbsolutePath()
-			};
-
-			new ProcessBuilder(ffmpegCommand).start().waitFor();
-
-			return webmVideo;
+			if (!processExited || process.exitValue() != 0) {
+				throw new TelegramApiException("The command couldn't complete successfully");
+			}
 		} catch (IOException | InterruptedException e) {
-			throw new TelegramApiException("An error occurred trying to convert passed-in video", e);
+			throw new TelegramApiException(e);
 		}
 	}
 

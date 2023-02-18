@@ -108,7 +108,3 @@ If your pull request represents a valid contribution to the project, it will be 
 ## License
 
 See the [**LICENSE**](LICENSE) file for license rights and limitations (MIT).
-
-<div align="right">
-    <sup>made with 💖 by <a href="https://github.com/rob93c">Roberto Cella</a></sup>
-</div>
