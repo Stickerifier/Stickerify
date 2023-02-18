@@ -187,7 +187,7 @@ public final class MediaHelper {
 			return null;
 		}
 
-		return convertWithFFmpeg(file, mediaInfo);
+		return convertWithFfmpeg(file, mediaInfo);
 	}
 
 	/**
@@ -232,7 +232,7 @@ public final class MediaHelper {
 	 * @return converted video
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
-	private static File convertWithFFmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
+	private static File convertWithFfmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
 		var webmVideo = createTempFile("webm");
 		var videoDetails = getResultingVideoDetails(mediaInfo);
 
