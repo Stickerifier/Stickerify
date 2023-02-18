@@ -146,12 +146,28 @@ public final class MediaHelper {
 	 * @param image the image to convert to png
 	 * @return png image
 	 * @throws IOException if an error occurs creating the png
+	 * @throws TelegramApiException if an error occurs creating the temp file
 	 */
-	private static File createPngFile(BufferedImage image) throws IOException {
-		var pngImage = File.createTempFile("Stickerify-", ".png");
+	private static File createPngFile(BufferedImage image) throws IOException, TelegramApiException {
+		var pngImage = createTempFile("png");
 		ImageIO.write(image, "png", pngImage);
 
 		return pngImage;
+	}
+
+	/**
+	 * Creates a new temp file of the desired type.
+	 *
+	 * @param fileType the extension of the new file
+	 * @return a new temp file
+	 * @throws TelegramApiException if an error occurs creating the temp file
+	 */
+	private static File createTempFile(String fileType) throws TelegramApiException {
+		try {
+			return File.createTempFile("Stickerify-", "." + fileType);
+		} catch (IOException e) {
+			throw new TelegramApiException("An error occurred creating a new temp file", e);
+		}
 	}
 
 	/**
@@ -217,34 +233,25 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
 	private static File convertWithFFmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
+		var webmVideo = createTempFile("webm");
 		var videoDetails = getResultingVideoDetails(mediaInfo);
 
-		try {
-			var webmVideo = File.createTempFile("Stickerify-", ".webm");
+		var ffmpegCommand = new String[] {
+				"ffmpeg",
+				"-i", file.getAbsolutePath(),
+				"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
+				"-c:v", "libvpx-" + VP9_CODEC,
+				"-b:v", "256k",
+				"-crf", "32",
+				"-g", "60",
+				"-an",
+				"-t", videoDetails.duration(),
+				"-y", webmVideo.getAbsolutePath()
+		};
 
-			var ffmpegCommand = new String[] {
-					"ffmpeg",
-					"-i", file.getAbsolutePath(),
-					"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
-					"-c:v", "libvpx-" + VP9_CODEC,
-					"-b:v", "256k",
-					"-crf", "32",
-					"-g", "60",
-					"-an",
-					"-t", videoDetails.duration(),
-					"-y", webmVideo.getAbsolutePath()
-			};
+		executeCommand(ffmpegCommand);
 
-			var completedSuccessfully = new ProcessBuilder(ffmpegCommand).start().waitFor(1L, MINUTES);
-
-			if (!completedSuccessfully) {
-				throw new TelegramApiException("FFmpeg command couldn't complete successfully");
-			}
-
-			return webmVideo;
-		} catch (IOException | InterruptedException e) {
-			throw new TelegramApiException("An error occurred trying to convert passed-in video", e);
-		}
+		return webmVideo;
 	}
 
 	/**
@@ -267,6 +274,30 @@ public final class MediaHelper {
 	}
 
 	private record ResultingVideoDetails(int width, int height, float frameRate, String duration) {}
+
+	/**
+	 * Executes passed-in command and ensures it completed successfully.
+	 *
+	 * @param command the command to be executed
+	 * @throws TelegramApiException either if:
+	 * <ul>
+	 *     <li>the command was unsuccessful
+	 *     <li>the waiting time elapsed
+	 *     <li>an unexpected failure happened running the command
+	 * </ul>
+	 */
+	private static void executeCommand(String[] command) throws TelegramApiException {
+		try {
+			var process = new ProcessBuilder(command).start();
+			var processExited = process.waitFor(1, MINUTES);
+
+			if (!processExited || process.exitValue() != 0) {
+				throw new TelegramApiException("The command couldn't complete successfully");
+			}
+		} catch (IOException | InterruptedException e) {
+			throw new TelegramApiException(e);
+		}
+	}
 
 	private MediaHelper() {
 		throw new UnsupportedOperationException();
