@@ -29,4 +29,4 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Execute tests
-        run: ./gradlew test
+        run: ./gradlew test --scan
