@@ -22,7 +22,7 @@ dependencies {
 
 group = 'com.github.stickerifier'
 version = '1.0-SNAPSHOT'
-description = 'Telegram bot to convert images in the format required to be used as Telegram stickers'
+description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
 
 java {
     toolchain {

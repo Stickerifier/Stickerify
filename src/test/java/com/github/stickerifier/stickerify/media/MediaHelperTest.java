@@ -159,7 +159,7 @@ public class MediaHelperTest {
 	void notAnImage() {
 		var document = resource("document.txt");
 		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
+
 		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
 	}
-
 }
