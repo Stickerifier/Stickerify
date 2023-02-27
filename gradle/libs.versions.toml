@@ -17,4 +17,4 @@ tika = "org.apache.tika:tika-core:2.7.0"
 logback = ["logback-core", "logback-classic", "slf4j-api"]
 
 [plugins]
-shadow = "com.github.johnrengelman.shadow:8.0.0"
+shadow = "com.github.johnrengelman.shadow:8.1.0"
