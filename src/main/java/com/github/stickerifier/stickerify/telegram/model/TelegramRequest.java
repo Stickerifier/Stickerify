@@ -26,21 +26,17 @@ public record TelegramRequest(Message message) {
 	}
 
 	public String getFileId() throws TelegramApiException {
-		String fileId;
-
 		if (message.hasPhoto()) {
-			fileId = message.getPhoto().stream().max(comparing(PhotoSize::getFileSize)).orElseThrow().getFileId();
+			return message.getPhoto().stream().max(comparing(PhotoSize::getFileSize)).orElseThrow().getFileId();
 		} else if (message.hasDocument()) {
-			fileId = message.getDocument().getFileId();
+			return message.getDocument().getFileId();
 		} else if (message.hasSticker()) {
-			fileId = message.getSticker().getFileId();
+			return message.getSticker().getFileId();
 		} else if (message.hasVideo()) {
-			fileId = message.getVideo().getFileId();
-		} else {
-			throw new TelegramApiException("The request contains an unsupported media: " + message);
+			return message.getVideo().getFileId();
 		}
 
-		return fileId;
+		throw new TelegramApiException("The request contains an unsupported media: " + message);
 	}
 
 	public Long getChatId() {
