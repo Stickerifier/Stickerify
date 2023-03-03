@@ -18,6 +18,7 @@ import java.util.Optional;
  */
 public record TelegramRequest(Message message) {
 
+	private static final String START_COMMAND = "/start";
 	private static final String HELP_COMMAND = "/help";
 
 	public boolean hasFile() {
@@ -25,19 +26,17 @@ public record TelegramRequest(Message message) {
 	}
 
 	public String getFileId() throws TelegramApiException {
-		String fileId;
-
 		if (message.hasPhoto()) {
-			fileId = message.getPhoto().stream().max(comparing(PhotoSize::getFileSize)).orElseThrow().getFileId();
+			return message.getPhoto().stream().max(comparing(PhotoSize::getFileSize)).orElseThrow().getFileId();
 		} else if (message.hasDocument()) {
-			fileId = message.getDocument().getFileId();
+			return message.getDocument().getFileId();
 		} else if (message.hasSticker()) {
-			fileId = message.getSticker().getFileId();
-		} else {
-			throw new TelegramApiException("The request contains an unsupported media: " + message);
+			return message.getSticker().getFileId();
+		} else if (message.hasVideo()) {
+			return message.getVideo().getFileId();
 		}
 
-		return fileId;
+		throw new TelegramApiException("The request contains an unsupported media: " + message);
 	}
 
 	public Long getChatId() {
@@ -46,6 +45,26 @@ public record TelegramRequest(Message message) {
 
 	public Integer getMessageId() {
 		return message.getMessageId();
+	}
+
+	/**
+	 * Creates a String describing the current request,
+	 * writing <b>only</b> the username and if the sender is a new user.
+	 *
+	 * @return the description of the request
+	 */
+	public String getDescription() {
+		var description = "request from " + getUsername();
+
+		if (START_COMMAND.equals(message.getText())) {
+			description += " (new user)";
+		}
+
+		return description;
+	}
+
+	private String getUsername() {
+		return Optional.ofNullable(message.getFrom().getUserName()).orElse("<anonymous>");
 	}
 
 	public Answer getAnswerMessage() {
@@ -58,12 +77,11 @@ public record TelegramRequest(Message message) {
 
 	@Override
 	public String toString() {
-		String username = Optional.ofNullable(message.getFrom().getUserName()).orElse("<anonymous>");
 		String text = Optional.ofNullable(message.getText()).orElse(message.getCaption());
 
 		return "request ["
 				+ "chat=" + getChatId()
-				+ ", from=" + username
+				+ ", from=" + getUsername()
 				+ writeIfNotEmpty("file", getSafeFileId())
 				+ writeIfNotEmpty("text", text)
 				+ "]";
