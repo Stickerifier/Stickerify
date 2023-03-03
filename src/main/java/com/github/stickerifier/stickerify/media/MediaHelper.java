@@ -29,7 +29,7 @@ public final class MediaHelper {
 
 	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
-	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "video/webm", "application/x-matroska");
+	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
 
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.

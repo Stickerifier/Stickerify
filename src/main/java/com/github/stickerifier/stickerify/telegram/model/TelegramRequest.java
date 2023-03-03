@@ -18,6 +18,7 @@ import java.util.Optional;
  */
 public record TelegramRequest(Message message) {
 
+	private static final String START_COMMAND = "/start";
 	private static final String HELP_COMMAND = "/help";
 
 	public boolean hasFile() {
@@ -33,6 +34,8 @@ public record TelegramRequest(Message message) {
 			fileId = message.getDocument().getFileId();
 		} else if (message.hasSticker()) {
 			fileId = message.getSticker().getFileId();
+		} else if (message.hasVideo()) {
+			fileId = message.getVideo().getFileId();
 		} else {
 			throw new TelegramApiException("The request contains an unsupported media: " + message);
 		}
@@ -48,6 +51,26 @@ public record TelegramRequest(Message message) {
 		return message.getMessageId();
 	}
 
+	/**
+	 * Creates a String describing the current request,
+	 * writing <b>only</b> the username and if the sender is a new user.
+	 *
+	 * @return the description of the request
+	 */
+	public String getDescription() {
+		var description = "request from " + getUsername();
+
+		if (START_COMMAND.equals(message.getText())) {
+			description += " (new user)";
+		}
+
+		return description;
+	}
+
+	private String getUsername() {
+		return Optional.ofNullable(message.getFrom().getUserName()).orElse("<anonymous>");
+	}
+
 	public Answer getAnswerMessage() {
 		return isHelpCommand() ? HELP : ABOUT;
 	}
@@ -58,12 +81,11 @@ public record TelegramRequest(Message message) {
 
 	@Override
 	public String toString() {
-		String username = Optional.ofNullable(message.getFrom().getUserName()).orElse("<anonymous>");
 		String text = Optional.ofNullable(message.getText()).orElse(message.getCaption());
 
 		return "request ["
 				+ "chat=" + getChatId()
-				+ ", from=" + username
+				+ ", from=" + getUsername()
 				+ writeIfNotEmpty("file", getSafeFileId())
 				+ writeIfNotEmpty("text", text)
 				+ "]";
