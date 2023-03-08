@@ -11,7 +11,7 @@ Telegram bot to convert medias in the format required to be used as Telegram sti
 * [How to launch the bot using Docker](#How-to-launch-the-bot-using-Docker)
 * [How to contribute to the project](#How-to-contribute-to-the-project)
 * [Hacktoberfest](#Hacktoberfest)
-* [Useful resources](#Useful-resources)
+* [Useful information](#Useful-information)
 * [License](#License)
 
 ## How to use the bot
@@ -51,10 +51,11 @@ And it's done!
 ## How to set up the project
 
 1. Install JDK 19 (or higher)
-2. Clone the project and move into its folder
-3. Run the command `./gradlew build`
-4. Import the project inside your IDE as a Gradle project
-5. Ensure your IDE is correctly configured to use a Java 19 (or higher) JDK
+2. Install [FFmpeg](https://ffmpeg.org/download.html)
+3. Clone the project and move into its folder
+4. Run the command `./gradlew build`
+5. Import the project inside your IDE as a Gradle project
+6. Ensure your IDE is correctly configured to use a Java 19 (or higher) JDK
 
 ## How to run the bot locally
 
@@ -98,12 +99,13 @@ If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as pa
 
 If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-accepted`, therefore counting towards the 4 contributions goal.
 
-## Useful resources
+## Useful information
 
-* [Telegram Bot API](https://core.telegram.org/bots)
-* [TelegramBots Java library](https://github.com/rubenlagus/TelegramBots)
-* [Railway](https://railway.app?referralCode=rob)
-* [Apache Tika](https://tika.apache.org/)
+* The bot is deployed on [Railway](https://railway.app?referralCode=rob)
+* The official documentation of the Telegram Bot API can be found [here](https://core.telegram.org/bots)
+* The library used by the bot to work with Telegram is [TelegramBots](https://github.com/rubenlagus/TelegramBots)
+* The video conversion uses [FFmpeg](https://ffmpeg.org/)
+* MIME type analysis is performed using [Apache Tika](https://tika.apache.org/)
 
 ## License
 
