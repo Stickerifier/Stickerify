@@ -51,11 +51,10 @@ And it's done!
 ## How to set up the project
 
 1. Install JDK 19 (or higher)
-2. Install [FFmpeg](https://ffmpeg.org/download.html)
-3. Clone the project and move into its folder
-4. Run the command `./gradlew build`
-5. Import the project inside your IDE as a Gradle project
-6. Ensure your IDE is correctly configured to use a Java 19 (or higher) JDK
+2. Clone the project and move into its folder
+3. Run the command `./gradlew build`
+4. Import the project inside your IDE as a Gradle project
+5. Ensure your IDE is correctly configured to use a Java 19 (or higher) JDK
 
 ## How to run the bot locally
 
@@ -65,7 +64,8 @@ After you successfully set up the project, you will have to go through the follo
 2. Copy the token it provided you and either:
    * set it as the value of a new environment variable named `STICKERIFY_TOKEN` 
    * use it as the value passed to the `super(botToken)` constructor inside `Stickerify`
-3. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
+3. Install [FFmpeg](https://ffmpeg.org/download.html)
+4. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
 ## How to launch the bot using Docker
 
