@@ -22,7 +22,9 @@ public record TelegramRequest(Message message) {
 	private static final String HELP_COMMAND = "/help";
 
 	public boolean hasFile() {
-		return message.hasPhoto() || message.hasDocument() || message.hasSticker() || message.hasVideo() || message.hasAudio();
+		return message.hasPhoto() || message.hasDocument() || message.hasSticker()
+				|| message.hasVideo() || message.hasVideoNote()
+				|| message.hasAudio() || message.hasVoice();
 	}
 
 	public String getFileId() throws TelegramApiException {
@@ -34,6 +36,8 @@ public record TelegramRequest(Message message) {
 			return message.getSticker().getFileId();
 		} else if (message.hasVideo()) {
 			return message.getVideo().getFileId();
+		} else if (message.hasVideoNote()) {
+			return message.getVideoNote().getFileId();
 		}
 
 		throw new TelegramApiException("The request contains an unsupported media: " + message);
