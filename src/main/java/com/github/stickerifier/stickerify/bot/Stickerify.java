@@ -34,6 +34,9 @@ public class Stickerify extends TelegramLongPollingBot {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 
+	/**
+	 * @see Stickerify
+	 */
 	public Stickerify() {
 		super(System.getenv("STICKERIFY_TOKEN"));
 	}
