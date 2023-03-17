@@ -9,7 +9,7 @@ jave = "ws.schild:jave-all-deps:3.3.1"
 junit = "org.junit.jupiter:junit-jupiter:5.9.2"
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
-slf4j-api = "org.slf4j:slf4j-api:2.0.6"
+slf4j-api = "org.slf4j:slf4j-api:2.0.7"
 telegrambots = "org.telegram:telegrambots:6.5.0"
 tika = "org.apache.tika:tika-core:2.7.0"
 
