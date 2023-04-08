@@ -1,6 +1,6 @@
 <configuration>
 
-	<conversionRule conversionWord="ex" converterClass="com.github.stickerifier.stickerify.logger.StacktraceConverter"/>
+	<conversionRule conversionWord="ex" converterClass="com.github.stickerifier.stickerify.logger.StackTraceConverter"/>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
