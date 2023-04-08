@@ -3,10 +3,13 @@ package com.github.stickerifier.stickerify.logger;
 import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.CoreConstants;
+import ch.qos.logback.core.pattern.Converter;
 
 /**
  * Custom converter class to be used by Logback in order to clear the stack trace
  * of an exception raised in the package {@code org.telegram.telegrambots}.
+ *
+ * @see Converter
  */
 public class StackTraceConverter extends ThrowableProxyConverter {
 

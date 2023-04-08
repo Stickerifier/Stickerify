@@ -4,12 +4,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.classic.spi.LoggingEventVO;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
+import ch.qos.logback.classic.spi.ThrowableProxyVO;
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,8 +28,7 @@ public class StackTraceConverterTest {
 	@Test
 	@DisplayName("Log message without any exception")
 	void processEventWithoutException() {
-		var event = mock(ILoggingEvent.class);
-		when(event.getThrowableProxy()).thenReturn(null);
+		var event = new LoggingEvent(null, MediaHelper.class.getName());
 
 		var convertedMessage = stackTraceConverter.convert(event);
 
@@ -40,11 +38,8 @@ public class StackTraceConverterTest {
 	@Test
 	@DisplayName("Log message with exception thrown outside project classes")
 	void processEventWithExternalException() {
-		var event = mock(ILoggingEvent.class);
-		var throwable = mock(IThrowableProxy.class);
-		when(event.getThrowableProxy()).thenReturn(throwable);
-		when(throwable.getClassName()).thenReturn(TelegramApiException.class.getName());
-		when(event.getLoggerName()).thenReturn(DefaultBotSession.class.getName());
+		var throwable = new LoggingThrowable();
+		var event = new LoggingEvent(throwable, DefaultBotSession.class.getName());
 
 		var convertedMessage = stackTraceConverter.convert(event);
 
@@ -54,15 +49,43 @@ public class StackTraceConverterTest {
 	@Test
 	@DisplayName("Log message with exception thrown inside project classes")
 	void processEventWithInternalException() {
-		var event = mock(ILoggingEvent.class);
-		var throwable = mock(IThrowableProxy.class);
-		when(event.getThrowableProxy()).thenReturn(throwable);
-		when(throwable.getClassName()).thenReturn(TelegramApiException.class.getName());
-		when(event.getLoggerName()).thenReturn(MediaHelper.class.getName());
-		when(throwable.getStackTraceElementProxyArray()).thenReturn(new StackTraceElementProxy[] {});
+		var throwable = new LoggingThrowable();
+		var event = new LoggingEvent(throwable, MediaHelper.class.getName());
 
 		var convertedMessage = stackTraceConverter.convert(event);
 
 		assertThat(convertedMessage, is(not(emptyString())));
+	}
+
+	private static class LoggingEvent extends LoggingEventVO {
+		private final IThrowableProxy throwable;
+		private final String loggerName;
+
+		LoggingEvent(IThrowableProxy throwable, String loggerName) {
+			this.throwable = throwable;
+			this.loggerName = loggerName;
+		}
+
+		@Override
+		public IThrowableProxy getThrowableProxy() {
+			return throwable;
+		}
+
+		@Override
+		public String getLoggerName() {
+			return loggerName;
+		}
+	}
+
+	private static class LoggingThrowable extends ThrowableProxyVO {
+		@Override
+		public String getClassName() {
+			return TelegramApiException.class.getName();
+		}
+
+		@Override
+		public StackTraceElementProxy[] getStackTraceElementProxyArray() {
+			return new StackTraceElementProxy[] {};
+		}
 	}
 }
