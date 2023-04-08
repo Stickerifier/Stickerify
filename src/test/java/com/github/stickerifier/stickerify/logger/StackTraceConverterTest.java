@@ -28,7 +28,7 @@ public class StackTraceConverterTest {
 	@Test
 	@DisplayName("Log message without any exception")
 	void processEventWithoutException() {
-		var event = new LoggingEvent(null, MediaHelper.class.getName());
+		var event = new LoggingEvent(MediaHelper.class.getName(), false);
 
 		var convertedMessage = stackTraceConverter.convert(event);
 
@@ -38,8 +38,7 @@ public class StackTraceConverterTest {
 	@Test
 	@DisplayName("Log message with exception thrown outside project classes")
 	void processEventWithExternalException() {
-		var throwable = new LoggingThrowable();
-		var event = new LoggingEvent(throwable, DefaultBotSession.class.getName());
+		var event = new LoggingEvent(DefaultBotSession.class.getName(), true);
 
 		var convertedMessage = stackTraceConverter.convert(event);
 
@@ -49,8 +48,7 @@ public class StackTraceConverterTest {
 	@Test
 	@DisplayName("Log message with exception thrown inside project classes")
 	void processEventWithInternalException() {
-		var throwable = new LoggingThrowable();
-		var event = new LoggingEvent(throwable, MediaHelper.class.getName());
+		var event = new LoggingEvent(MediaHelper.class.getName(), true);
 
 		var convertedMessage = stackTraceConverter.convert(event);
 
@@ -58,12 +56,25 @@ public class StackTraceConverterTest {
 	}
 
 	private static class LoggingEvent extends LoggingEventVO {
-		private final IThrowableProxy throwable;
+		private IThrowableProxy throwable;
 		private final String loggerName;
 
-		LoggingEvent(IThrowableProxy throwable, String loggerName) {
-			this.throwable = throwable;
+		private LoggingEvent(String loggerName, boolean isExceptionLog) {
 			this.loggerName = loggerName;
+
+			if (isExceptionLog) {
+				this.throwable = new ThrowableProxyVO() {
+					@Override
+					public String getClassName() {
+						return TelegramApiException.class.getName();
+					}
+
+					@Override
+					public StackTraceElementProxy[] getStackTraceElementProxyArray() {
+						return new StackTraceElementProxy[] {};
+					}
+				};
+			}
 		}
 
 		@Override
@@ -74,18 +85,6 @@ public class StackTraceConverterTest {
 		@Override
 		public String getLoggerName() {
 			return loggerName;
-		}
-	}
-
-	private static class LoggingThrowable extends ThrowableProxyVO {
-		@Override
-		public String getClassName() {
-			return TelegramApiException.class.getName();
-		}
-
-		@Override
-		public StackTraceElementProxy[] getStackTraceElementProxyArray() {
-			return new StackTraceElementProxy[] {};
 		}
 	}
 }
