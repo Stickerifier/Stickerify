@@ -36,8 +36,7 @@ public enum Answer {
 	private final boolean disableWebPreview;
 
 	Answer(String text) {
-		this.text = text;
-		this.disableWebPreview = false;
+		this(text, false);
 	}
 
 	Answer(String text, boolean disableWebPreview) {
