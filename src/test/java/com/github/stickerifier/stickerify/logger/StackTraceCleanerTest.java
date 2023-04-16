@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-public class StackTraceConverterTest {
+public class StackTraceCleanerTest {
 
-	private StackTraceConverter stackTraceConverter;
+	private StackTraceCleaner stackTraceCleaner;
 
 	@BeforeEach
 	void setup() {
-		stackTraceConverter = new StackTraceConverter();
+		stackTraceCleaner = new StackTraceCleaner();
 	}
 
 	@Test
@@ -30,7 +30,7 @@ public class StackTraceConverterTest {
 	void processEventWithoutException() {
 		var event = new LoggingEvent(MediaHelper.class.getName(), false);
 
-		var convertedMessage = stackTraceConverter.convert(event);
+		var convertedMessage = stackTraceCleaner.convert(event);
 
 		assertThat(convertedMessage, is(emptyString()));
 	}
@@ -40,7 +40,7 @@ public class StackTraceConverterTest {
 	void processEventWithExternalException() {
 		var event = new LoggingEvent(DefaultBotSession.class.getName(), true);
 
-		var convertedMessage = stackTraceConverter.convert(event);
+		var convertedMessage = stackTraceCleaner.convert(event);
 
 		assertThat(convertedMessage, is(emptyString()));
 	}
@@ -50,7 +50,7 @@ public class StackTraceConverterTest {
 	void processEventWithInternalException() {
 		var event = new LoggingEvent(MediaHelper.class.getName(), true);
 
-		var convertedMessage = stackTraceConverter.convert(event);
+		var convertedMessage = stackTraceCleaner.convert(event);
 
 		assertThat(convertedMessage, is(not(emptyString())));
 	}

@@ -11,7 +11,7 @@ import ch.qos.logback.core.pattern.Converter;
  *
  * @see Converter
  */
-public class StackTraceConverter extends ThrowableProxyConverter {
+public class StackTraceCleaner extends ThrowableProxyConverter {
 
 	private static final String TELEGRAMBOTS_ROOT_PACKAGE = "org.telegram.telegrambots";
 
