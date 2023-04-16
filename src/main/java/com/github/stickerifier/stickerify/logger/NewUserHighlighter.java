@@ -14,8 +14,7 @@ import ch.qos.logback.core.pattern.Converter;
 import java.util.regex.Pattern;
 
 /**
- * Custom converter class to be used by Logback in order to
- * highlight substrings of the message to be logged.
+ * Custom converter class to be used by Logback in order to highlight new bot users.
  *
  * @see Converter
  */
