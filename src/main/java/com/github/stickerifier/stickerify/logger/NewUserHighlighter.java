@@ -20,24 +20,20 @@ public class NewUserHighlighter extends MessageConverter {
 	private static final String BRIGHT_GREEN_FG = "92";
 	static final String START_GREEN = changeColorTo(BRIGHT_GREEN_FG);
 	static final String RESET_COLOR = changeColorTo(DEFAULT_FG);
+	static final String HIGHLIGHTED_NEW_USER = START_GREEN + NEW_USER + RESET_COLOR;
 
 	@Override
 	public String convert(ILoggingEvent event) {
 		String message = event.getFormattedMessage();
 
 		if (message != null && message.contains(NEW_USER)) {
-			return highlightNewUser(message);
+			return message.replaceFirst(NEW_USER, HIGHLIGHTED_NEW_USER);
 		}
 
 		return message;
 	}
 
-	private static String highlightNewUser(String message) {
-		final int index = message.indexOf(NEW_USER);
-		return message.substring(0, index) + START_GREEN + NEW_USER + RESET_COLOR + message.substring(index + NEW_USER.length());
-	}
-
-	private static String changeColorTo(String color) {
+	private static String changeColorTo(final String color) {
 		return ESC_START + color + ESC_END;
 	}
 }

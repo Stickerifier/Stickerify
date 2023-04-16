@@ -1,5 +1,6 @@
 package com.github.stickerifier.stickerify.logger;
 
+import static com.github.stickerifier.stickerify.logger.NewUserHighlighter.HIGHLIGHTED_NEW_USER;
 import static com.github.stickerifier.stickerify.logger.NewUserHighlighter.RESET_COLOR;
 import static com.github.stickerifier.stickerify.logger.NewUserHighlighter.START_GREEN;
 import static com.github.stickerifier.stickerify.telegram.model.TelegramRequest.NEW_USER;
@@ -47,8 +48,7 @@ public class NewUserHighlighterTest {
 		var convertedMessage = newUserHighlighter.convert(event);
 
 		assertAll(
-				() -> assertThat(convertedMessage, containsString(START_GREEN)),
-				() -> assertThat(convertedMessage, containsString(RESET_COLOR)),
+				() -> assertThat(convertedMessage, containsString(HIGHLIGHTED_NEW_USER)),
 				() -> assertThat(convertedMessage, is(not(equalTo(message))))
 		);
 	}
