@@ -18,8 +18,8 @@ import ch.qos.logback.core.pattern.Converter;
 public class NewUserHighlighter extends MessageConverter {
 
 	private static final String BRIGHT_GREEN_FG = "92";
-	private static final String START_GREEN = ESC_START + BRIGHT_GREEN_FG + ESC_END;
-	private static final String RESET_COLOR = ESC_START + DEFAULT_FG + ESC_END;
+	static final String START_GREEN = ESC_START + BRIGHT_GREEN_FG + ESC_END;
+	static final String RESET_COLOR = ESC_START + DEFAULT_FG + ESC_END;
 
 	@Override
 	public String convert(ILoggingEvent event) {
