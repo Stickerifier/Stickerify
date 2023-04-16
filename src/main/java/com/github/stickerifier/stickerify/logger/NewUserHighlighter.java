@@ -4,7 +4,7 @@ import static ch.qos.logback.core.pattern.color.ANSIConstants.BOLD;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.DEFAULT_FG;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_END;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_START;
-import static ch.qos.logback.core.pattern.color.ANSIConstants.GREEN_FG;
+import static ch.qos.logback.core.pattern.color.ANSIConstants.YELLOW_FG;
 import static com.github.stickerifier.stickerify.telegram.model.TelegramRequest.NEW_USER;
 
 import ch.qos.logback.classic.pattern.MessageConverter;
@@ -21,9 +21,9 @@ import java.util.regex.Pattern;
  */
 public class NewUserHighlighter extends MessageConverter {
 
-	static final String START_GREEN = changeColorTo(BOLD + GREEN_FG);
+	static final String START_YELLOW = changeColorTo(BOLD + YELLOW_FG);
 	static final String RESET_COLOR = changeColorTo(DEFAULT_FG);
-	static final String HIGHLIGHTED_NEW_USER = START_GREEN + NEW_USER + RESET_COLOR;
+	static final String HIGHLIGHTED_NEW_USER = START_YELLOW + NEW_USER + RESET_COLOR;
 
 	@Override
 	public String convert(ILoggingEvent event) {
