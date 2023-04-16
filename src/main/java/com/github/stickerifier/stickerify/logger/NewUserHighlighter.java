@@ -18,8 +18,8 @@ import ch.qos.logback.core.pattern.Converter;
 public class NewUserHighlighter extends MessageConverter {
 
 	private static final String BRIGHT_GREEN_FG = "92";
-	static final String START_GREEN = ESC_START + BRIGHT_GREEN_FG + ESC_END;
-	static final String RESET_COLOR = ESC_START + DEFAULT_FG + ESC_END;
+	static final String START_GREEN = changeColorTo(BRIGHT_GREEN_FG);
+	static final String RESET_COLOR = changeColorTo(DEFAULT_FG);
 
 	@Override
 	public String convert(ILoggingEvent event) {
@@ -35,5 +35,9 @@ public class NewUserHighlighter extends MessageConverter {
 	private static String highlightNewUser(String message) {
 		final int index = message.indexOf(NEW_USER);
 		return message.substring(0, index) + START_GREEN + NEW_USER + RESET_COLOR + message.substring(index + NEW_USER.length());
+	}
+
+	private static String changeColorTo(String color) {
+		return ESC_START + color + ESC_END;
 	}
 }
