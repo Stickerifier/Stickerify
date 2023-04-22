@@ -18,7 +18,7 @@ import java.util.Optional;
  */
 public record TelegramRequest(Message message) {
 
-	public static final String NEW_USER = "(new user)";
+	public static final String NEW_USER = " (new user)";
 	private static final String START_COMMAND = "/start";
 	private static final String HELP_COMMAND = "/help";
 
@@ -62,7 +62,7 @@ public record TelegramRequest(Message message) {
 		var description = "request from " + getUsername();
 
 		if (START_COMMAND.equals(message.getText())) {
-			description += " " + NEW_USER;
+			description += NEW_USER;
 		}
 
 		return description;
