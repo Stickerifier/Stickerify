@@ -20,9 +20,9 @@ import java.util.regex.Pattern;
  */
 public class NewUserHighlighter extends MessageConverter {
 
-	static final String START_YELLOW = changeColorTo(BOLD + YELLOW_FG);
-	static final String RESET_COLOR = changeColorTo(DEFAULT_FG);
-	static final String HIGHLIGHTED_NEW_USER = START_YELLOW + NEW_USER + RESET_COLOR;
+	private static final String START_YELLOW = changeColorTo(BOLD + YELLOW_FG);
+	private static final String RESET_COLOR = changeColorTo(DEFAULT_FG);
+	static final String HIGHLIGHTED_NEW_USER = " " + START_YELLOW + NEW_USER.substring(1) + RESET_COLOR;
 
 	@Override
 	public String convert(ILoggingEvent event) {
