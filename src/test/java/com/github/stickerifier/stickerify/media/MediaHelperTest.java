@@ -1,10 +1,12 @@
 package com.github.stickerifier.stickerify.media;
 
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -124,10 +126,11 @@ public class MediaHelperTest {
 				() -> assertThat("Video's width is not correct", videoSize.getWidth(), is(equalTo(expectedWidth))),
 				() -> assertThat("Video's height is not correct", videoSize.getHeight(), is(equalTo(expectedHeight))),
 				() -> assertThat("Video's frame rate is not correct", videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
-				() -> assertThat("Video's decoder must be VP9", videoInfo.getDecoder(), startsWith(VP9_CODEC)),
+				() -> assertThat("Video must be encoded with the VP9 codec", videoInfo.getDecoder(), startsWith(VP9_CODEC)),
 				() -> assertThat("Video's duration is not correct", mediaInfo.getDuration(), is(equalTo(expectedDuration))),
 				() -> assertThat("Video's format must be matroska", mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
-				() -> assertThat("The video must not have audio", mediaInfo.getAudio(), is(nullValue()))
+				() -> assertThat("Video must have no audio stream", mediaInfo.getAudio(), is(nullValue())),
+				() -> assertThat("Video size should not exceed 256 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_FILE_SIZE)))
 		);
 	}
 
