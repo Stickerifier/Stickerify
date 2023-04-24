@@ -1,10 +1,12 @@
 package com.github.stickerifier.stickerify.media;
 
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -59,9 +61,9 @@ public class MediaHelperTest {
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
 		assertAll(
-				() -> assertThat(actualExtension, is(equalTo(".png"))),
-				() -> assertThat(image.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat(image.getHeight(), is(equalTo(expectedHeight)))
+				() -> assertThat("Image's extension must be png", actualExtension, is(equalTo(".png"))),
+				() -> assertThat("Image's width is not correct", image.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat("Image's height is not correct", image.getHeight(), is(equalTo(expectedHeight)))
 		);
 	}
 
@@ -79,6 +81,14 @@ public class MediaHelperTest {
 		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(512, 512);
+	}
+
+	@Test
+	void noImageConversionNeeded() throws Exception {
+		var startingImage = image(512, 256, "png");
+		result = MediaHelper.convert(startingImage);
+
+		assertThat(result, is(nullValue()));
 	}
 
 	@Test
@@ -112,14 +122,15 @@ public class MediaHelperTest {
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
 		assertAll(
-				() -> assertThat(actualExtension, is(equalTo(".webm"))),
-				() -> assertThat(videoSize.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat(videoSize.getHeight(), is(equalTo(expectedHeight))),
-				() -> assertThat(videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
-				() -> assertThat(videoInfo.getDecoder(), startsWith(VP9_CODEC)),
-				() -> assertThat(mediaInfo.getDuration(), is(equalTo(expectedDuration))),
-				() -> assertThat(mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
-				() -> assertThat(mediaInfo.getAudio(), is(nullValue()))
+				() -> assertThat("Video's extension must be webm", actualExtension, is(equalTo(".webm"))),
+				() -> assertThat("Video's width is not correct", videoSize.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat("Video's height is not correct", videoSize.getHeight(), is(equalTo(expectedHeight))),
+				() -> assertThat("Video's frame rate is not correct", videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
+				() -> assertThat("Video must be encoded with the VP9 codec", videoInfo.getDecoder(), startsWith(VP9_CODEC)),
+				() -> assertThat("Video's duration is not correct", mediaInfo.getDuration(), is(equalTo(expectedDuration))),
+				() -> assertThat("Video's format must be matroska", mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
+				() -> assertThat("Video must have no audio stream", mediaInfo.getAudio(), is(nullValue())),
+				() -> assertThat("Video size should not exceed 256 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_FILE_SIZE)))
 		);
 	}
 
@@ -148,7 +159,15 @@ public class MediaHelperTest {
 	}
 
 	@Test
-	void noConversionNeeded() throws Exception {
+	void convertGifVideo() throws Exception {
+		var startingVideo = resource("valid.gif");
+		result = MediaHelper.convert(startingVideo);
+
+		assertVideoConsistency(512, 274, 10F, 1_000L);
+	}
+
+	@Test
+	void noVideoConversionNeeded() throws Exception {
 		var startingVideo = resource("no_conversion_needed.webm");
 		result = MediaHelper.convert(startingVideo);
 

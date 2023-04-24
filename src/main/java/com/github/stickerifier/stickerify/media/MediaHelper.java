@@ -2,6 +2,7 @@ package com.github.stickerifier.stickerify.media;
 
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURATION_MILLIS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
@@ -21,6 +22,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 public final class MediaHelper {
@@ -29,7 +31,7 @@ public final class MediaHelper {
 
 	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
-	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
+	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
 
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.
@@ -46,9 +48,10 @@ public final class MediaHelper {
 			return convertToPng(inputFile, mimeType);
 		} else if (isSupportedMedia(mimeType, SUPPORTED_VIDEOS)) {
 			return convertToWebm(inputFile);
-		} else {
-			throw new TelegramApiException("Passed-in file is not supported");
 		}
+
+		LOGGER.warn("The file with MIME type {} could not be converted", mimeType);
+		throw new TelegramApiException("Passed-in file is not supported");
 	}
 
 	/**
@@ -181,7 +184,7 @@ public final class MediaHelper {
 	private static File convertToWebm(File file) throws TelegramApiException {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
-		if (isVideoCompliant(mediaInfo)) {
+		if (isVideoCompliant(mediaInfo) && isFileSizeCompliant(file)) {
 			LOGGER.info("The video doesn't need conversion");
 
 			return null;
@@ -222,6 +225,21 @@ public final class MediaHelper {
 				&& mediaInfo.getDuration() <= MAX_DURATION_MILLIS
 				&& mediaInfo.getAudio() == null
 				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat());
+	}
+
+	/**
+	 * Checks that passed-in file's size does not exceed 256 KB.
+	 *
+	 * @param file the file to check
+	 * @return {@code true} if file's size is compliant
+	 * @throws TelegramApiException if an error occurred retrieving the size of the file
+	 */
+	private static boolean isFileSizeCompliant(File file) throws TelegramApiException {
+		try {
+			return Files.size(file.toPath()) <= MAX_FILE_SIZE;
+		} catch (IOException e) {
+			throw new TelegramApiException(e);
+		}
 	}
 
 	/**
@@ -286,7 +304,7 @@ public final class MediaHelper {
 	 *     <li>an unexpected failure happened running the command
 	 * </ul>
 	 */
-	private static void executeCommand(String[] command) throws TelegramApiException {
+	private static void executeCommand(final String[] command) throws TelegramApiException {
 		try {
 			var process = new ProcessBuilder(command).start();
 			var processExited = process.waitFor(1, MINUTES);

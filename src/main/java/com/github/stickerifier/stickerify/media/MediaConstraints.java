@@ -13,6 +13,7 @@ public final class MediaConstraints {
 	static final long MAX_DURATION_MILLIS = 3_000L;
 	static final String VP9_CODEC = "vp9";
 	static final String MATROSKA_FORMAT = "matroska";
+	static final long MAX_FILE_SIZE = 256_000L;
 
 	private MediaConstraints() {
 		throw new UnsupportedOperationException();
