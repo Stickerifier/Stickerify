@@ -59,9 +59,9 @@ public class MediaHelperTest {
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
 		assertAll(
-				() -> assertThat(actualExtension, is(equalTo(".png"))),
-				() -> assertThat(image.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat(image.getHeight(), is(equalTo(expectedHeight)))
+				() -> assertThat("Image's extension must be png", actualExtension, is(equalTo(".png"))),
+				() -> assertThat("Image's width is not correct", image.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat("Image's height is not correct", image.getHeight(), is(equalTo(expectedHeight)))
 		);
 	}
 
@@ -112,14 +112,14 @@ public class MediaHelperTest {
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
 		assertAll(
-				() -> assertThat(actualExtension, is(equalTo(".webm"))),
-				() -> assertThat(videoSize.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat(videoSize.getHeight(), is(equalTo(expectedHeight))),
-				() -> assertThat(videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
-				() -> assertThat(videoInfo.getDecoder(), startsWith(VP9_CODEC)),
-				() -> assertThat(mediaInfo.getDuration(), is(equalTo(expectedDuration))),
-				() -> assertThat(mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
-				() -> assertThat(mediaInfo.getAudio(), is(nullValue()))
+				() -> assertThat("Video's extension must be webm", actualExtension, is(equalTo(".webm"))),
+				() -> assertThat("Video's width is not correct", videoSize.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat("Video's height is not correct", videoSize.getHeight(), is(equalTo(expectedHeight))),
+				() -> assertThat("Video's frame rate is not correct", videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
+				() -> assertThat("Video's decoder must be VP9", videoInfo.getDecoder(), startsWith(VP9_CODEC)),
+				() -> assertThat("Video's duration is not correct", mediaInfo.getDuration(), is(equalTo(expectedDuration))),
+				() -> assertThat("Video's format must be matroska", mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
+				() -> assertThat("The video must not have audio", mediaInfo.getAudio(), is(nullValue()))
 		);
 	}
 
@@ -145,6 +145,14 @@ public class MediaHelperTest {
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(288, 512, 30F, 2_000L);
+	}
+
+	@Test
+	void convertGifVideo() throws Exception {
+		var startingVideo = resource("valid.gif");
+		result = MediaHelper.convert(startingVideo);
+
+		assertVideoConsistency(512, 274, 10F, 1_000L);
 	}
 
 	@Test

@@ -29,7 +29,7 @@ public final class MediaHelper {
 
 	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
-	private static final List<String> SUPPORTED_VIDEOS = List.of("video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
+	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
 
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.
@@ -46,9 +46,10 @@ public final class MediaHelper {
 			return convertToPng(inputFile, mimeType);
 		} else if (isSupportedMedia(mimeType, SUPPORTED_VIDEOS)) {
 			return convertToWebm(inputFile);
-		} else {
-			throw new TelegramApiException("Passed-in file is not supported");
 		}
+
+		LOGGER.warn("The file with MIME type {} could not be converted", mimeType);
+		throw new TelegramApiException("Passed-in file is not supported");
 	}
 
 	/**

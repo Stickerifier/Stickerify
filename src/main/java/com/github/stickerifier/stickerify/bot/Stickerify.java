@@ -89,7 +89,7 @@ public class Stickerify extends TelegramLongPollingBot {
 				execute(response);
 			}
 		} catch (TelegramApiException e) {
-			LOGGER.warn("Unable to reply to {} with processed file", request, e);
+			LOGGER.warn("Unable to reply to {} with processed file", request.getDescription(), e);
 			answerText(ERROR, request);
 		} finally {
 			deleteTempFiles(pathsToDelete);
