@@ -82,6 +82,14 @@ public class MediaHelperTest {
 	}
 
 	@Test
+	void noImageConversionNeeded() throws Exception {
+		var startingImage = image(512, 256, "png");
+		result = MediaHelper.convert(startingImage);
+
+		assertThat(result, is(nullValue()));
+	}
+
+	@Test
 	void resizeWebpImage() throws Exception {
 		var startingImage = resource("valid.webp");
 		result = MediaHelper.convert(startingImage);
@@ -156,7 +164,7 @@ public class MediaHelperTest {
 	}
 
 	@Test
-	void noConversionNeeded() throws Exception {
+	void noVideoConversionNeeded() throws Exception {
 		var startingVideo = resource("no_conversion_needed.webm");
 		result = MediaHelper.convert(startingVideo);
 
