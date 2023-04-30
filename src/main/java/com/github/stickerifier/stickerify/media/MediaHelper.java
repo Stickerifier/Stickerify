@@ -50,7 +50,7 @@ public final class MediaHelper {
 			return convertToWebm(inputFile);
 		}
 
-		LOGGER.warn("The file with MIME type {} could not be converted", mimeType);
+		LOGGER.warn("The file with {} MIME type could not be converted", mimeType);
 		throw new TelegramApiException("Passed-in file is not supported");
 	}
 

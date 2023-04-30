@@ -1,5 +1,4 @@
 <configuration>
-
 	<conversionRule conversionWord="msg" converterClass="com.github.stickerifier.stickerify.logger.NewUserHighlighter"/>
 	<conversionRule conversionWord="ex" converterClass="com.github.stickerifier.stickerify.logger.StackTraceCleaner"/>
 
@@ -12,4 +11,7 @@
 	<root level="info">
 		<appender-ref ref="CONSOLE"/>
 	</root>
+
+	<logger name="org.apache.tika" level="info" />
+	<logger name="ws.schild.jave" level="info" />
 </configuration>
