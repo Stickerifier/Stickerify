@@ -1,5 +1,5 @@
 <configuration>
-	<conversionRule conversionWord="msg" converterClass="com.github.stickerifier.stickerify.logger.NewUserHighlighter"/>
+	<conversionRule conversionWord="msg" converterClass="com.github.stickerifier.stickerify.logger.SubstringHighlighter"/>
 	<conversionRule conversionWord="ex" converterClass="com.github.stickerifier.stickerify.logger.StackTraceCleaner"/>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
