@@ -28,14 +28,16 @@ Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answe
 ```mermaid
     flowchart LR
         A[User] -->|Message| B([Stickerify])
-        B -->|Request contains a file| C{Is file valid?}
+        B -->|Request contains a file| C{Is file supported?}
         click B "https://t.me/StickerifyImageBot" _blank
         style B fill:#2889ba,stroke:#e0e0e0,color:#e0e0e0
-        C -->|Yes| D(Convert file)
+        C -->|Yes| D{Does file need conversion?}
         C -->|No| E(Error message)
         B -->|Request is text-only| F{Is help command?}
         F -->|Yes| G(Show bot usage)
         F -->|No| H(About message)
+        D -->|Yes| J(Convert file)
+        D -->|No| K(No conversion)
 ```
 
 ## How to create a new sticker
