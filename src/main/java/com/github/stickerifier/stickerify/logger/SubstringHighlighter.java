@@ -15,17 +15,17 @@ import ch.qos.logback.core.pattern.Converter;
 import java.util.regex.Pattern;
 
 /**
- * Custom converter class to be used by Logback in order to highlight important message substrings.
+ * Custom converter class to be used by Logback in order to highlight important substrings.
  *
  * @see Converter
  */
 public class SubstringHighlighter extends MessageConverter {
 
 	private static final String START_YELLOW = changeColorTo(BOLD + YELLOW_FG);
-	static final String START_GREEN = changeColorTo(BOLD + GREEN_FG);
 	private static final String RESET_TEXT_ATTRIBUTES = "0;";
 	static final String RESET_COLOR = changeColorTo(RESET_TEXT_ATTRIBUTES + DEFAULT_FG);
 	static final String HIGHLIGHTED_NEW_USER = " " + START_YELLOW + NEW_USER.substring(1) + RESET_COLOR;
+	static final String START_GREEN = changeColorTo(BOLD + GREEN_FG);
 	private static final String MIME_TYPE_REGEX = "[\\w-]+/[\\w-]+";
 
 	@Override
@@ -47,7 +47,7 @@ public class SubstringHighlighter extends MessageConverter {
 		return message;
 	}
 
-	static String changeColorTo(final String color) {
+	private static String changeColorTo(final String color) {
 		return ESC_START + color + ESC_END;
 	}
 
