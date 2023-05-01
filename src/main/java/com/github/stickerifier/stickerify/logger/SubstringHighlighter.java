@@ -22,9 +22,8 @@ import java.util.regex.Pattern;
 public class SubstringHighlighter extends MessageConverter {
 
 	private static final String START_YELLOW = changeColorTo(BOLD + YELLOW_FG);
-	private static final String RESET_TEXT_ATTRIBUTES = "0;";
-	static final String RESET_COLOR = changeColorTo(RESET_TEXT_ATTRIBUTES + DEFAULT_FG);
-	static final String HIGHLIGHTED_NEW_USER = " " + START_YELLOW + NEW_USER.substring(1) + RESET_COLOR;
+	static final String CONTINUE_PREVIOUS_COLOR = changeColorTo("0;" + DEFAULT_FG);
+	static final String HIGHLIGHTED_NEW_USER = " " + START_YELLOW + NEW_USER.substring(1) + CONTINUE_PREVIOUS_COLOR;
 	static final String START_GREEN = changeColorTo(BOLD + GREEN_FG);
 	private static final Pattern MIME_TYPE_PATTERN = Pattern.compile("[\\w-]+/[\\w-]+");
 
@@ -39,7 +38,7 @@ public class SubstringHighlighter extends MessageConverter {
 
 			var mimeType = getMimeType(message);
 			if (mimeType != null) {
-				var highlightedMimeType = START_GREEN + mimeType + RESET_COLOR;
+				var highlightedMimeType = START_GREEN + mimeType + CONTINUE_PREVIOUS_COLOR;
 				return message.replaceFirst(mimeType, highlightedMimeType);
 			}
 		}
