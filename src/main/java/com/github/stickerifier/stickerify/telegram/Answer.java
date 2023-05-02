@@ -6,10 +6,11 @@ package com.github.stickerifier.stickerify.telegram;
 public enum Answer {
 
 	HELP("""
-			Send me the image or gif you want to convert and I will take care of the rest\\.
+			Send me the media you want to convert and I will take care of the rest\\.
 
 			Based on what you send, I will answer the following:
 			\\- the converted media, if you sent a supported file \\(images, gifs, standard and video stickers are supported\\)
+			\\- no file, if you sent a media already suiting Telegram's requirements
 			\\- an error message, if you sent an unsupported file
 			\\- an informative message for any message without a file
 			"""),
