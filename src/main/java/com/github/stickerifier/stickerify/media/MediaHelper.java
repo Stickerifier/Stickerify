@@ -42,12 +42,13 @@ public final class MediaHelper {
 	 */
 	public static File convert(File inputFile) throws TelegramApiException {
 		var mimeType = detectMimeType(inputFile);
-		var image = getImage(inputFile);
-
-		if (isSupportedImage(image) && !isSupportedVideo(mimeType)) {
-			return convertToPng(image, mimeType);
-		} else if (isSupportedVideo(mimeType)) {
+		if (isSupportedVideo(mimeType)) {
 			return convertToWebm(inputFile);
+		}
+
+		var image = toImage(inputFile);
+		if (image != null) {
+			return convertToPng(image, mimeType);
 		}
 
 		LOGGER.warn("The file with {} MIME type could not be converted", mimeType);
@@ -75,18 +76,6 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Checks if the image can be converted.
-	 * The only requirement for an image to be supported is that
-	 * {@link ImageIO#read(File)} returns a non-null {@link BufferedImage}.
-	 *
-	 * @param image the image to check
-	 * @return {@code true} if the image is supported
-	 */
-	private static boolean isSupportedImage(BufferedImage image) {
-		return image != null;
-	}
-
-	/**
 	 * Retrieve the image from the passed-in file.
 	 * If the file isn't a supported image, {@code null} is returned.
 	 *
@@ -94,7 +83,7 @@ public final class MediaHelper {
 	 * @return the image, if supported
 	 * @throws TelegramApiException if an error occurred processing passed-in file
 	 */
-	private static BufferedImage getImage(File file) throws TelegramApiException {
+	private static BufferedImage toImage(File file) throws TelegramApiException {
 		try {
 			return ImageIO.read(file);
 		} catch (IOException e) {
