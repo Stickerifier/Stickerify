@@ -3,14 +3,14 @@ WORKDIR /app
 COPY settings.gradle build.gradle ./
 COPY gradle/libs.versions.toml ./gradle/
 RUN \
-  --mount=type=cache,target=/home/gradle/.gradle/caches \
+  --mount=type=cache,id=cache-gradle,target=/home/gradle/.gradle/caches \
   gradle dependencies --no-daemon
 COPY . .
 RUN gradle shadowJar --no-daemon
 
 FROM eclipse-temurin:19 AS bot
 RUN \
-  --mount=type=cache,target=/var/cache/apt \
+  --mount=type=cache,id=cache-apt,target=/var/cache/apt \
   apt-get -y update && apt-get -y upgrade && \
   apt-get install -y --no-install-recommends ffmpeg
 ARG STICKERIFY_TOKEN
