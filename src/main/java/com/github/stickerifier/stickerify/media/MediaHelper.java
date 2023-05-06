@@ -80,7 +80,7 @@ public final class MediaHelper {
 	 * If the file isn't a supported image, {@code null} is returned.
 	 *
 	 * @param file the file to read
-	 * @return the image, if supported
+	 * @return the image, if supported by {@link ImageIO}
 	 * @throws TelegramApiException if an error occurred processing passed-in file
 	 */
 	private static BufferedImage toImage(File file) throws TelegramApiException {
