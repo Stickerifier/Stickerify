@@ -175,7 +175,7 @@ public class MediaHelperTest {
 	}
 
 	@Test
-	void notAnImage() {
+	void unsupportedFile() {
 		var document = resource("document.txt");
 		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
 
