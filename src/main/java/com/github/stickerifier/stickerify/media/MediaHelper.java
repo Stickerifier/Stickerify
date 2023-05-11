@@ -30,7 +30,6 @@ public final class MediaHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
 	private static final int PRESERVE_ASPECT_RATIO = -2;
-	private static final List<String> SUPPORTED_IMAGES = List.of("image/jpeg", "image/png", "image/webp");
 	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
 
 	/**
@@ -42,12 +41,14 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if the file is not supported or if the conversion failed
 	 */
 	public static File convert(File inputFile) throws TelegramApiException {
-		String mimeType = detectMimeType(inputFile);
-
-		if (isSupportedMedia(mimeType, SUPPORTED_IMAGES)) {
-			return convertToPng(inputFile, mimeType);
-		} else if (isSupportedMedia(mimeType, SUPPORTED_VIDEOS)) {
+		var mimeType = detectMimeType(inputFile);
+		if (isSupportedVideo(mimeType)) {
 			return convertToWebm(inputFile);
+		}
+
+		var image = toImage(inputFile);
+		if (image != null) {
+			return convertToPng(image, mimeType);
 		}
 
 		LOGGER.warn("The file with {} MIME type could not be converted", mimeType);
@@ -75,38 +76,47 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Checks if the MIME type corresponds to a supported one.
+	 * Retrieve the image from the passed-in file.
+	 * If the file isn't a supported image, {@code null} is returned.
+	 *
+	 * @param file the file to read
+	 * @return the image, if supported by {@link ImageIO}
+	 * @throws TelegramApiException if an error occurred processing passed-in file
+	 */
+	private static BufferedImage toImage(File file) throws TelegramApiException {
+		try {
+			return ImageIO.read(file);
+		} catch (IOException e) {
+			throw new TelegramApiException("Unable to retrieve the image from passed-in file", e);
+		}
+	}
+
+	/**
+	 * Checks if the MIME type corresponds to one of the supported video formats.
 	 *
 	 * @param mimeType the MIME type to check
-	 * @param supportedFormats the list of the formats to check
 	 * @return {@code true} if the MIME type is supported
 	 */
-	private static boolean isSupportedMedia(String mimeType, List<String> supportedFormats) {
-		return supportedFormats.stream().anyMatch(format -> format.equals(mimeType));
+	private static boolean isSupportedVideo(String mimeType) {
+		return SUPPORTED_VIDEOS.stream().anyMatch(format -> format.equals(mimeType));
 	}
 
 	/**
 	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
 	 *
-	 * @param file the file to convert to png
+	 * @param image the image to convert to png
 	 * @param mimeType the MIME type of the file
 	 * @return converted image, {@code null} if no conversion was required
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
-	private static File convertToPng(File file, String mimeType) throws TelegramApiException {
-		try {
-			var image = ImageIO.read(file);
+	private static File convertToPng(BufferedImage image, String mimeType) throws TelegramApiException {
+		if (isImageCompliant(image, mimeType)) {
+			LOGGER.info("The image doesn't need conversion");
 
-			if (isImageCompliant(image, mimeType)) {
-				LOGGER.info("The image doesn't need conversion");
-
-				return null;
-			}
-
-			return createPngFile(resizeImage(image));
-		} catch (IOException e) {
-			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
+			return null;
 		}
+
+		return createPngFile(resizeImage(image));
 	}
 
 	/**
@@ -148,12 +158,16 @@ public final class MediaHelper {
 	 *
 	 * @param image the image to convert to png
 	 * @return png image
-	 * @throws IOException if an error occurs creating the png
 	 * @throws TelegramApiException if an error occurs creating the temp file
 	 */
-	private static File createPngFile(BufferedImage image) throws IOException, TelegramApiException {
+	private static File createPngFile(BufferedImage image) throws TelegramApiException {
 		var pngImage = createTempFile("png");
-		ImageIO.write(image, "png", pngImage);
+
+		try {
+			ImageIO.write(image, "png", pngImage);
+		} catch (IOException e) {
+			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
+		}
 
 		return pngImage;
 	}
