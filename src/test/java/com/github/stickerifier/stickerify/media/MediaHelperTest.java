@@ -60,10 +60,10 @@ public class MediaHelperTest {
 		var image = ImageIO.read(result);
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
-		assertAll(
-				() -> assertThat("Image's extension must be png", actualExtension, is(equalTo(".png"))),
-				() -> assertThat("Image's width is not correct", image.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat("Image's height is not correct", image.getHeight(), is(equalTo(expectedHeight)))
+		assertAll("Image validation failed",
+				() -> assertThat("image's extension must be png", actualExtension, is(equalTo(".png"))),
+				() -> assertThat("image's width is not correct", image.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat("image's height is not correct", image.getHeight(), is(equalTo(expectedHeight)))
 		);
 	}
 
@@ -121,16 +121,16 @@ public class MediaHelperTest {
 
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
-		assertAll(
-				() -> assertThat("Video's extension must be webm", actualExtension, is(equalTo(".webm"))),
-				() -> assertThat("Video's width is not correct", videoSize.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat("Video's height is not correct", videoSize.getHeight(), is(equalTo(expectedHeight))),
-				() -> assertThat("Video's frame rate is not correct", videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
-				() -> assertThat("Video must be encoded with the VP9 codec", videoInfo.getDecoder(), startsWith(VP9_CODEC)),
-				() -> assertThat("Video's duration is not correct", mediaInfo.getDuration(), is(equalTo(expectedDuration))),
-				() -> assertThat("Video's format must be matroska", mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
-				() -> assertThat("Video must have no audio stream", mediaInfo.getAudio(), is(nullValue())),
-				() -> assertThat("Video size should not exceed 256 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_FILE_SIZE)))
+		assertAll("Video validation failed",
+				() -> assertThat("video's extension must be webm", actualExtension, is(equalTo(".webm"))),
+				() -> assertThat("video's width is not correct", videoSize.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat("video's height is not correct", videoSize.getHeight(), is(equalTo(expectedHeight))),
+				() -> assertThat("video's frame rate is not correct", videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
+				() -> assertThat("video must be encoded with the VP9 codec", videoInfo.getDecoder(), startsWith(VP9_CODEC)),
+				() -> assertThat("video's duration is not correct", mediaInfo.getDuration(), is(equalTo(expectedDuration))),
+				() -> assertThat("video's format must be matroska", mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
+				() -> assertThat("video must have no audio stream", mediaInfo.getAudio(), is(nullValue())),
+				() -> assertThat("video size should not exceed 256 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_FILE_SIZE)))
 		);
 	}
 
