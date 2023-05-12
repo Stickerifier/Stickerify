@@ -3,26 +3,28 @@ package com.github.stickerifier.stickerify.bot;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
+import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
+import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.GetFile;
+import com.pengrad.telegrambot.request.SendDocument;
+import com.pengrad.telegrambot.request.SendMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Set;
 
 /**
@@ -30,26 +32,26 @@ import java.util.Set;
  *
  * @author Roberto Cella
  */
-public class Stickerify extends TelegramLongPollingBot {
+public class Stickerify extends TelegramBot {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
+	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 
 	/**
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		super(System.getenv("STICKERIFY_TOKEN"));
+		super(BOT_TOKEN);
+
+		setUpdatesListener(updates -> {
+			updates.forEach(this::handleUpdate);
+			return UpdatesListener.CONFIRMED_UPDATES_ALL;
+		}, e -> LOGGER.error("There was an unexpected failure", e));
 	}
 
-	@Override
-	public String getBotUsername() {
-		return Stickerify.class.getSimpleName();
-	}
-
-	@Override
-	public void onUpdateReceived(Update update) {
-		if (update.hasMessage()) {
-			TelegramRequest request = new TelegramRequest(update.getMessage());
+	private void handleUpdate(Update update) {
+		if (update.message() != null) {
+			TelegramRequest request = new TelegramRequest(update.message());
 			LOGGER.info("Received {}", request.getDescription());
 
 			answer(request);
@@ -78,15 +80,14 @@ public class Stickerify extends TelegramLongPollingBot {
 			} else {
 				pathsToDelete.add(outputFile.toPath());
 
-				SendDocument response = SendDocument.builder()
-						.chatId(request.getChatId())
+				var document = new SendDocument(request.getChatId(), outputFile)
 						.replyToMessageId(request.getMessageId())
 						.caption(FILE_READY.getText())
-						.parseMode(ParseMode.MARKDOWNV2)
-						.document(new InputFile(outputFile))
-						.build();
+						.parseMode(MarkdownV2);
 
-				execute(response);
+				if (!execute(document).isOk()) {
+					throw new TelegramApiException("Telegram failed to reply with processed file");
+				}
 			}
 		} catch (TelegramApiException e) {
 			LOGGER.warn("Unable to reply to {} with processed file", request.getDescription(), e);
@@ -97,9 +98,17 @@ public class Stickerify extends TelegramLongPollingBot {
 	}
 
 	private File retrieveFile(String fileId) throws TelegramApiException {
-		GetFile getFile = new GetFile(fileId);
+		var file = execute(new GetFile(fileId)).file();
+		var fileUrl = getFullFilePath(file);
 
-		return downloadFile(execute(getFile).getFilePath());
+		try (var inputStream = new URL(fileUrl).openStream()) {
+			var downloadedFile = File.createTempFile("OriginalFile-", null);
+			Files.copy(inputStream, downloadedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+			return downloadedFile;
+		} catch (IOException e) {
+			throw new TelegramApiException(e);
+		}
 	}
 
 	private void answerText(TelegramRequest request) {
@@ -107,17 +116,12 @@ public class Stickerify extends TelegramLongPollingBot {
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {
-		SendMessage response = SendMessage.builder()
-				.chatId(request.getChatId())
-				.text(answer.getText())
-				.parseMode(ParseMode.MARKDOWNV2)
-				.disableWebPagePreview(answer.isDisableWebPreview())
-				.build();
+		var message = new SendMessage(request.getChatId(), answer.getText())
+				.parseMode(MarkdownV2)
+				.disableWebPagePreview(answer.isDisableWebPreview());
 
-		try {
-			execute(response);
-		} catch (TelegramApiException e) {
-			LOGGER.error("Unable to reply to {} with {}", request, response, e);
+		if (!execute(message).isOk()) {
+			LOGGER.error("Unable to reply to {} with {}", request, message);
 		}
 	}
 
