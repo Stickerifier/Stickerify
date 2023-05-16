@@ -21,10 +21,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Set;
 
 /**
@@ -99,11 +97,11 @@ public class Stickerify extends TelegramBot {
 
 	private File retrieveFile(String fileId) throws TelegramApiException {
 		var file = execute(new GetFile(fileId)).file();
-		var fileUrl = getFullFilePath(file);
 
-		try (var inputStream = new URL(fileUrl).openStream()) {
+		try {
+			var fileContent = getFileContent(file);
 			var downloadedFile = File.createTempFile("OriginalFile-", null);
-			Files.copy(inputStream, downloadedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.write(downloadedFile.toPath(), fileContent);
 
 			return downloadedFile;
 		} catch (IOException e) {
