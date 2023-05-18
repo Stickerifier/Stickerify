@@ -78,12 +78,12 @@ public class Stickerify extends TelegramBot {
 			} else {
 				pathsToDelete.add(outputFile.toPath());
 
-				var document = new SendDocument(request.getChatId(), outputFile)
+				var answerWithFile = new SendDocument(request.getChatId(), outputFile)
 						.replyToMessageId(request.getMessageId())
 						.caption(FILE_READY.getText())
 						.parseMode(MarkdownV2);
 
-				if (!execute(document).isOk()) {
+				if (!execute(answerWithFile).isOk()) {
 					throw new TelegramApiException("Telegram failed to reply with processed file");
 				}
 			}
@@ -114,17 +114,17 @@ public class Stickerify extends TelegramBot {
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {
-		var message = new SendMessage(request.getChatId(), answer.getText())
+		var answerWithText = new SendMessage(request.getChatId(), answer.getText())
 				.parseMode(MarkdownV2)
 				.disableWebPagePreview(answer.isDisableWebPreview());
 
-		if (!execute(message).isOk()) {
-			LOGGER.error("Unable to reply to {} with {}", request, message);
+		if (!execute(answerWithText).isOk()) {
+			LOGGER.error("Unable to reply to {} with {}", request, answerWithText);
 		}
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
-		for (Path path : pathsToDelete) {
+		for (var path : pathsToDelete) {
 			try {
 				Files.deleteIfExists(path);
 			} catch (IOException e) {
