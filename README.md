@@ -105,8 +105,9 @@ If your pull request represents a valid contribution to the project, it will be 
 
 * The bot is deployed on [Railway](https://railway.app?referralCode=rob)
 * The official documentation of the Telegram Bot API can be found [here](https://core.telegram.org/bots)
-* The library used by the bot to work with Telegram is [java-telegram-bot-api](https://github.com/pengrad/java-telegram-bot-api)
-* The video conversion uses [FFmpeg](https://ffmpeg.org/)
+* The library used by the bot to work with Telegram is [Java Telegram Bot API](https://github.com/pengrad/java-telegram-bot-api)
+* Video conversion uses [FFmpeg](https://ffmpeg.org/) and [JAVE2](https://github.com/a-schild/jave2)
+* Image conversion uses [ImageIO](https://docs.oracle.com/en/java/javase/20/docs/api/java.desktop/javax/imageio/ImageIO.html), [TwelveMonkeys](https://github.com/haraldk/TwelveMonkeys), and [imgscalr](https://github.com/rkalla/imgscalr)
 * MIME type analysis is performed using [Apache Tika](https://tika.apache.org/)
 
 ## License
