@@ -13,7 +13,7 @@ dependencies {
     implementation libs.imgscalr
     implementation libs.jave
     implementation libs.bundles.logback
-    implementation libs.telegrambots
+    implementation libs.telegram.bot.api
     implementation libs.tika
 
     testImplementation libs.hamcrest
@@ -21,7 +21,7 @@ dependencies {
 }
 
 group = 'com.github.stickerifier'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
 
 java {

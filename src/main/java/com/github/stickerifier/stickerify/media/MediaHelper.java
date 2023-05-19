@@ -8,12 +8,12 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
+import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Mode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 import ws.schild.jave.info.MultimediaInfo;
