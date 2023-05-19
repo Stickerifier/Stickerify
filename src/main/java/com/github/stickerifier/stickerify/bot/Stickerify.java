@@ -44,7 +44,7 @@ public class Stickerify extends TelegramBot {
 		setUpdatesListener(updates -> {
 			updates.forEach(this::handleUpdate);
 			return UpdatesListener.CONFIRMED_UPDATES_ALL;
-		}, e -> LOGGER.error("There was an unexpected failure: " + e.getMessage()));
+		}, e -> LOGGER.error("There was an unexpected failure: {}", e.getMessage()));
 	}
 
 	private void handleUpdate(Update update) {
