@@ -1,6 +1,6 @@
 package com.github.stickerifier.stickerify.telegram.exception;
 
-import java.util.regex.Pattern;
+import org.slf4j.helpers.MessageFormatter;
 
 public final class TelegramApiException extends Exception {
 	public TelegramApiException(String message) {
@@ -16,15 +16,6 @@ public final class TelegramApiException extends Exception {
 	}
 
 	public TelegramApiException(String message, Object... parameters) {
-		this(fillWithParameters(message, parameters));
-	}
-
-	private static String fillWithParameters(final String message, final Object... parameters) {
-		String formattedMessage = message;
-		for (var parameter : parameters) {
-			formattedMessage = formattedMessage.replaceFirst(Pattern.quote("{}"), String.valueOf(parameter));
-		}
-
-		return formattedMessage;
+		this(MessageFormatter.basicArrayFormat(message, parameters));
 	}
 }
