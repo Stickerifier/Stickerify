@@ -13,9 +13,11 @@ import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.BaseResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,9 +85,7 @@ public class Stickerify extends TelegramBot {
 						.caption(FILE_READY.getText())
 						.parseMode(MarkdownV2);
 
-				if (!execute(answerWithFile).isOk()) {
-					throw new TelegramApiException("Telegram failed to reply with processed file");
-				}
+				executeOrFail(answerWithFile);
 			}
 		} catch (TelegramApiException e) {
 			LOGGER.warn("Unable to reply to {} with processed file", request.getDescription(), e);
@@ -96,7 +96,7 @@ public class Stickerify extends TelegramBot {
 	}
 
 	private File retrieveFile(String fileId) throws TelegramApiException {
-		var file = execute(new GetFile(fileId)).file();
+		var file = executeOrFail(new GetFile(fileId)).file();
 
 		try {
 			var fileContent = getFileContent(file);
@@ -118,9 +118,21 @@ public class Stickerify extends TelegramBot {
 				.parseMode(MarkdownV2)
 				.disableWebPagePreview(answer.isDisableWebPreview());
 
-		if (!execute(answerWithText).isOk()) {
-			LOGGER.error("Unable to reply to {} with {}", request, answerWithText);
+		try {
+			executeOrFail(answerWithText);
+		} catch (TelegramApiException e) {
+			LOGGER.error("Unable to reply to {} with {}", request, answerWithText, e);
 		}
+	}
+
+	private <T extends BaseRequest<T, R>, R extends BaseResponse> R executeOrFail(BaseRequest<T, R> request) throws TelegramApiException {
+		var response = execute(request);
+
+		if (!response.isOk()) {
+			throw new TelegramApiException("Telegram couldn't execute the {} request", request.getMethod());
+		}
+
+		return response;
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {

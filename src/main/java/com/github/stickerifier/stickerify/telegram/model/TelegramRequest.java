@@ -42,7 +42,7 @@ public record TelegramRequest(Message message) {
 			return message.videoNote().fileId();
 		}
 
-		throw new TelegramApiException("The request doesn't contain a supported media: " + message);
+		throw new TelegramApiException("The request doesn't contain a supported media: {}", message);
 	}
 
 	public Long getChatId() {
