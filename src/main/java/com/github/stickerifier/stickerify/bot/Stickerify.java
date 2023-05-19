@@ -49,7 +49,7 @@ public class Stickerify extends TelegramBot {
 
 	private void handleUpdate(Update update) {
 		if (update.message() != null) {
-			TelegramRequest request = new TelegramRequest(update.message());
+			var request = new TelegramRequest(update.message());
 			LOGGER.info("Received {}", request.getDescription());
 
 			answer(request);
