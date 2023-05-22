@@ -15,6 +15,7 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.GetFile;
+import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -32,21 +33,25 @@ import java.util.Set;
  *
  * @author Roberto Cella
  */
-public class Stickerify extends TelegramBot {
+public class Stickerify {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
+
+	private TelegramBot bot;
 
 	/**
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		super(BOT_TOKEN);
+		bot = new TelegramBot.Builder(BOT_TOKEN)
+				.updateListenerSleep(500)
+				.build();
 
-		setUpdatesListener(updates -> {
+		bot.setUpdatesListener(updates -> {
 			updates.forEach(this::handleUpdate);
 			return UpdatesListener.CONFIRMED_UPDATES_ALL;
-		}, e -> LOGGER.error("There was an unexpected failure: {}", e.getMessage()));
+		}, e -> LOGGER.error("There was an unexpected failure: {}", e.getMessage()), new GetUpdates().timeout(50));
 	}
 
 	private void handleUpdate(Update update) {
@@ -85,10 +90,10 @@ public class Stickerify extends TelegramBot {
 						.caption(FILE_READY.getText())
 						.parseMode(MarkdownV2);
 
-				executeOrFail(answerWithFile);
+				execute(answerWithFile);
 			}
 		} catch (TelegramApiException e) {
-			LOGGER.warn("Unable to reply to {} with processed file", request.getDescription(), e);
+			LOGGER.atWarn().setCause(e).log("Unable to reply to {} with processed file", request.getDescription());
 			answerText(ERROR, request);
 		} finally {
 			deleteTempFiles(pathsToDelete);
@@ -96,10 +101,10 @@ public class Stickerify extends TelegramBot {
 	}
 
 	private File retrieveFile(String fileId) throws TelegramApiException {
-		var file = executeOrFail(new GetFile(fileId)).file();
+		var file = execute(new GetFile(fileId)).file();
 
 		try {
-			var fileContent = getFileContent(file);
+			var fileContent = bot.getFileContent(file);
 			var downloadedFile = File.createTempFile("OriginalFile-", null);
 			Files.write(downloadedFile.toPath(), fileContent);
 
@@ -119,20 +124,20 @@ public class Stickerify extends TelegramBot {
 				.disableWebPagePreview(answer.isDisableWebPreview());
 
 		try {
-			executeOrFail(answerWithText);
+			execute(answerWithText);
 		} catch (TelegramApiException e) {
-			LOGGER.error("Unable to reply to {} with {}", request, answerWithText, e);
+			LOGGER.error("Unable to reply to {} with {}", request, answerWithText);
 		}
 	}
 
-	private <T extends BaseRequest<T, R>, R extends BaseResponse> R executeOrFail(BaseRequest<T, R> request) throws TelegramApiException {
-		var response = execute(request);
+	private <T extends BaseRequest<T, R>, R extends BaseResponse> R execute(BaseRequest<T, R> request) throws TelegramApiException {
+		var response = bot.execute(request);
 
-		if (!response.isOk()) {
-			throw new TelegramApiException("Telegram couldn't execute the {} request", request.getMethod());
+		if (response.isOk()) {
+			return response;
 		}
 
-		return response;
+		throw new TelegramApiException("Telegram couldn't execute the {} request", request.getMethod());
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
@@ -140,7 +145,7 @@ public class Stickerify extends TelegramBot {
 			try {
 				Files.deleteIfExists(path);
 			} catch (IOException e) {
-				LOGGER.error("An error occurred trying to delete temp file {}", path, e);
+				LOGGER.atError().setCause(e).log("An error occurred trying to delete temp file {}", path);
 			}
 		}
 	}
