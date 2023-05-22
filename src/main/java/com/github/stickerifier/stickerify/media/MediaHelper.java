@@ -51,7 +51,7 @@ public final class MediaHelper {
 			return convertToPng(image, mimeType);
 		}
 
-		LOGGER.warn("The file with {} MIME type could not be converted", mimeType);
+		LOGGER.atWarn().log("The file with {} MIME type could not be converted", mimeType);
 		throw new TelegramApiException("Passed-in file is not supported");
 	}
 
@@ -67,9 +67,9 @@ public final class MediaHelper {
 		try {
 			mimeType = new Tika().detect(file);
 
-			LOGGER.debug("The file has {} MIME type", mimeType);
+			LOGGER.atDebug().log("The file has {} MIME type", mimeType);
 		} catch (IOException e) {
-			LOGGER.error("Unable to retrieve MIME type for file {}", file.getName());
+			LOGGER.atError().log("Unable to retrieve MIME type for file {}", file.getName());
 		}
 
 		return mimeType;
@@ -111,7 +111,7 @@ public final class MediaHelper {
 	 */
 	private static File convertToPng(BufferedImage image, String mimeType) throws TelegramApiException {
 		if (isImageCompliant(image, mimeType)) {
-			LOGGER.info("The image doesn't need conversion");
+			LOGGER.atInfo().log("The image doesn't need conversion");
 
 			return null;
 		}
@@ -199,7 +199,7 @@ public final class MediaHelper {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
 		if (isVideoCompliant(mediaInfo) && isFileSizeCompliant(file)) {
-			LOGGER.info("The video doesn't need conversion");
+			LOGGER.atInfo().log("The video doesn't need conversion");
 
 			return null;
 		}

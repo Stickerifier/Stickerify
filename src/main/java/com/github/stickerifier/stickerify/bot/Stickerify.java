@@ -38,26 +38,22 @@ public class Stickerify {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 
-	private TelegramBot bot;
+	private final TelegramBot bot = new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build();
 
 	/**
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		bot = new TelegramBot.Builder(BOT_TOKEN)
-				.updateListenerSleep(500)
-				.build();
-
 		bot.setUpdatesListener(updates -> {
 			updates.forEach(this::handleUpdate);
 			return UpdatesListener.CONFIRMED_UPDATES_ALL;
-		}, e -> LOGGER.error("There was an unexpected failure: {}", e.getMessage()), new GetUpdates().timeout(50));
+		}, e -> LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage()), new GetUpdates().timeout(50));
 	}
 
 	private void handleUpdate(Update update) {
 		if (update.message() != null) {
 			var request = new TelegramRequest(update.message());
-			LOGGER.info("Received {}", request.getDescription());
+			LOGGER.atInfo().log("Received {}", request.getDescription());
 
 			answer(request);
 		}
@@ -126,7 +122,7 @@ public class Stickerify {
 		try {
 			execute(answerWithText);
 		} catch (TelegramApiException e) {
-			LOGGER.error("Unable to reply to {} with {}", request, answerWithText);
+			LOGGER.atError().log("Unable to reply to {} with {}", request, answerWithText);
 		}
 	}
 
