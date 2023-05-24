@@ -10,6 +10,7 @@ import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
+import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
@@ -26,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,19 +46,22 @@ public class Stickerify {
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		bot.setUpdatesListener(updates -> {
-			updates.forEach(this::handleUpdate);
-			return UpdatesListener.CONFIRMED_UPDATES_ALL;
-		}, e -> LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage()), new GetUpdates().timeout(50));
+		ExceptionHandler exceptionHandler = e -> LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
+
+		bot.setUpdatesListener(this::handleUpdates, exceptionHandler, new GetUpdates().timeout(50));
 	}
 
-	private void handleUpdate(Update update) {
-		if (update.message() != null) {
-			var request = new TelegramRequest(update.message());
-			LOGGER.atInfo().log("Received {}", request.getDescription());
+	private int handleUpdates(List<Update> updates) {
+		updates.forEach(update -> {
+			if (update.message() != null) {
+				var request = new TelegramRequest(update.message());
+				LOGGER.atInfo().log("Received {}", request.getDescription());
 
-			answer(request);
-		}
+				answer(request);
+			}
+		});
+
+		return UpdatesListener.CONFIRMED_UPDATES_ALL;
 	}
 
 	private void answer(TelegramRequest request) {
