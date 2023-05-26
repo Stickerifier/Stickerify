@@ -10,3 +10,4 @@ src/main/resources/images/
 *.md
 gradlew*
 LICENSE
+.editorconfig

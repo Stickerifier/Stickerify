@@ -16,28 +16,30 @@ Telegram bot to convert medias in the format required to be used as Telegram sti
 
 ## How to use the bot
 
-You can use the bot going [here](https://t.me/StickerifyImageBot): start it, and you can now send it the medias you need to convert.
+You can use the bot going [here](https://t.me/StickerifyImageBot): start it, and you can now send it the medias you need
+to convert.
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted media, if you sent a supported file (images, gifs, standard and video stickers are supported) that needed conversion
+* the converted media, if you sent a supported file (images, gifs, standard and video stickers are supported) that
+  needed conversion
 * no file, if you sent a media already suiting Telegram's requirements
 * an error message, if you sent an unsupported file
 * an informative message for any message without a file
 
 ```mermaid
     flowchart LR
-        A[User] -->|Message| B([Stickerify])
-        B -->|Request contains a file| C{Is file supported?}
-        click B "https://t.me/StickerifyImageBot" _blank
-        style B fill:#2889ba,stroke:#e0e0e0,color:#e0e0e0
-        C -->|Yes| D{Does file need conversion?}
-        C -->|No| E(Error message)
-        B -->|Request is text-only| F{Is help command?}
-        F -->|Yes| G(Show bot usage)
-        F -->|No| H(About message)
-        D -->|Yes| J(Convert file)
-        D -->|No| K(No conversion)
+    A[User] -->|Message| B([Stickerify])
+    B -->|Request contains a file| C{Is file supported?}
+    click B "https://t.me/StickerifyImageBot" _blank
+    style B fill: #2889ba, stroke: #e0e0e0, color: #e0e0e0
+    C -->|Yes| D{Does file need conversion?}
+    C -->|No| E(Error message)
+    B -->|Request has only text| F{Is help command?}
+    F -->|Yes| G(Show bot usage)
+    F -->|No| H(About message)
+    D -->|Yes| J(Convert file)
+    D -->|No| K(No conversion)
 ```
 
 ## How to create a new sticker
@@ -64,8 +66,8 @@ After you successfully set up the project, you will have to go through the follo
 
 1. Chat with [BotFather](https://t.me/BotFather) and ask it to create a new bot
 2. Copy the token it provided you and either:
-   * set it as the value of a new environment variable named `STICKERIFY_TOKEN` 
-   * use it as the value passed to the `super(botToken)` constructor inside `Stickerify`
+    * set it as the value of a new environment variable named `STICKERIFY_TOKEN`
+    * use it as the value passed to the `super(botToken)` constructor inside `Stickerify`
 3. Install [FFmpeg](https://ffmpeg.org/download.html)
 4. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
@@ -73,15 +75,16 @@ After you successfully set up the project, you will have to go through the follo
 
 1. Install [Docker](https://docs.docker.com/get-docker/)
 2. Prepare the Docker image either:
-   * building it with the command:
-      ```shell
-      docker build -t rob93c/stickerify .
-      ```
-   * pulling the image from [Docker Hub](https://hub.docker.com/):
-      ```shell
-      docker pull rob93c/stickerify
-      ```
-3. Now you just need to run the Docker image passing the token (`{{TOKEN}}`) retrieved from [BotFather](https://t.me/BotFather):
+    * building it with the command:
+       ```shell
+       docker build -t rob93c/stickerify .
+       ```
+    * pulling the image from [Docker Hub](https://hub.docker.com/):
+       ```shell
+       docker pull rob93c/stickerify
+       ```
+3. Now you just need to run the Docker image passing the token (`{{TOKEN}}`) retrieved
+   from [BotFather](https://t.me/BotFather):
    ```shell
    docker run -e "STICKERIFY_TOKEN={{TOKEN}}" rob93c/stickerify
    ```
@@ -94,20 +97,26 @@ Have any question? Feel free to [open a new discussion](https://github.com/Stick
 
 ## Hacktoberfest
 
-[Hacktoberfest](https://hacktoberfest.com/) is an event aiming to encourage people to contribute to open source projects every October.
+[Hacktoberfest](https://hacktoberfest.com/) is an event aiming to encourage people to contribute to open source projects
+every October.
 This project adheres to this initiative and welcomes any hacktoberfest-related improvement!
 
-If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as part of this event, first read the [contributing guidelines](CONTRIBUTING.md) and then feel free to open a new issue _and/or_ pull request.
+If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as part of this event, first read
+the [contributing guidelines](CONTRIBUTING.md) and then feel free to open a new issue _and/or_ pull request.
 
-If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-accepted`, therefore counting towards the 4 contributions goal.
+If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-accepted`,
+therefore counting towards the 4 contributions goal.
 
 ## Useful information
 
 * The bot is deployed on [Railway](https://railway.app?referralCode=rob)
 * The official documentation of the Telegram Bot API can be found [here](https://core.telegram.org/bots)
-* The library used by the bot to work with Telegram is [Java Telegram Bot API](https://github.com/pengrad/java-telegram-bot-api)
+* The library used by the bot to work with Telegram
+  is [Java Telegram Bot API](https://github.com/pengrad/java-telegram-bot-api)
 * Video conversion uses [FFmpeg](https://ffmpeg.org/) and [JAVE2](https://github.com/a-schild/jave2)
-* Image conversion uses [ImageIO](https://docs.oracle.com/en/java/javase/20/docs/api/java.desktop/javax/imageio/ImageIO.html), [TwelveMonkeys](https://github.com/haraldk/TwelveMonkeys), and [imgscalr](https://github.com/rkalla/imgscalr)
+* Image conversion
+  uses [ImageIO](https://docs.oracle.com/en/java/javase/20/docs/api/java.desktop/javax/imageio/ImageIO.html), [TwelveMonkeys](https://github.com/haraldk/TwelveMonkeys),
+  and [imgscalr](https://github.com/rkalla/imgscalr)
 * MIME type analysis is performed using [Apache Tika](https://tika.apache.org/)
 
 ## License
