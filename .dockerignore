@@ -11,3 +11,5 @@ src/main/resources/images/
 gradlew*
 LICENSE
 .editorconfig
+Dockerfile
+*.dockerfile
