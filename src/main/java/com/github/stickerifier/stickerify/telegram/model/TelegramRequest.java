@@ -26,10 +26,12 @@ public record TelegramRequest(Message message) {
 	private static final String HELP_COMMAND = "/help";
 
 	public TelegramFile getFile() {
-		return Stream.of(message.photo(), message.document(), message.sticker(), message.video(), message.videoNote(), message.audio(), message.voice())
+		return Stream.of(message.photo(), message.document(), message.sticker(),
+						message.video(), message.videoNote(),
+						message.audio(), message.voice())
 				.filter(Objects::nonNull)
 				.findFirst()
-				.map(f -> switch (f) {
+				.map(inputFile -> switch (inputFile) {
 					case PhotoSize[] photos -> Arrays.stream(photos)
 							.max(comparing(PhotoSize::fileSize))
 							.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
