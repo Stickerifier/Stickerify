@@ -1,6 +1,11 @@
 package com.github.stickerifier.stickerify.bot;
 
-import static com.github.stickerifier.stickerify.telegram.Answer.*;
+import static com.github.stickerifier.stickerify.telegram.Answer.ABOUT;
+import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
+import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
+import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
+import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
+import static com.github.stickerifier.stickerify.telegram.Answer.HELP;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 
@@ -83,6 +88,10 @@ public class Stickerify {
 		Set<Path> pathsToDelete = newHashSet(2);
 
 		try {
+			if (fileId == null) {
+				throw new TelegramApiException("The request doesn't contain a supported media: {}", request.message());
+			}
+
 			var originalFile = retrieveFile(fileId);
 			pathsToDelete.add(originalFile.toPath());
 

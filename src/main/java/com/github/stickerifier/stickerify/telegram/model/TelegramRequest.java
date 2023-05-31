@@ -33,14 +33,15 @@ public record TelegramRequest(Message message) {
 				.findFirst()
 				.map(inputFile -> switch (inputFile) {
 					case PhotoSize[] photos -> Arrays.stream(photos)
-							.max(comparing(PhotoSize::fileSize))
 							.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
-							.orElse(null);
+							.filter(TelegramFile::canBeDownloaded)
+							.max(comparing(TelegramFile::fileSize))
+							.orElse(TelegramFile.TOO_LARGE);
 					case Document document -> new TelegramFile(document.fileId(), document.fileSize());
 					case Sticker sticker -> new TelegramFile(sticker.fileId(), sticker.fileSize());
 					case Video video -> new TelegramFile(video.fileId(), video.fileSize());
 					case VideoNote videoNote -> new TelegramFile(videoNote.fileId(), videoNote.fileSize());
-					default -> null;
+					default -> TelegramFile.NOT_SUPPORTED;
 				})
 				.orElse(null);
 	}
