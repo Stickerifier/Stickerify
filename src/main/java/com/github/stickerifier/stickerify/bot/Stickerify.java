@@ -1,8 +1,6 @@
 package com.github.stickerifier.stickerify.bot;
 
-import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
-import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
-import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
+import static com.github.stickerifier.stickerify.telegram.Answer.*;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 
@@ -65,21 +63,30 @@ public class Stickerify {
 	}
 
 	private void answer(TelegramRequest request) {
-		if (request.hasFile()) {
-			answerFile(request);
+		var file = request.getFile();
+		if (file != null) {
+			if (file.canBeDownloaded()) {
+				answerFile(request, file.fileId());
+			} else {
+				answerText(FILE_TOO_LARGE, request);
+			}
 		} else {
-			answerText(request);
+			if (request.isHelpCommand()) {
+				answerText(HELP, request);
+			} else {
+				answerText(ABOUT, request);
+			}
 		}
 	}
 
-	private void answerFile(TelegramRequest request) {
+	private void answerFile(TelegramRequest request, String fileId) {
 		Set<Path> pathsToDelete = newHashSet(2);
 
 		try {
-			File originalFile = retrieveFile(request.getFileId());
+			var originalFile = retrieveFile(fileId);
 			pathsToDelete.add(originalFile.toPath());
 
-			File outputFile = MediaHelper.convert(originalFile);
+			var outputFile = MediaHelper.convert(originalFile);
 
 			if (outputFile == null) {
 				answerText(FILE_ALREADY_VALID, request);
@@ -113,10 +120,6 @@ public class Stickerify {
 		} catch (IOException e) {
 			throw new TelegramApiException(e);
 		}
-	}
-
-	private void answerText(TelegramRequest request) {
-		answerText(request.getAnswerMessage(), request);
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {
