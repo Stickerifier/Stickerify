@@ -12,6 +12,7 @@ import static java.util.HashSet.newHashSet;
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
+import com.github.stickerifier.stickerify.telegram.model.TelegramFile;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
@@ -69,18 +70,18 @@ public class Stickerify {
 
 	private void answer(TelegramRequest request) {
 		var file = request.getFile();
-		if (file != null) {
-			if (file.canBeDownloaded()) {
-				answerFile(request, file.fileId());
-			} else {
-				answerText(FILE_TOO_LARGE, request);
-			}
-		} else {
+		if (file == null) {
 			if (request.isHelpCommand()) {
 				answerText(HELP, request);
 			} else {
 				answerText(ABOUT, request);
 			}
+		} else if (file == TelegramFile.NOT_SUPPORTED) {
+			answerText(ERROR, request);
+		} else if (!file.canBeDownloaded()) {
+			answerText(FILE_TOO_LARGE, request);
+		} else {
+			answerFile(request, file.fileId());
 		}
 	}
 
@@ -88,10 +89,6 @@ public class Stickerify {
 		Set<Path> pathsToDelete = newHashSet(2);
 
 		try {
-			if (fileId == null) {
-				throw new TelegramApiException("The request doesn't contain a supported media: {}", request.message());
-			}
-
 			var originalFile = retrieveFile(fileId);
 			pathsToDelete.add(originalFile.toPath());
 
