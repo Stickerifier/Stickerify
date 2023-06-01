@@ -32,7 +32,7 @@ public record TelegramRequest(Message message) {
 				.filter(Objects::nonNull)
 				.findFirst()
 				.map(inputFile -> switch (inputFile) {
-					case PhotoSize[] photos -> Arrays.stream(photos)
+					case PhotoSize[] photos when photos.length > 0 -> Arrays.stream(photos)
 							.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
 							.filter(TelegramFile::canBeDownloaded)
 							.max(comparing(TelegramFile::fileSize))
