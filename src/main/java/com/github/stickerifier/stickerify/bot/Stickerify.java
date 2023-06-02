@@ -3,12 +3,14 @@ package com.github.stickerifier.stickerify.bot;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
+import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
+import com.github.stickerifier.stickerify.telegram.model.TelegramFile;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
@@ -65,21 +67,33 @@ public class Stickerify {
 	}
 
 	private void answer(TelegramRequest request) {
-		if (request.hasFile()) {
-			answerFile(request);
+		var file = request.getFile();
+
+		if (file != null) {
+			answerFile(request, file);
 		} else {
 			answerText(request);
 		}
 	}
 
-	private void answerFile(TelegramRequest request) {
+	private void answerFile(TelegramRequest request, TelegramFile file) {
+		if (file == TelegramFile.NOT_SUPPORTED) {
+			answerText(ERROR, request);
+		} else if (file.canBeDownloaded()) {
+			answerFile(request, file.id());
+		} else {
+			answerText(FILE_TOO_LARGE, request);
+		}
+	}
+
+	private void answerFile(TelegramRequest request, String fileId) {
 		Set<Path> pathsToDelete = newHashSet(2);
 
 		try {
-			File originalFile = retrieveFile(request.getFileId());
+			var originalFile = retrieveFile(fileId);
 			pathsToDelete.add(originalFile.toPath());
 
-			File outputFile = MediaHelper.convert(originalFile);
+			var outputFile = MediaHelper.convert(originalFile);
 
 			if (outputFile == null) {
 				answerText(FILE_ALREADY_VALID, request);

@@ -32,14 +32,17 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs += '--enable-preview'
 }
 
 test {
     useJUnitPlatform()
+    jvmArgs(['--enable-preview'])
 }
 
 application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
+    applicationDefaultJvmArgs = ['--enable-preview']
 }
 
 shadowJar {

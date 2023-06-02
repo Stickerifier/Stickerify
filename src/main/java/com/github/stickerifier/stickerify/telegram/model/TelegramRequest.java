@@ -5,12 +5,17 @@ import static com.github.stickerifier.stickerify.telegram.Answer.HELP;
 import static java.util.Comparator.comparing;
 
 import com.github.stickerifier.stickerify.telegram.Answer;
-import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
+import com.pengrad.telegrambot.model.Document;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
+import com.pengrad.telegrambot.model.Sticker;
+import com.pengrad.telegrambot.model.Video;
+import com.pengrad.telegrambot.model.VideoNote;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Data class wrapping a {@link Message} instance to represent a Telegram request.
@@ -23,26 +28,25 @@ public record TelegramRequest(Message message) {
 	private static final String START_COMMAND = "/start";
 	private static final String HELP_COMMAND = "/help";
 
-	public boolean hasFile() {
-		return message.photo() != null || message.document() != null || message.sticker() != null
-				|| message.video() != null || message.videoNote() != null
-				|| message.audio() != null || message.voice() != null;
-	}
-
-	public String getFileId() throws TelegramApiException {
-		if (message.photo() != null) {
-			return Arrays.stream(message.photo()).max(comparing(PhotoSize::fileSize)).orElseThrow().fileId();
-		} else if (message.document() != null) {
-			return message.document().fileId();
-		} else if (message.sticker() != null) {
-			return message.sticker().fileId();
-		} else if (message.video() != null) {
-			return message.video().fileId();
-		} else if (message.videoNote() != null) {
-			return message.videoNote().fileId();
-		}
-
-		throw new TelegramApiException("The request doesn't contain a supported media: {}", message);
+	public TelegramFile getFile() {
+		return Stream.of(message.photo(), message.document(), message.sticker(),
+						message.video(), message.videoNote(),
+						message.audio(), message.voice())
+				.filter(Objects::nonNull)
+				.findFirst()
+				.map(inputFile -> switch (inputFile) {
+					case PhotoSize[] photos when photos.length > 0 -> Arrays.stream(photos)
+							.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
+							.filter(TelegramFile::canBeDownloaded)
+							.max(comparing(TelegramFile::size))
+							.orElse(TelegramFile.TOO_LARGE);
+					case Document document -> new TelegramFile(document.fileId(), document.fileSize());
+					case Sticker sticker -> new TelegramFile(sticker.fileId(), sticker.fileSize());
+					case Video video -> new TelegramFile(video.fileId(), video.fileSize());
+					case VideoNote videoNote -> new TelegramFile(videoNote.fileId(), videoNote.fileSize());
+					default -> TelegramFile.NOT_SUPPORTED;
+				})
+				.orElse(null);
 	}
 
 	public Long getChatId() {
@@ -83,12 +87,13 @@ public record TelegramRequest(Message message) {
 
 	@Override
 	public String toString() {
-		String text = Optional.ofNullable(message.text()).orElse(message.caption());
+		var file = Optional.ofNullable(getFile()).map(TelegramFile::id).orElse(null);
+		var text = Optional.ofNullable(message.text()).orElse(message.caption());
 
 		return "request ["
 				+ "chat=" + getChatId()
 				+ ", from=" + getUsername()
-				+ writeIfNotEmpty("file", getSafeFileId())
+				+ writeIfNotEmpty("file", file)
 				+ writeIfNotEmpty("text", text)
 				+ "]";
 	}
@@ -97,13 +102,5 @@ public record TelegramRequest(Message message) {
 		return value != null && !value.isEmpty()
 				? ", " + field + "=" + value
 				: "";
-	}
-
-	private String getSafeFileId() {
-		try {
-			return getFileId();
-		} catch (TelegramApiException e) {
-			return null;
-		}
 	}
 }

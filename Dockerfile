@@ -15,4 +15,4 @@ RUN \
   apt-get -y update && apt-get -y upgrade && \
   apt-get install -y --no-install-recommends ffmpeg
 COPY --from=builder /app/build/libs .
-CMD ["java", "-jar", "Stickerify-shadow.jar"]
+CMD ["java", "--enable-preview", "-jar", "Stickerify-shadow.jar"]

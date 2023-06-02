@@ -22,6 +22,9 @@ public enum Answer {
 			The media you sent was already suitable to be a Telegram sticker\\.
 			Send it to [Stickers](https://t.me/Stickers) to add it as a new sticker\\.
 			"""),
+	FILE_TOO_LARGE("""
+			The file can't be converted because Telegram bots can't handle files larger than 20 MB at the moment: please send a smaller one\\.
+			"""),
 	ABOUT("""
 			This bot is open source, check it out on [Github](https://github.com/Stickerifier/Stickerify)\\.
 

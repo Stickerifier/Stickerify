@@ -1,7 +1,7 @@
 package com.github.stickerifier.stickerify.logger;
 
-import static com.github.stickerifier.stickerify.logger.SubstringHighlighter.HIGHLIGHTED_NEW_USER;
 import static com.github.stickerifier.stickerify.logger.SubstringHighlighter.CONTINUE_PREVIOUS_COLOR;
+import static com.github.stickerifier.stickerify.logger.SubstringHighlighter.HIGHLIGHTED_NEW_USER;
 import static com.github.stickerifier.stickerify.logger.SubstringHighlighter.START_GREEN;
 import static com.github.stickerifier.stickerify.telegram.model.TelegramRequest.NEW_USER;
 import static org.hamcrest.MatcherAssert.assertThat;
