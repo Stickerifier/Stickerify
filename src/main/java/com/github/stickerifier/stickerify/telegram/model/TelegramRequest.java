@@ -1,7 +1,10 @@
 package com.github.stickerifier.stickerify.telegram.model;
 
+import static com.github.stickerifier.stickerify.telegram.Answer.ABOUT;
+import static com.github.stickerifier.stickerify.telegram.Answer.HELP;
 import static java.util.Comparator.comparing;
 
+import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.model.Document;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
@@ -35,7 +38,7 @@ public record TelegramRequest(Message message) {
 					case PhotoSize[] photos when photos.length > 0 -> Arrays.stream(photos)
 							.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
 							.filter(TelegramFile::canBeDownloaded)
-							.max(comparing(TelegramFile::fileSize))
+							.max(comparing(TelegramFile::size))
 							.orElse(TelegramFile.TOO_LARGE);
 					case Document document -> new TelegramFile(document.fileId(), document.fileSize());
 					case Sticker sticker -> new TelegramFile(sticker.fileId(), sticker.fileSize());
@@ -74,13 +77,17 @@ public record TelegramRequest(Message message) {
 		return Optional.ofNullable(message.from().username()).orElse("<anonymous>");
 	}
 
-	public boolean isHelpCommand() {
+	public Answer getAnswerMessage() {
+		return isHelpCommand() ? HELP : ABOUT;
+	}
+
+	private boolean isHelpCommand() {
 		return HELP_COMMAND.equalsIgnoreCase(message.text());
 	}
 
 	@Override
 	public String toString() {
-		var file = Optional.ofNullable(getFile()).map(TelegramFile::fileId).orElse(null);
+		var file = Optional.ofNullable(getFile()).map(TelegramFile::id).orElse(null);
 		var text = Optional.ofNullable(message.text()).orElse(message.caption());
 
 		return "request ["

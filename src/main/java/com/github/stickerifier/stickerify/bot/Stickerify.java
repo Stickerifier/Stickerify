@@ -1,11 +1,9 @@
 package com.github.stickerifier.stickerify.bot;
 
-import static com.github.stickerifier.stickerify.telegram.Answer.ABOUT;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
-import static com.github.stickerifier.stickerify.telegram.Answer.HELP;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 
@@ -70,18 +68,21 @@ public class Stickerify {
 
 	private void answer(TelegramRequest request) {
 		var file = request.getFile();
-		if (file == null) {
-			if (request.isHelpCommand()) {
-				answerText(HELP, request);
-			} else {
-				answerText(ABOUT, request);
-			}
-		} else if (file == TelegramFile.NOT_SUPPORTED) {
-			answerText(ERROR, request);
-		} else if (!file.canBeDownloaded()) {
-			answerText(FILE_TOO_LARGE, request);
+
+		if (file != null) {
+			answerFile(request, file);
 		} else {
-			answerFile(request, file.fileId());
+			answerText(request);
+		}
+	}
+
+	private void answerFile(TelegramRequest request, TelegramFile file) {
+		if (file == TelegramFile.NOT_SUPPORTED) {
+			answerText(ERROR, request);
+		} else if (file.canBeDownloaded()) {
+			answerFile(request, file.id());
+		} else {
+			answerText(FILE_TOO_LARGE, request);
 		}
 	}
 
@@ -126,6 +127,10 @@ public class Stickerify {
 		} catch (IOException e) {
 			throw new TelegramApiException(e);
 		}
+	}
+
+	private void answerText(TelegramRequest request) {
+		answerText(request.getAnswerMessage(), request);
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {
