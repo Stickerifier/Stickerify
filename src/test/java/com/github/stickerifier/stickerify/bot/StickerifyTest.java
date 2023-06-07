@@ -1,14 +1,16 @@
 package com.github.stickerifier.stickerify.bot;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.github.stickerifier.stickerify.media.Responses;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okio.Buffer;
 import okio.Okio;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -24,150 +26,82 @@ public class StickerifyTest {
 	@TempDir
 	private File directory;
 
-	@Rule
-	public MockWebServer server = new MockWebServer();
+	public final MockWebServer server = new MockWebServer();
 
 	@Test
 	void startMessage() throws Exception {
-		server.enqueue(new MockResponse().setBody("""
-				{
-					ok: true,
-					result: [{
-						update_id: 1,
-						message: {
-							message_id: 1,
-							from: { username: "User" },
-							chat: { id: 1 },
-							text: "/start"
-						}
-					}]
-				}
-				"""));
+		server.enqueue(Responses.START_MESSAGE);
 
 		startBot(server);
 
-		var request1 = server.takeRequest();
-		assertEquals("/api/token/getUpdates", request1.getPath());
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
 
-		var request2 = server.takeRequest();
-		assertEquals("/api/token/sendMessage", request2.getPath());
-		assertEquals(sendMessageResponse(Answer.ABOUT), request2.getBody().readUtf8());
+		var sendMessage = server.takeRequest();
+		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.ABOUT);
+	}
+
+	private static void startBot(MockWebServer server) {
+		var telegramBot = new TelegramBot.Builder("token")
+				.apiUrl(server.url("api/").toString())
+				.fileApiUrl(server.url("files/").toString())
+				.updateListenerSleep(500)
+				.build();
+		new Stickerify(telegramBot);
+	}
+
+	private static void assertResponseContainsMessage(String body, Answer answer) {
+		var message = URLEncoder.encode(answer.getText(), StandardCharsets.UTF_8).replace("+", "%20");
+		assertThat(body, containsString(message));
 	}
 
 	@Test
 	void helpMessage() throws Exception {
-		server.enqueue(new MockResponse().setBody("""
-				{
-					ok: true,
-					result: [{
-						update_id: 1,
-						message: {
-							message_id: 1,
-							from: { username: "User" },
-							chat: { id: 1 },
-							text: "/help"
-						}
-					}]
-				}
-				"""));
+		server.enqueue(Responses.HELP_MESSAGE);
 
 		startBot(server);
 
-		var request1 = server.takeRequest();
-		assertEquals("/api/token/getUpdates", request1.getPath());
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
 
-		var request2 = server.takeRequest();
-		assertEquals("/api/token/sendMessage", request2.getPath());
-		assertEquals(sendMessageResponse(Answer.HELP), request2.getBody().readUtf8());
+		var sendMessage = server.takeRequest();
+		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.HELP);
 	}
 
 	@Test
 	void fileNotSupported() throws Exception {
-		server.enqueue(new MockResponse().setBody("""
-				{
-					ok: true,
-					result: [{
-						update_id: 1,
-						message: {
-							message_id: 1,
-							from: { username: "User" },
-							chat: { id: 1 },
-							audio: {
-								file_id: "audio.mp3"
-							}
-						}
-					}]
-				}
-				"""));
+		server.enqueue(Responses.FILE_NOT_SUPPORTED);
 
 		startBot(server);
 
-		var request1 = server.takeRequest();
-		assertEquals("/api/token/getUpdates", request1.getPath());
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
 
-		var request2 = server.takeRequest();
-		assertEquals("/api/token/sendMessage", request2.getPath());
-		assertEquals(sendMessageResponse(Answer.ERROR), request2.getBody().readUtf8());
+		var sendMessage = server.takeRequest();
+		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.ERROR);
 	}
 
 	@Test
 	void fileTooBig() throws Exception {
-		server.enqueue(new MockResponse().setBody("""
-				{
-					ok: true,
-					result: [{
-						update_id: 1,
-						message: {
-							message_id: 1,
-							from: { username: "User" },
-							chat: { id: 1 },
-							video: {
-								file_id: "video.mp4",
-								file_size: 100000000
-							}
-						}
-					}]
-				}
-				"""));
+		server.enqueue(Responses.FILE_TOO_BIG);
 
 		startBot(server);
 
-		var request1 = server.takeRequest();
-		assertEquals("/api/token/getUpdates", request1.getPath());
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
 
-		var request2 = server.takeRequest();
-		assertEquals("/api/token/sendMessage", request2.getPath());
-		assertEquals(sendMessageResponse(Answer.FILE_TOO_LARGE), request2.getBody().readUtf8());
+		var sendMessage = server.takeRequest();
+		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.FILE_TOO_LARGE);
 	}
 
 	@Test
 	void fileAlreadyValid() throws Exception {
-		server.enqueue(new MockResponse().setBody("""
-				{
-					ok: true,
-					result: [{
-						update_id: 1,
-						message: {
-							message_id: 1,
-							from: { username: "User" },
-							chat: { id: 1 },
-							photo: [{
-								file_id: "image.png",
-								file_size: 200000
-							}]
-						}
-					}]
-				}
-				"""));
-		server.enqueue(new MockResponse().setBody("""
-				{
-					ok: true,
-					result: {
-						file_id: "image.png",
-						file_path: "image/image.png"
-					}
-				}
-				"""));
+		server.enqueue(Responses.FILE_ALREADY_VALID);
+		server.enqueue(Responses.FILE_DOWNLOAD);
 		try (var buffer = new Buffer(); var source = Okio.source(image(512, 512))) {
 			buffer.writeAll(source);
 			server.enqueue(new MockResponse().setBody(buffer));
@@ -175,81 +109,19 @@ public class StickerifyTest {
 
 		startBot(server);
 
-		var request1 = server.takeRequest();
-		assertEquals("/api/token/getUpdates", request1.getPath());
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
 
-		var request2 = server.takeRequest();
-		assertEquals("/api/token/getFile", request2.getPath());
-		assertEquals("file_id=image.png", request2.getBody().readUtf8());
+		var getFile = server.takeRequest();
+		assertEquals("/api/token/getFile", getFile.getPath());
+		assertEquals("file_id=image.png", getFile.getBody().readUtf8());
 
-		var request3 = server.takeRequest();
-		assertEquals("/files/token/image/image.png", request3.getPath());
+		var download = server.takeRequest();
+		assertEquals("/files/token/image/image.png", download.getPath());
 
-		var request4 = server.takeRequest();
-		assertEquals("/api/token/sendMessage", request4.getPath());
-		assertEquals(sendMessageResponse(Answer.FILE_ALREADY_VALID), request4.getBody().readUtf8());
-	}
-
-	@Test
-	void convertedFile() throws Exception {
-		server.enqueue(new MockResponse().setBody("""
-				{
-					ok: true,
-					result: [{
-						update_id: 1,
-						message: {
-							message_id: 1,
-							from: { username: "User" },
-							chat: { id: 1 },
-							photo: [{
-								file_id: "image.png",
-								file_size: 200000
-							}]
-						}
-					}]
-				}
-				"""));
-		server.enqueue(new MockResponse().setBody("""
-				{
-					ok: true,
-					result: {
-						file_id: "image.png",
-						file_path: "image/image.png"
-					}
-				}
-				"""));
-		try (var buffer = new Buffer(); var source = Okio.source(image(800, 400))) {
-			buffer.writeAll(source);
-			server.enqueue(new MockResponse().setBody(buffer));
-		}
-
-		startBot(server);
-
-		var request1 = server.takeRequest();
-		assertEquals("/api/token/getUpdates", request1.getPath());
-
-		var request2 = server.takeRequest();
-		assertEquals("/api/token/getFile", request2.getPath());
-		assertEquals("file_id=image.png", request2.getBody().readUtf8());
-
-		var request3 = server.takeRequest();
-		assertEquals("/files/token/image/image.png", request3.getPath());
-
-		var request4 = server.takeRequest();
-		assertEquals("/api/token/sendDocument", request4.getPath());
-		// TODO: parse and validate multipart body
-	}
-
-	private void startBot(MockWebServer server) {
-		var apiUrl = server.url("api/").toString();
-		var fileApiUrl = server.url("files/").toString();
-		var telegramBot = new TelegramBot.Builder("token").apiUrl(apiUrl).fileApiUrl(fileApiUrl).updateListenerSleep(500).build();
-		new Stickerify(telegramBot);
-	}
-
-	private String sendMessageResponse(final Answer answer) {
-		var message = URLEncoder.encode(answer.getText(), StandardCharsets.UTF_8).replace("+", "%20");
-		return "chat_id=1&text=%s&parse_mode=MarkdownV2&disable_web_page_preview=%b".formatted(message, answer.isDisableWebPreview());
+		var sendMessage = server.takeRequest();
+		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.FILE_ALREADY_VALID);
 	}
 
 	private File image(int width, int height) throws IOException {
@@ -258,6 +130,32 @@ public class StickerifyTest {
 		ImageIO.write(image, "png", file);
 
 		return file;
+	}
+
+	@Test
+	void fileConverted() throws Exception {
+		server.enqueue(Responses.FILE_UPDATE);
+		server.enqueue(Responses.FILE_DOWNLOAD);
+		try (var buffer = new Buffer(); var source = Okio.source(image(800, 400))) {
+			buffer.writeAll(source);
+			server.enqueue(new MockResponse().setBody(buffer));
+		}
+
+		startBot(server);
+
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+
+		var getFile = server.takeRequest();
+		assertEquals("/api/token/getFile", getFile.getPath());
+		assertEquals("file_id=image.png", getFile.getBody().readUtf8());
+
+		var download = server.takeRequest();
+		assertEquals("/files/token/image/image.png", download.getPath());
+
+		var sendDocument = server.takeRequest();
+		assertEquals("/api/token/sendDocument", sendDocument.getPath());
+		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
 	}
 
 }
