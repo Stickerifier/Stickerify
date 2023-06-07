@@ -10,6 +10,7 @@ jave = "ws.schild:jave-all-deps:3.3.1"
 junit = "org.junit.jupiter:junit-jupiter:5.9.3"
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+okhttp-mockwebserver = "com.squareup.okhttp3:mockwebserver:4.11.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.7"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:6.7.0"
 tika = "org.apache.tika:tika-core:2.8.0"

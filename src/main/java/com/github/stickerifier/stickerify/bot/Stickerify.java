@@ -42,12 +42,18 @@ public class Stickerify {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 
-	private final TelegramBot bot = new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build();
+	private final TelegramBot bot;
 
 	/**
 	 * @see Stickerify
 	 */
 	public Stickerify() {
+		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build());
+	}
+
+	Stickerify(TelegramBot bot) {
+		this.bot = bot;
+
 		ExceptionHandler exceptionHandler = e -> LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
 
 		bot.setUpdatesListener(this::handleUpdates, exceptionHandler, new GetUpdates().timeout(50));
