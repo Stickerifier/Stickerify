@@ -1,4 +1,4 @@
-package com.github.stickerifier.stickerify.media;
+package com.github.stickerifier.stickerify.bot;
 
 import okhttp3.mockwebserver.MockResponse;
 
