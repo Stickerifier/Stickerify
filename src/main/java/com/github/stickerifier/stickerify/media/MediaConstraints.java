@@ -17,7 +17,7 @@ public final class MediaConstraints {
 	static final long VIDEO_FILE_SIZE = 256_000L;
 	static final long ANIMATION_FILE_SIZE = 64_000L;
 	static final int ANIMATION_FRAMERATE = 60;
-	static final int ANIMATION_DURATION_SECONDS = 180;
+	static final int MAX_ANIMATION_DURATION_SECONDS = 180;
 
 	private MediaConstraints() {
 		throw new UnsupportedOperationException();

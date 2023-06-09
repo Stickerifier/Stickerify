@@ -9,10 +9,10 @@ repositories {
 }
 
 dependencies {
+    implementation libs.gson
     implementation libs.imageio.webp
     implementation libs.imgscalr
     implementation libs.jave
-    implementation libs.gson
     implementation libs.bundles.logback
     implementation libs.telegram.bot.api
     implementation libs.tika

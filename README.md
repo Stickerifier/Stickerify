@@ -21,7 +21,7 @@ to convert.
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted media, if you sent a supported file (images, gifs, standard, video, and animated stickers are supported)
+* the converted media, if you sent a supported file (images, gifs, videos, and existing Telegram stickers are supported)
   that needed conversion
 * no file, if you sent a media already suiting Telegram's requirements
 * an error message, if you sent an unsupported file

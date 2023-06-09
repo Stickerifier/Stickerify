@@ -1,9 +1,9 @@
 package com.github.stickerifier.stickerify.media;
 
-import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_FRAMERATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
@@ -13,6 +13,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
@@ -25,7 +26,6 @@ import ws.schild.jave.info.MultimediaInfo;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 
 public final class MediaHelper {
@@ -57,7 +58,7 @@ public final class MediaHelper {
 			return convertToWebm(inputFile);
 		}
 
-		if (isAnimatedStickerCompliant(mimeType, inputFile) && isFileSizeLowerThan(inputFile, ANIMATION_FILE_SIZE)) {
+		if (isAnimatedStickerCompliant(inputFile, mimeType)) {
 			LOGGER.atInfo().log("The animated sticker doesn't need conversion");
 
 			return null;
@@ -92,31 +93,53 @@ public final class MediaHelper {
 		return mimeType;
 	}
 
-	private static boolean isAnimatedStickerCompliant(String mimeType, File file) {
+	/**
+	 * Checks if passed-in file is a valid animated sticker: it first checks
+	 * if the file is a {@code gzip} archive, then it reads its content and verifies if it's a valid JSON.
+	 * Once JSON information are retrieved, they are validated against Telegram's requirements.
+	 *
+	 * @param file the file to check
+	 * @param mimeType the MIME type of the file
+	 * @return {@code true} if the file is compliant
+	 */
+	private static boolean isAnimatedStickerCompliant(File file, String mimeType) throws TelegramApiException {
 		if ("application/gzip".equals(mimeType)) {
 			String zipContent = "";
 
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file));
-				 var bufferedReader = new BufferedReader(new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8))) {
-				zipContent = bufferedReader.readLine();
+				 var scanner = new Scanner(new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8))) {
+				if (scanner.hasNext()) {
+					zipContent = scanner.nextLine();
+				}
 			} catch (IOException e) {
 				LOGGER.atError().log("Unable to retrieve gzip content from file {}", file.getName());
 			}
 
-			var sticker = GSON.fromJson(zipContent, AnimatedSticker.class);
+			try {
+				var sticker = GSON.fromJson(zipContent, AnimationDetails.class);
 
-			return isAnimatedStickerCompliant(sticker);
+				return isAnimationCompliant(sticker) && isFileSizeLowerThan(file, ANIMATION_FILE_SIZE);
+			} catch (JsonSyntaxException e) {
+				return false;
+			}
 		}
 
 		return false;
 	}
 
-	private record AnimatedSticker(@SerializedName("w") int width, @SerializedName("h") int height, @SerializedName("fr") int frameRate, @SerializedName("ip") int start, @SerializedName("op") int end) {}
+	private record AnimationDetails(@SerializedName("w") int width, @SerializedName("h") int height, @SerializedName("fr") int frameRate, @SerializedName("ip") int start, @SerializedName("op") int end) {}
 
-	private static boolean isAnimatedStickerCompliant(AnimatedSticker sticker) {
-		return sticker != null && sticker.frameRate() == ANIMATION_FRAMERATE
-				&& sticker.end() - sticker.start() == ANIMATION_DURATION_SECONDS
-				&& sticker.width() == MAX_SIZE && sticker.width() == sticker.height();
+	/**
+	 * Checks if passed-in animation is already compliant with Telegram's requisites.
+	 * If so, conversion won't take place and no file will be returned to the user.
+	 *
+	 * @param animation the animation to check
+	 * @return {@code true} if the animation is compliant
+	 */
+	private static boolean isAnimationCompliant(AnimationDetails animation) {
+		return animation != null && animation.frameRate() == ANIMATION_FRAMERATE
+				&& animation.end() - animation.start() <= MAX_ANIMATION_DURATION_SECONDS
+				&& animation.width() == MAX_SIZE && animation.width() == animation.height();
 	}
 
 	/**
@@ -258,7 +281,7 @@ public final class MediaHelper {
 	private static File convertToWebm(File file) throws TelegramApiException {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
-		if (isVideoCompliant(mediaInfo) && isFileSizeLowerThan(file, VIDEO_FILE_SIZE)) {
+		if (isVideoCompliant(file, mediaInfo)) {
 			LOGGER.atInfo().log("The video doesn't need conversion");
 
 			return null;
@@ -286,10 +309,12 @@ public final class MediaHelper {
 	 * Checks if passed-in file is already compliant with Telegram's requisites.
 	 * If so, conversion won't take place and no file will be returned to the user.
 	 *
+	 * @param file the file to check
 	 * @param mediaInfo video's multimedia information
 	 * @return {@code true} if the file is compliant
+	 * @throws TelegramApiException if an error occurred retrieving the size of the file
 	 */
-	private static boolean isVideoCompliant(MultimediaInfo mediaInfo) {
+	private static boolean isVideoCompliant(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
 		var videoInfo = mediaInfo.getVideo();
 		var videoSize = videoInfo.getSize();
 
@@ -298,7 +323,8 @@ public final class MediaHelper {
 				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
 				&& mediaInfo.getDuration() <= MAX_VIDEO_DURATION_MILLIS
 				&& mediaInfo.getAudio() == null
-				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat());
+				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat())
+				&& isFileSizeLowerThan(file, VIDEO_FILE_SIZE);
 	}
 
 	/**
