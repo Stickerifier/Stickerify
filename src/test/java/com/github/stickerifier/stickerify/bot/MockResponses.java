@@ -1,8 +1,12 @@
 package com.github.stickerifier.stickerify.bot;
 
 import okhttp3.mockwebserver.MockResponse;
+import okio.Buffer;
+import okio.Okio;
 
-public class Responses {
+import java.io.File;
+
+public final class MockResponses {
 
 	public static final MockResponse START_MESSAGE = new MockResponse().setBody("""
 			{
@@ -115,4 +119,14 @@ public class Responses {
 			}
 			""");
 
+	public static MockResponse fileResponse(File file) throws Exception {
+		try (var buffer = new Buffer(); var source = Okio.source(file)) {
+			buffer.writeAll(source);
+			return new MockResponse().setBody(buffer);
+		}
+	}
+
+	private MockResponses() {
+		throw new UnsupportedOperationException();
+	}
 }

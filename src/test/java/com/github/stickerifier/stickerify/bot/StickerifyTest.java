@@ -4,19 +4,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.github.stickerifier.stickerify.media.ResourceHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
-import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import okio.Buffer;
-import okio.Okio;
+import okhttp3.mockwebserver.RecordedRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -25,11 +22,18 @@ public class StickerifyTest {
 	@TempDir
 	private File directory;
 
+	private ResourceHelper resources;
+
 	public final MockWebServer server = new MockWebServer();
+
+	@BeforeEach
+	void setup() {
+		resources = new ResourceHelper(directory);
+	}
 
 	@Test
 	void startMessage() throws Exception {
-		server.enqueue(Responses.START_MESSAGE);
+		server.enqueue(MockResponses.START_MESSAGE);
 
 		startBot(server);
 
@@ -38,7 +42,7 @@ public class StickerifyTest {
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
-		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.ABOUT);
+		assertResponseContainsMessage(sendMessage, Answer.ABOUT);
 	}
 
 	private static void startBot(MockWebServer server) {
@@ -50,14 +54,14 @@ public class StickerifyTest {
 		new Stickerify(telegramBot);
 	}
 
-	private static void assertResponseContainsMessage(String body, Answer answer) {
+	private static void assertResponseContainsMessage(RecordedRequest request, Answer answer) {
 		var message = URLEncoder.encode(answer.getText(), StandardCharsets.UTF_8).replace("+", "%20");
-		assertThat(body, containsString(message));
+		assertThat(request.getBody().readUtf8(), containsString(message));
 	}
 
 	@Test
 	void helpMessage() throws Exception {
-		server.enqueue(Responses.HELP_MESSAGE);
+		server.enqueue(MockResponses.HELP_MESSAGE);
 
 		startBot(server);
 
@@ -66,12 +70,12 @@ public class StickerifyTest {
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
-		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.HELP);
+		assertResponseContainsMessage(sendMessage, Answer.HELP);
 	}
 
 	@Test
 	void fileNotSupported() throws Exception {
-		server.enqueue(Responses.FILE_NOT_SUPPORTED);
+		server.enqueue(MockResponses.FILE_NOT_SUPPORTED);
 
 		startBot(server);
 
@@ -80,12 +84,12 @@ public class StickerifyTest {
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
-		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.ERROR);
+		assertResponseContainsMessage(sendMessage, Answer.ERROR);
 	}
 
 	@Test
 	void fileTooBig() throws Exception {
-		server.enqueue(Responses.FILE_TOO_BIG);
+		server.enqueue(MockResponses.FILE_TOO_BIG);
 
 		startBot(server);
 
@@ -94,17 +98,14 @@ public class StickerifyTest {
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
-		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.FILE_TOO_LARGE);
+		assertResponseContainsMessage(sendMessage, Answer.FILE_TOO_LARGE);
 	}
 
 	@Test
 	void fileAlreadyValid() throws Exception {
-		server.enqueue(Responses.FILE_ALREADY_VALID);
-		server.enqueue(Responses.FILE_DOWNLOAD);
-		try (var buffer = new Buffer(); var source = Okio.source(image(512, 512))) {
-			buffer.writeAll(source);
-			server.enqueue(new MockResponse().setBody(buffer));
-		}
+		server.enqueue(MockResponses.FILE_ALREADY_VALID);
+		server.enqueue(MockResponses.FILE_DOWNLOAD);
+		server.enqueue(MockResponses.fileResponse(resources.image(512, 512, "png")));
 
 		startBot(server);
 
@@ -120,25 +121,14 @@ public class StickerifyTest {
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
-		assertResponseContainsMessage(sendMessage.getBody().readUtf8(), Answer.FILE_ALREADY_VALID);
-	}
-
-	private File image(int width, int height) throws IOException {
-		var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		var file = new File(directory, "%d x %d.png".formatted(width, height));
-		ImageIO.write(image, "png", file);
-
-		return file;
+		assertResponseContainsMessage(sendMessage, Answer.FILE_ALREADY_VALID);
 	}
 
 	@Test
 	void fileConverted() throws Exception {
-		server.enqueue(Responses.FILE_UPDATE);
-		server.enqueue(Responses.FILE_DOWNLOAD);
-		try (var buffer = new Buffer(); var source = Okio.source(image(800, 400))) {
-			buffer.writeAll(source);
-			server.enqueue(new MockResponse().setBody(buffer));
-		}
+		server.enqueue(MockResponses.FILE_UPDATE);
+		server.enqueue(MockResponses.FILE_DOWNLOAD);
+		server.enqueue(MockResponses.fileResponse(resources.image(800, 400, "png")));
 
 		startBot(server);
 
