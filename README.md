@@ -21,8 +21,8 @@ to convert.
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted media, if you sent a supported file (images, gifs, standard and video stickers are supported) that
-  needed conversion
+* the converted media, if you sent a supported file (images, gifs, standard, video, and animated stickers are supported)
+  that needed conversion
 * no file, if you sent a media already suiting Telegram's requirements
 * an error message, if you sent an unsupported file
 * an informative message for any message without a file
@@ -117,6 +117,7 @@ therefore counting towards the 4 contributions goal.
 * Image conversion
   uses [ImageIO](https://docs.oracle.com/en/java/javase/20/docs/api/java.desktop/javax/imageio/ImageIO.html), [TwelveMonkeys](https://github.com/haraldk/TwelveMonkeys),
   and [imgscalr](https://github.com/rkalla/imgscalr)
+* Animated sticker validation uses [Gson](https://github.com/google/gson)
 * MIME type analysis is performed using [Apache Tika](https://tika.apache.org/)
 
 ## License

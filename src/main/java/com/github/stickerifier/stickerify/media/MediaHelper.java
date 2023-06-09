@@ -1,14 +1,19 @@
 package com.github.stickerifier.stickerify.media;
 
+import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_DURATION_SECONDS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_FILE_SIZE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_FRAMERATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_DURATION_MILLIS;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FILE_SIZE;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Mode;
@@ -20,15 +25,21 @@ import ws.schild.jave.info.MultimediaInfo;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public final class MediaHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
+	private static final Gson GSON = new Gson();
 	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
 
@@ -44,6 +55,12 @@ public final class MediaHelper {
 		var mimeType = detectMimeType(inputFile);
 		if (isSupportedVideo(mimeType)) {
 			return convertToWebm(inputFile);
+		}
+
+		if (isAnimatedStickerCompliant(mimeType, inputFile) && isFileSizeLowerThan(inputFile, ANIMATION_FILE_SIZE)) {
+			LOGGER.atInfo().log("The animated sticker doesn't need conversion");
+
+			return null;
 		}
 
 		var image = toImage(inputFile);
@@ -73,6 +90,49 @@ public final class MediaHelper {
 		}
 
 		return mimeType;
+	}
+
+	private static boolean isAnimatedStickerCompliant(String mimeType, File file) {
+		if ("application/gzip".equals(mimeType)) {
+			String zipContent = "";
+
+			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file));
+				 var bufferedReader = new BufferedReader(new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8))) {
+				zipContent = bufferedReader.readLine();
+			} catch (IOException e) {
+				LOGGER.atError().log("Unable to retrieve gzip content from file {}", file.getName());
+			}
+
+			var sticker = GSON.fromJson(zipContent, AnimatedSticker.class);
+
+			return isAnimatedStickerCompliant(sticker);
+		}
+
+		return false;
+	}
+
+	private record AnimatedSticker(@SerializedName("w") int width, @SerializedName("h") int height, @SerializedName("fr") int frameRate, @SerializedName("ip") int start, @SerializedName("op") int end) {}
+
+	private static boolean isAnimatedStickerCompliant(AnimatedSticker sticker) {
+		return sticker != null && sticker.frameRate() == ANIMATION_FRAMERATE
+				&& sticker.end() - sticker.start() == ANIMATION_DURATION_SECONDS
+				&& sticker.width() == MAX_SIZE && sticker.width() == sticker.height();
+	}
+
+	/**
+	 * Checks that passed-in file's size does not exceed specified threshold.
+	 *
+	 * @param file the file to check
+	 * @param threshold max allowed file size
+	 * @return {@code true} if file's size is compliant
+	 * @throws TelegramApiException if an error occurred retrieving the size of the file
+	 */
+	private static boolean isFileSizeLowerThan(File file, long threshold) throws TelegramApiException {
+		try {
+			return Files.size(file.toPath()) <= threshold;
+		} catch (IOException e) {
+			throw new TelegramApiException(e);
+		}
 	}
 
 	/**
@@ -198,7 +258,7 @@ public final class MediaHelper {
 	private static File convertToWebm(File file) throws TelegramApiException {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
-		if (isVideoCompliant(mediaInfo) && isFileSizeCompliant(file)) {
+		if (isVideoCompliant(mediaInfo) && isFileSizeLowerThan(file, VIDEO_FILE_SIZE)) {
 			LOGGER.atInfo().log("The video doesn't need conversion");
 
 			return null;
@@ -234,26 +294,11 @@ public final class MediaHelper {
 		var videoSize = videoInfo.getSize();
 
 		return isSizeCompliant(videoSize.getWidth(), videoSize.getHeight())
-				&& videoInfo.getFrameRate() <= MAX_FRAMES
+				&& videoInfo.getFrameRate() <= MAX_VIDEO_FRAMES
 				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
-				&& mediaInfo.getDuration() <= MAX_DURATION_MILLIS
+				&& mediaInfo.getDuration() <= MAX_VIDEO_DURATION_MILLIS
 				&& mediaInfo.getAudio() == null
 				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat());
-	}
-
-	/**
-	 * Checks that passed-in file's size does not exceed 256 KB.
-	 *
-	 * @param file the file to check
-	 * @return {@code true} if file's size is compliant
-	 * @throws TelegramApiException if an error occurred retrieving the size of the file
-	 */
-	private static boolean isFileSizeCompliant(File file) throws TelegramApiException {
-		try {
-			return Files.size(file.toPath()) <= MAX_FILE_SIZE;
-		} catch (IOException e) {
-			throw new TelegramApiException(e);
-		}
 	}
 
 	/**
@@ -295,8 +340,8 @@ public final class MediaHelper {
 	 */
 	private static ResultingVideoDetails getResultingVideoDetails(MultimediaInfo mediaInfo) {
 		var videoInfo = mediaInfo.getVideo();
-		float frameRate = Math.min(videoInfo.getFrameRate(), MAX_FRAMES);
-		long duration = Math.min(mediaInfo.getDuration(), MAX_DURATION_MILLIS) / 1_000L;
+		float frameRate = Math.min(videoInfo.getFrameRate(), MAX_VIDEO_FRAMES);
+		long duration = Math.min(mediaInfo.getDuration(), MAX_VIDEO_DURATION_MILLIS) / 1_000L;
 
 		boolean isWidthBigger = videoInfo.getSize().getWidth() >= videoInfo.getSize().getHeight();
 		int width = isWidthBigger ? MAX_SIZE : PRESERVE_ASPECT_RATIO;
