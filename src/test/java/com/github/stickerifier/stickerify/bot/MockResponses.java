@@ -104,7 +104,7 @@ public final class MockResponses {
 						},
 						sticker: {
 							file_id: "animated_sticker.gz",
-							file_size: 200000
+							file_size: 64000
 						}
 					}
 				}]
