@@ -8,7 +8,7 @@ import java.io.File;
 
 public final class MockResponses {
 
-	public static final MockResponse START_MESSAGE = new MockResponse().setBody("""
+	static final MockResponse START_MESSAGE = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -27,7 +27,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse HELP_MESSAGE = new MockResponse().setBody("""
+	static final MockResponse HELP_MESSAGE = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -46,7 +46,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse FILE_NOT_SUPPORTED = new MockResponse().setBody("""
+	static final MockResponse FILE_NOT_SUPPORTED = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -67,7 +67,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse FILE_TOO_BIG = new MockResponse().setBody("""
+	static final MockResponse FILE_TOO_BIG = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -89,7 +89,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse ANIMATED_STICKER = new MockResponse().setBody("""
+	static final MockResponse ANIMATED_STICKER = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -111,7 +111,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse PNG_FILE = new MockResponse().setBody("""
+	static final MockResponse PNG_FILE = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -133,7 +133,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse WEBP_FILE = new MockResponse().setBody("""
+	static final MockResponse WEBP_FILE = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -155,7 +155,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse MOV_FILE = new MockResponse().setBody("""
+	static final MockResponse MOV_FILE = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -177,7 +177,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse WEBM_FILE = new MockResponse().setBody("""
+	static final MockResponse WEBM_FILE = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -199,7 +199,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse GIF_FILE = new MockResponse().setBody("""
+	static final MockResponse GIF_FILE = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -221,7 +221,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse DOCUMENT = new MockResponse().setBody("""
+	static final MockResponse DOCUMENT = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -243,7 +243,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static MockResponse fileInfo(String id) {
+	static MockResponse fileInfo(String id) {
 		return new MockResponse().setBody("""
 				{
 					ok: true,
@@ -255,7 +255,7 @@ public final class MockResponses {
 				""".formatted(id, id));
 	}
 
-	public static MockResponse fileDownload(File file) throws Exception {
+	static MockResponse fileDownload(File file) throws Exception {
 		try (var buffer = new Buffer(); var source = Okio.source(file)) {
 			buffer.writeAll(source);
 			return new MockResponse().setBody(buffer);
