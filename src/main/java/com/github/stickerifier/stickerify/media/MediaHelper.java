@@ -1,13 +1,13 @@
 package com.github.stickerifier.stickerify.media;
 
-import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_FRAMERATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -29,11 +29,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 
 public final class MediaHelper {
@@ -104,30 +102,33 @@ public final class MediaHelper {
 	 */
 	private static boolean isAnimatedStickerCompliant(File file, String mimeType) throws TelegramApiException {
 		if ("application/gzip".equals(mimeType)) {
-			String zipContent = "";
+			String uncompressedContent = "";
 
-			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file));
-				 var scanner = new Scanner(new InputStreamReader(gzipInputStream, StandardCharsets.UTF_8))) {
-				if (scanner.hasNext()) {
-					zipContent = scanner.nextLine();
-				}
+			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
+				uncompressedContent = new String(gzipInputStream.readAllBytes(), StandardCharsets.UTF_8);
 			} catch (IOException e) {
 				LOGGER.atError().log("Unable to retrieve gzip content from file {}", file.getName());
 			}
 
 			try {
-				var sticker = GSON.fromJson(zipContent, AnimationDetails.class);
+				var sticker = GSON.fromJson(uncompressedContent, AnimationDetails.class);
 
-				return isAnimationCompliant(sticker) && isFileSizeLowerThan(file, ANIMATION_FILE_SIZE);
+				return isAnimationCompliant(sticker) && isFileSizeLowerThan(file, MAX_ANIMATION_FILE_SIZE);
 			} catch (JsonSyntaxException e) {
-				return false;
+				LOGGER.atInfo().log("The archive isn't an animated sticker");
 			}
 		}
 
 		return false;
 	}
 
-	private record AnimationDetails(@SerializedName("w") int width, @SerializedName("h") int height, @SerializedName("fr") int frameRate, @SerializedName("ip") int start, @SerializedName("op") int end) {}
+	private record AnimationDetails(
+			@SerializedName("w") int width,
+			@SerializedName("h") int height,
+			@SerializedName("fr") int frameRate,
+			@SerializedName("ip") int start,
+			@SerializedName("op") int end
+	) {}
 
 	/**
 	 * Checks if passed-in animation is already compliant with Telegram's requisites.
@@ -324,7 +325,7 @@ public final class MediaHelper {
 				&& mediaInfo.getDuration() <= MAX_VIDEO_DURATION_MILLIS
 				&& mediaInfo.getAudio() == null
 				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat())
-				&& isFileSizeLowerThan(file, VIDEO_FILE_SIZE);
+				&& isFileSizeLowerThan(file, MAX_VIDEO_FILE_SIZE);
 	}
 
 	/**
