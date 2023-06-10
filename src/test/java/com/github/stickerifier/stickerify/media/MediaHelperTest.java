@@ -167,7 +167,7 @@ public class MediaHelperTest {
 
 	@Test
 	void noAnimatedStickerConversionNeeded() throws Exception {
-		var animatedSticker = resource("animated_sticker.gz");
+		var animatedSticker = resources.resource("animated_sticker.gz");
 		result = MediaHelper.convert(animatedSticker);
 
 		assertThat(result, is(nullValue()));
@@ -175,7 +175,7 @@ public class MediaHelperTest {
 
 	@Test
 	void unsupportedGzipArchive() {
-		var archive = resource("unsupported_archive.gz");
+		var archive = resources.resource("unsupported_archive.gz");
 		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(archive));
 
 		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));

@@ -89,7 +89,7 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse FILE_ALREADY_VALID = new MockResponse().setBody("""
+	public static final MockResponse ANIMATED_STICKER = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
@@ -102,10 +102,10 @@ public final class MockResponses {
 						chat: {
 							id: 1
 						},
-						photo: [{
-							file_id: "image.png",
+						sticker: {
+							file_id: "animated_sticker.gz",
 							file_size: 200000
-						}]
+						}
 					}
 				}]
 			}

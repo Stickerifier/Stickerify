@@ -51,7 +51,7 @@ public class StickerifyTest {
 				.fileApiUrl(server.url("files/").toString())
 				.updateListenerSleep(500)
 				.build();
-		new Stickerify(bot);
+		new Stickerify(bot, Runnable::run);
 	}
 
 	private static void assertResponseContainsMessage(RecordedRequest request, Answer answer) {
@@ -103,9 +103,9 @@ public class StickerifyTest {
 
 	@Test
 	void fileAlreadyValid() throws Exception {
-		server.enqueue(MockResponses.FILE_ALREADY_VALID);
-		server.enqueue(MockResponses.fileInfo("image.png"));
-		server.enqueue(MockResponses.fileDownload(resources.image(512, 512, "png")));
+		server.enqueue(MockResponses.ANIMATED_STICKER);
+		server.enqueue(MockResponses.fileInfo("animated_sticker.gz"));
+		server.enqueue(MockResponses.fileDownload(resources.resource("animated_sticker.gz")));
 
 		startBot(server);
 
@@ -114,10 +114,10 @@ public class StickerifyTest {
 
 		var getFile = server.takeRequest();
 		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=image.png", getFile.getBody().readUtf8());
+		assertEquals("file_id=animated_sticker.gz", getFile.getBody().readUtf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/image.png", download.getPath());
+		assertEquals("/files/token/animated_sticker.gz", download.getPath());
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());

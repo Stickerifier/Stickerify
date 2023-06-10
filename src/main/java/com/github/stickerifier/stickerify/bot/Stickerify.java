@@ -31,6 +31,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Telegram bot to convert medias in the format required to be used as Telegram stickers.
@@ -43,16 +45,18 @@ public class Stickerify {
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 
 	private final TelegramBot bot;
+	private final Executor executor;
 
 	/**
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build());
+		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), Executors.newVirtualThreadPerTaskExecutor());
 	}
 
-	Stickerify(TelegramBot bot) {
+	Stickerify(TelegramBot bot, Executor executor) {
 		this.bot = bot;
+		this.executor = executor;
 
 		ExceptionHandler exceptionHandler = e -> LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
 
@@ -60,7 +64,7 @@ public class Stickerify {
 	}
 
 	private int handleUpdates(List<Update> updates) {
-		updates.forEach(update -> Thread.ofVirtual().start(() -> {
+		updates.forEach(update -> executor.execute(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
 				LOGGER.atInfo().log("Received {}", request.getDescription());
