@@ -19,6 +19,7 @@ dependencies {
 
     testImplementation libs.hamcrest
     testImplementation libs.junit
+    testImplementation libs.mockwebserver
 }
 
 group = 'com.github.stickerifier'

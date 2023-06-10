@@ -11,17 +11,17 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import com.github.stickerifier.stickerify.ResourceHelper;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,7 +31,14 @@ public class MediaHelperTest {
 	@TempDir
 	private File directory;
 
+	private ResourceHelper resources;
+
 	private File result;
+
+	@BeforeEach
+	void setup() {
+		resources = new ResourceHelper(directory);
+	}
 
 	@AfterEach
 	void cleanup() throws IOException {
@@ -42,18 +49,10 @@ public class MediaHelperTest {
 
 	@Test
 	void resizeImage() throws Exception {
-		var startingImage = image(1024, 1024, "jpg");
+		var startingImage = resources.createImage(1024, 1024, "jpg");
 		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(512, 512);
-	}
-
-	private File image(int width, int height, String extension) throws IOException {
-		var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		var file = new File(directory, "%d x %d.%s".formatted(width, height, extension));
-		ImageIO.write(image, extension, file);
-
-		return file;
 	}
 
 	private void assertImageConsistency(int expectedWidth, int expectedHeight) throws IOException {
@@ -69,7 +68,7 @@ public class MediaHelperTest {
 
 	@Test
 	void resizeRectangularImage() throws Exception {
-		var startingImage = image(1024, 512, "jpg");
+		var startingImage = resources.createImage(1024, 512, "jpg");
 		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(512, 256);
@@ -77,7 +76,7 @@ public class MediaHelperTest {
 
 	@Test
 	void resizeSmallImage() throws Exception {
-		var startingImage = image(256, 256, "png");
+		var startingImage = resources.createImage(256, 256, "png");
 		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(512, 512);
@@ -85,7 +84,7 @@ public class MediaHelperTest {
 
 	@Test
 	void noImageConversionNeeded() throws Exception {
-		var startingImage = image(512, 256, "png");
+		var startingImage = resources.createImage(512, 256, "png");
 		result = MediaHelper.convert(startingImage);
 
 		assertThat(result, is(nullValue()));
@@ -93,22 +92,15 @@ public class MediaHelperTest {
 
 	@Test
 	void resizeWebpImage() throws Exception {
-		var startingImage = resource("valid.webp");
+		var startingImage = resources.loadResource("valid.webp");
 		result = MediaHelper.convert(startingImage);
 
 		assertImageConsistency(256, 512);
 	}
 
-	private File resource(String filename) {
-		var resource = getClass().getClassLoader().getResource(filename);
-		assumeTrue(resource != null, "Test resource [%s] not found.".formatted(filename));
-
-		return new File(resource.getFile());
-	}
-
 	@Test
 	void convertLongMovVideo() throws Exception {
-		var startingVideo = resource("long.mov");
+		var startingVideo = resources.loadResource("long.mov");
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(512, 288, 30F, 3_000L);
@@ -136,7 +128,7 @@ public class MediaHelperTest {
 
 	@Test
 	void convertShortAndLowFpsVideo() throws Exception {
-		var startingVideo = resource("short_low_fps.webm");
+		var startingVideo = resources.loadResource("short_low_fps.webm");
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(512, 288, 10F, 1_000L);
@@ -144,7 +136,7 @@ public class MediaHelperTest {
 
 	@Test
 	void resizeSmallWebmVideo() throws Exception {
-		var startingVideo = resource("small_video_sticker.webm");
+		var startingVideo = resources.loadResource("small_video_sticker.webm");
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(512, 212, 30F, 2_000L);
@@ -152,7 +144,7 @@ public class MediaHelperTest {
 
 	@Test
 	void convertVerticalWebmVideo() throws Exception {
-		var startingVideo = resource("vertical_video_sticker.webm");
+		var startingVideo = resources.loadResource("vertical_video_sticker.webm");
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(288, 512, 30F, 2_000L);
@@ -160,7 +152,7 @@ public class MediaHelperTest {
 
 	@Test
 	void convertGifVideo() throws Exception {
-		var startingVideo = resource("valid.gif");
+		var startingVideo = resources.loadResource("valid.gif");
 		result = MediaHelper.convert(startingVideo);
 
 		assertVideoConsistency(512, 274, 10F, 1_000L);
@@ -168,7 +160,7 @@ public class MediaHelperTest {
 
 	@Test
 	void noVideoConversionNeeded() throws Exception {
-		var startingVideo = resource("no_conversion_needed.webm");
+		var startingVideo = resources.loadResource("no_conversion_needed.webm");
 		result = MediaHelper.convert(startingVideo);
 
 		assertThat(result, is(nullValue()));
@@ -176,7 +168,7 @@ public class MediaHelperTest {
 
 	@Test
 	void noAnimatedStickerConversionNeeded() throws Exception {
-		var animatedSticker = resource("animated_sticker.gz");
+		var animatedSticker = resources.loadResource("animated_sticker.gz");
 		result = MediaHelper.convert(animatedSticker);
 
 		assertThat(result, is(nullValue()));
@@ -184,7 +176,7 @@ public class MediaHelperTest {
 
 	@Test
 	void unsupportedGzipArchive() {
-		var archive = resource("unsupported_archive.gz");
+		var archive = resources.loadResource("unsupported_archive.gz");
 		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(archive));
 
 		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
@@ -192,7 +184,7 @@ public class MediaHelperTest {
 
 	@Test
 	void unsupportedFile() {
-		var document = resource("document.txt");
+		var document = resources.loadResource("document.txt");
 		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
 
 		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
