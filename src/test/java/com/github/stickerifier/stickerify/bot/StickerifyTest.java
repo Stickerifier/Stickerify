@@ -46,12 +46,12 @@ public class StickerifyTest {
 	}
 
 	private static void startBot(MockWebServer server) {
-		var telegramBot = new TelegramBot.Builder("token")
+		var bot = new TelegramBot.Builder("token")
 				.apiUrl(server.url("api/").toString())
 				.fileApiUrl(server.url("files/").toString())
 				.updateListenerSleep(500)
 				.build();
-		new Stickerify(telegramBot);
+		new Stickerify(bot);
 	}
 
 	private static void assertResponseContainsMessage(RecordedRequest request, Answer answer) {
@@ -104,8 +104,8 @@ public class StickerifyTest {
 	@Test
 	void fileAlreadyValid() throws Exception {
 		server.enqueue(MockResponses.FILE_ALREADY_VALID);
-		server.enqueue(MockResponses.FILE_DOWNLOAD);
-		server.enqueue(MockResponses.fileResponse(resources.image(512, 512, "png")));
+		server.enqueue(MockResponses.fileInfo("image.png"));
+		server.enqueue(MockResponses.fileDownload(resources.image(512, 512, "png")));
 
 		startBot(server);
 
@@ -117,7 +117,7 @@ public class StickerifyTest {
 		assertEquals("file_id=image.png", getFile.getBody().readUtf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/image/image.png", download.getPath());
+		assertEquals("/files/token/image.png", download.getPath());
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
@@ -125,10 +125,10 @@ public class StickerifyTest {
 	}
 
 	@Test
-	void fileConverted() throws Exception {
-		server.enqueue(MockResponses.FILE_UPDATE);
-		server.enqueue(MockResponses.FILE_DOWNLOAD);
-		server.enqueue(MockResponses.fileResponse(resources.image(800, 400, "png")));
+	void convertedPng() throws Exception {
+		server.enqueue(MockResponses.PNG_FILE);
+		server.enqueue(MockResponses.fileInfo("image.png"));
+		server.enqueue(MockResponses.fileDownload(resources.image(800, 400, "png")));
 
 		startBot(server);
 
@@ -140,11 +140,126 @@ public class StickerifyTest {
 		assertEquals("file_id=image.png", getFile.getBody().readUtf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/image/image.png", download.getPath());
+		assertEquals("/files/token/image.png", download.getPath());
 
 		var sendDocument = server.takeRequest();
 		assertEquals("/api/token/sendDocument", sendDocument.getPath());
 		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+	}
+
+	@Test
+	void convertedWebp() throws Exception {
+		server.enqueue(MockResponses.WEBP_FILE);
+		server.enqueue(MockResponses.fileInfo("valid.webp"));
+		server.enqueue(MockResponses.fileDownload(resources.resource("valid.webp")));
+
+		startBot(server);
+
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+
+		var getFile = server.takeRequest();
+		assertEquals("/api/token/getFile", getFile.getPath());
+		assertEquals("file_id=valid.webp", getFile.getBody().readUtf8());
+
+		var download = server.takeRequest();
+		assertEquals("/files/token/valid.webp", download.getPath());
+
+		var sendDocument = server.takeRequest();
+		assertEquals("/api/token/sendDocument", sendDocument.getPath());
+		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+	}
+
+	@Test
+	void convertedMov() throws Exception {
+		server.enqueue(MockResponses.MOV_FILE);
+		server.enqueue(MockResponses.fileInfo("long.mov"));
+		server.enqueue(MockResponses.fileDownload(resources.resource("long.mov")));
+
+		startBot(server);
+
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+
+		var getFile = server.takeRequest();
+		assertEquals("/api/token/getFile", getFile.getPath());
+		assertEquals("file_id=long.mov", getFile.getBody().readUtf8());
+
+		var download = server.takeRequest();
+		assertEquals("/files/token/long.mov", download.getPath());
+
+		var sendDocument = server.takeRequest();
+		assertEquals("/api/token/sendDocument", sendDocument.getPath());
+		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+	}
+
+	@Test
+	void convertedWebm() throws Exception {
+		server.enqueue(MockResponses.WEBM_FILE);
+		server.enqueue(MockResponses.fileInfo("short_low_fps.webm"));
+		server.enqueue(MockResponses.fileDownload(resources.resource("short_low_fps.webm")));
+
+		startBot(server);
+
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+
+		var getFile = server.takeRequest();
+		assertEquals("/api/token/getFile", getFile.getPath());
+		assertEquals("file_id=short_low_fps.webm", getFile.getBody().readUtf8());
+
+		var download = server.takeRequest();
+		assertEquals("/files/token/short_low_fps.webm", download.getPath());
+
+		var sendDocument = server.takeRequest();
+		assertEquals("/api/token/sendDocument", sendDocument.getPath());
+		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+	}
+
+	@Test
+	void convertedGif() throws Exception {
+		server.enqueue(MockResponses.GIF_FILE);
+		server.enqueue(MockResponses.fileInfo("valid.gif"));
+		server.enqueue(MockResponses.fileDownload(resources.resource("valid.gif")));
+
+		startBot(server);
+
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+
+		var getFile = server.takeRequest();
+		assertEquals("/api/token/getFile", getFile.getPath());
+		assertEquals("file_id=valid.gif", getFile.getBody().readUtf8());
+
+		var download = server.takeRequest();
+		assertEquals("/files/token/valid.gif", download.getPath());
+
+		var sendDocument = server.takeRequest();
+		assertEquals("/api/token/sendDocument", sendDocument.getPath());
+		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+	}
+
+	@Test
+	void documentNotSupported() throws Exception {
+		server.enqueue(MockResponses.DOCUMENT);
+		server.enqueue(MockResponses.fileInfo("document.txt"));
+		server.enqueue(MockResponses.fileDownload(resources.resource("document.txt")));
+
+		startBot(server);
+
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+
+		var getFile = server.takeRequest();
+		assertEquals("/api/token/getFile", getFile.getPath());
+		assertEquals("file_id=document.txt", getFile.getBody().readUtf8());
+
+		var download = server.takeRequest();
+		assertEquals("/files/token/document.txt", download.getPath());
+
+		var sendMessage = server.takeRequest();
+		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertResponseContainsMessage(sendMessage, Answer.ERROR);
 	}
 
 }

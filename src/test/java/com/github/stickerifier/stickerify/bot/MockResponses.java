@@ -15,8 +15,12 @@ public final class MockResponses {
 					update_id: 1,
 					message: {
 						message_id: 1,
-						from: { username: "User" },
-						chat: { id: 1 },
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
 						text: "/start"
 					}
 				}]
@@ -30,8 +34,12 @@ public final class MockResponses {
 					update_id: 1,
 					message: {
 						message_id: 1,
-						from: { username: "User" },
-						chat: { id: 1 },
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
 						text: "/help"
 					}
 				}]
@@ -45,8 +53,12 @@ public final class MockResponses {
 					update_id: 1,
 					message: {
 						message_id: 1,
-						from: { username: "User" },
-						chat: { id: 1 },
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
 						audio: {
 							file_id: "audio.mp3"
 						}
@@ -62,8 +74,12 @@ public final class MockResponses {
 					update_id: 1,
 					message: {
 						message_id: 1,
-						from: { username: "User" },
-						chat: { id: 1 },
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
 						video: {
 							file_id: "video.mp4",
 							file_size: 100000000
@@ -80,8 +96,12 @@ public final class MockResponses {
 					update_id: 1,
 					message: {
 						message_id: 1,
-						from: { username: "User" },
-						chat: { id: 1 },
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
 						photo: [{
 							file_id: "image.png",
 							file_size: 200000
@@ -91,15 +111,19 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse FILE_UPDATE = new MockResponse().setBody("""
+	public static final MockResponse PNG_FILE = new MockResponse().setBody("""
 			{
 				ok: true,
 				result: [{
 					update_id: 1,
 					message: {
 						message_id: 1,
-						from: { username: "User" },
-						chat: { id: 1 },
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
 						photo: [{
 							file_id: "image.png",
 							file_size: 200000
@@ -109,17 +133,129 @@ public final class MockResponses {
 			}
 			""");
 
-	public static final MockResponse FILE_DOWNLOAD = new MockResponse().setBody("""
+	public static final MockResponse WEBP_FILE = new MockResponse().setBody("""
 			{
 				ok: true,
-				result: {
-					file_id: "image.png",
-					file_path: "image/image.png"
-				}
+				result: [{
+					update_id: 1,
+					message: {
+						message_id: 1,
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
+						photo: [{
+							file_id: "valid.webp",
+							file_size: 200000
+						}]
+					}
+				}]
 			}
 			""");
 
-	public static MockResponse fileResponse(File file) throws Exception {
+	public static final MockResponse MOV_FILE = new MockResponse().setBody("""
+			{
+				ok: true,
+				result: [{
+					update_id: 1,
+					message: {
+						message_id: 1,
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
+						video: {
+							file_id: "long.mov",
+							file_size: 200000
+						}
+					}
+				}]
+			}
+			""");
+
+	public static final MockResponse WEBM_FILE = new MockResponse().setBody("""
+			{
+				ok: true,
+				result: [{
+					update_id: 1,
+					message: {
+						message_id: 1,
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
+						video: {
+							file_id: "short_low_fps.webm",
+							file_size: 200000
+						}
+					}
+				}]
+			}
+			""");
+
+	public static final MockResponse GIF_FILE = new MockResponse().setBody("""
+			{
+				ok: true,
+				result: [{
+					update_id: 1,
+					message: {
+						message_id: 1,
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
+						sticker: {
+							file_id: "valid.gif",
+							file_size: 200000
+						}
+					}
+				}]
+			}
+			""");
+
+	public static final MockResponse DOCUMENT = new MockResponse().setBody("""
+			{
+				ok: true,
+				result: [{
+					update_id: 1,
+					message: {
+						message_id: 1,
+						from: {
+							username: "User"
+						},
+						chat: {
+							id: 1
+						},
+						document: {
+							file_id: "document.txt",
+							file_size: 200000
+						}
+					}
+				}]
+			}
+			""");
+
+	public static MockResponse fileInfo(String id) {
+		return new MockResponse().setBody("""
+				{
+					ok: true,
+					result: {
+						file_id: "%s",
+						file_path: "%s"
+					}
+				}
+				""".formatted(id, id));
+	}
+
+	public static MockResponse fileDownload(File file) throws Exception {
 		try (var buffer = new Buffer(); var source = Okio.source(file)) {
 			buffer.writeAll(source);
 			return new MockResponse().setBody(buffer);
