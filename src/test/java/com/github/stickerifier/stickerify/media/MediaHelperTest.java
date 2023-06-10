@@ -1,7 +1,7 @@
 package com.github.stickerifier.stickerify.media;
 
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_FILE_SIZE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -130,7 +130,7 @@ public class MediaHelperTest {
 				() -> assertThat("video's duration is not correct", mediaInfo.getDuration(), is(equalTo(expectedDuration))),
 				() -> assertThat("video's format must be matroska", mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
 				() -> assertThat("video must have no audio stream", mediaInfo.getAudio(), is(nullValue())),
-				() -> assertThat("video size should not exceed 256 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_FILE_SIZE)))
+				() -> assertThat("video size should not exceed 256 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_VIDEO_FILE_SIZE)))
 		);
 	}
 
@@ -172,6 +172,22 @@ public class MediaHelperTest {
 		result = MediaHelper.convert(startingVideo);
 
 		assertThat(result, is(nullValue()));
+	}
+
+	@Test
+	void noAnimatedStickerConversionNeeded() throws Exception {
+		var animatedSticker = resource("animated_sticker.gz");
+		result = MediaHelper.convert(animatedSticker);
+
+		assertThat(result, is(nullValue()));
+	}
+
+	@Test
+	void unsupportedGzipArchive() {
+		var archive = resource("unsupported_archive.gz");
+		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(archive));
+
+		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
 	}
 
 	@Test

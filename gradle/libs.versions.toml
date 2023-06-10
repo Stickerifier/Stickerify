@@ -2,6 +2,7 @@
 logback = "1.4.7"
 
 [libraries]
+gson = "com.google.code.gson:gson:2.10.1"
 hamcrest = "org.hamcrest:hamcrest-core:2.2"
 imageio-webp = "com.twelvemonkeys.imageio:imageio-webp:3.9.4"
 imgscalr = "org.imgscalr:imgscalr-lib:4.2"

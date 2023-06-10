@@ -54,14 +54,14 @@ public class Stickerify {
 	}
 
 	private int handleUpdates(List<Update> updates) {
-		updates.forEach(update -> {
+		updates.forEach(update -> Thread.ofVirtual().start(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
 				LOGGER.atInfo().log("Received {}", request.getDescription());
 
 				answer(request);
 			}
-		});
+		}));
 
 		return UpdatesListener.CONFIRMED_UPDATES_ALL;
 	}
@@ -82,6 +82,8 @@ public class Stickerify {
 		} else if (file.canBeDownloaded()) {
 			answerFile(request, file.id());
 		} else {
+			LOGGER.atInfo().log("Passed-in file is too large");
+
 			answerText(FILE_TOO_LARGE, request);
 		}
 	}
@@ -135,6 +137,7 @@ public class Stickerify {
 
 	private void answerText(Answer answer, TelegramRequest request) {
 		var answerWithText = new SendMessage(request.getChatId(), answer.getText())
+				.replyToMessageId(request.getMessageId())
 				.parseMode(MarkdownV2)
 				.disableWebPagePreview(answer.isDisableWebPreview());
 
