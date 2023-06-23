@@ -3,6 +3,7 @@ package com.github.stickerifier.stickerify.media;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
+import static com.github.stickerifier.stickerify.media.MediaHelper.FFMPEG_LOCATOR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -107,7 +108,7 @@ public class MediaHelperTest {
 	}
 
 	private void assertVideoConsistency(int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws EncoderException {
-		var mediaInfo = new MultimediaObject(result).getInfo();
+		var mediaInfo = new MultimediaObject(result, FFMPEG_LOCATOR).getInfo();
 		var videoInfo = mediaInfo.getVideo();
 		var videoSize = videoInfo.getSize();
 

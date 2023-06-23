@@ -5,6 +5,7 @@ import static ch.qos.logback.core.pattern.color.ANSIConstants.DEFAULT_FG;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_END;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_START;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.GREEN_FG;
+import static ch.qos.logback.core.pattern.color.ANSIConstants.RESET;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.YELLOW_FG;
 import static com.github.stickerifier.stickerify.telegram.model.TelegramRequest.NEW_USER;
 
@@ -22,10 +23,10 @@ import java.util.regex.Pattern;
 public class SubstringHighlighter extends MessageConverter {
 
 	private static final String START_YELLOW = changeColorTo(BOLD + YELLOW_FG);
-	static final String CONTINUE_PREVIOUS_COLOR = changeColorTo("0;" + DEFAULT_FG);
+	static final String CONTINUE_PREVIOUS_COLOR = changeColorTo(RESET + DEFAULT_FG);
 	static final String HIGHLIGHTED_NEW_USER = " " + START_YELLOW + NEW_USER.substring(1) + CONTINUE_PREVIOUS_COLOR;
 	static final String START_GREEN = changeColorTo(BOLD + GREEN_FG);
-	private static final Pattern MIME_TYPE_PATTERN = Pattern.compile("[\\w-]+/[\\w-]+");
+	private static final Pattern MIME_TYPE_PATTERN = Pattern.compile("( )([\\w-]+/[\\w-]+)( )");
 
 	@Override
 	public String convert(ILoggingEvent event) {
@@ -53,6 +54,6 @@ public class SubstringHighlighter extends MessageConverter {
 	private static String getMimeType(final String message) {
 		var matcher = MIME_TYPE_PATTERN.matcher(message);
 
-		return matcher.find() ? matcher.group() : null;
+		return matcher.find() ? matcher.group(2) : null;
 	}
 }
