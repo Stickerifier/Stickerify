@@ -5,6 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.schild.jave.process.ProcessLocator;
 
+/**
+ * Custom locator class to be used by Jave to find the path where FFmpeg is installed at in the system.
+ *
+ * @see ProcessLocator
+ */
 public class SystemFfmpegLocator implements ProcessLocator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SystemFfmpegLocator.class);
@@ -16,7 +21,6 @@ public class SystemFfmpegLocator implements ProcessLocator {
 
 	@Override
 	public String getExecutablePath() {
-
 		if (ffmpegLocation.isEmpty()) {
 			try {
 				ffmpegLocation = ProcessHelper.getCommandOutput(FIND_FFMPEG).trim();
