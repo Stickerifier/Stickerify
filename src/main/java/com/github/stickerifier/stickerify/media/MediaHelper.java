@@ -10,8 +10,8 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDE
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 
+import com.github.stickerifier.stickerify.process.PathLocator;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
-import com.github.stickerifier.stickerify.process.SystemFfmpegLocator;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -41,7 +41,7 @@ public final class MediaHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
 	private static final Gson GSON = new Gson();
-	static final ProcessLocator FFMPEG_LOCATOR = new SystemFfmpegLocator();
+	static final ProcessLocator FFMPEG_LOCATOR = new PathLocator();
 	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
 

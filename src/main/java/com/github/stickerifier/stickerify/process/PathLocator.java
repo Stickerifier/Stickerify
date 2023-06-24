@@ -10,17 +10,16 @@ import ws.schild.jave.process.ProcessLocator;
  *
  * @see ProcessLocator
  */
-public class SystemFfmpegLocator implements ProcessLocator {
+public class PathLocator implements ProcessLocator {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SystemFfmpegLocator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PathLocator.class);
 
 	private static final boolean IS_WINDOWS = System.getProperty("os.name").contains("Windows");
 	private static final String[] FIND_FFMPEG = { IS_WINDOWS ? "where" : "which", "ffmpeg" };
 
 	private static String ffmpegLocation = "";
 
-	@Override
-	public String getExecutablePath() {
+	public PathLocator() {
 		if (ffmpegLocation.isEmpty()) {
 			try {
 				ffmpegLocation = ProcessHelper.getCommandOutput(FIND_FFMPEG).trim();
@@ -30,7 +29,10 @@ public class SystemFfmpegLocator implements ProcessLocator {
 				LOGGER.atError().setCause(e).log("Unable to detect the installation path of FFmpeg");
 			}
 		}
+	}
 
+	@Override
+	public String getExecutablePath() {
 		return ffmpegLocation;
 	}
 }
