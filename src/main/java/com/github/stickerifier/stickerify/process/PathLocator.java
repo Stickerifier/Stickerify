@@ -17,17 +17,15 @@ public class PathLocator implements ProcessLocator {
 	private static final boolean IS_WINDOWS = System.getProperty("os.name").contains("Windows");
 	private static final String[] FIND_FFMPEG = { IS_WINDOWS ? "where" : "which", "ffmpeg" };
 
-	private static String ffmpegLocation = "";
+	private String ffmpegLocation;
 
 	public PathLocator() {
-		if (ffmpegLocation.isEmpty()) {
-			try {
-				ffmpegLocation = ProcessHelper.getCommandOutput(FIND_FFMPEG).trim();
+		try {
+			ffmpegLocation = ProcessHelper.getCommandOutput(FIND_FFMPEG).trim();
 
-				LOGGER.atInfo().log("FFmpeg is installed at {}", ffmpegLocation);
-			} catch (TelegramApiException e) {
-				LOGGER.atError().setCause(e).log("Unable to detect the installation path of FFmpeg");
-			}
+			LOGGER.atInfo().log("FFmpeg is installed at {}", ffmpegLocation);
+		} catch (TelegramApiException e) {
+			LOGGER.atError().setCause(e).log("Unable to detect FFmpeg's installation path");
 		}
 	}
 

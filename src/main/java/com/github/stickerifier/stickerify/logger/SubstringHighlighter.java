@@ -26,7 +26,7 @@ public class SubstringHighlighter extends MessageConverter {
 	static final String CONTINUE_PREVIOUS_COLOR = changeColorTo(RESET + DEFAULT_FG);
 	static final String HIGHLIGHTED_NEW_USER = " " + START_YELLOW + NEW_USER.substring(1) + CONTINUE_PREVIOUS_COLOR;
 	static final String START_GREEN = changeColorTo(BOLD + GREEN_FG);
-	private static final Pattern MIME_TYPE_PATTERN = Pattern.compile("( )([\\w-]+/[\\w-]+)( )");
+	private static final Pattern MIME_TYPE_PATTERN = Pattern.compile(" ([\\w-]+/[\\w-]+) ");
 
 	@Override
 	public String convert(ILoggingEvent event) {
@@ -54,6 +54,6 @@ public class SubstringHighlighter extends MessageConverter {
 	private static String getMimeType(final String message) {
 		var matcher = MIME_TYPE_PATTERN.matcher(message);
 
-		return matcher.find() ? matcher.group(2) : null;
+		return matcher.find() ? matcher.group(1) : null;
 	}
 }
