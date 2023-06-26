@@ -9,8 +9,9 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDE
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
-import static java.util.concurrent.TimeUnit.MINUTES;
 
+import com.github.stickerifier.stickerify.process.PathLocator;
+import com.github.stickerifier.stickerify.process.ProcessHelper;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 import ws.schild.jave.info.MultimediaInfo;
+import ws.schild.jave.process.ProcessLocator;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -39,6 +41,7 @@ public final class MediaHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
 	private static final Gson GSON = new Gson();
+	static final ProcessLocator FFMPEG_LOCATOR = new PathLocator();
 	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
 
@@ -300,7 +303,7 @@ public final class MediaHelper {
 	 */
 	private static MultimediaInfo retrieveMultimediaInfo(File file) throws TelegramApiException {
 		try {
-			return new MultimediaObject(file).getInfo();
+			return new MultimediaObject(file, FFMPEG_LOCATOR).getInfo();
 		} catch (EncoderException e) {
 			throw new TelegramApiException(e);
 		}
@@ -353,7 +356,7 @@ public final class MediaHelper {
 				"-y", webmVideo.getAbsolutePath()
 		};
 
-		executeCommand(ffmpegCommand);
+		ProcessHelper.executeCommand(ffmpegCommand);
 
 		return webmVideo;
 	}
@@ -378,30 +381,6 @@ public final class MediaHelper {
 	}
 
 	private record ResultingVideoDetails(int width, int height, float frameRate, String duration) {}
-
-	/**
-	 * Executes passed-in command and ensures it completed successfully.
-	 *
-	 * @param command the command to be executed
-	 * @throws TelegramApiException either if:
-	 * <ul>
-	 *     <li>the command was unsuccessful
-	 *     <li>the waiting time elapsed
-	 *     <li>an unexpected failure happened running the command
-	 * </ul>
-	 */
-	private static void executeCommand(final String[] command) throws TelegramApiException {
-		try {
-			var process = new ProcessBuilder(command).start();
-			var processExited = process.waitFor(1, MINUTES);
-
-			if (!processExited || process.exitValue() != 0) {
-				throw new TelegramApiException("The command couldn't complete successfully");
-			}
-		} catch (IOException | InterruptedException e) {
-			throw new TelegramApiException(e);
-		}
-	}
 
 	private MediaHelper() {
 		throw new UnsupportedOperationException();
