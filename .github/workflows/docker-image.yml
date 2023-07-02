@@ -32,7 +32,7 @@ jobs:
             rob93c/stickerify
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
+            type=ref,prefix=pr-,event=pr
           flavor: |
             latest=auto
 
