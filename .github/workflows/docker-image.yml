@@ -2,6 +2,7 @@ name: Docker Image CI
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     branches:
       - main
@@ -23,11 +24,23 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Extract metadate
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            rob93c/stickerify
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+          flavor: |
+            latest=auto
+
       - name: Upload Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: rob93c/stickerify:latest
+          tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
