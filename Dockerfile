@@ -1,4 +1,4 @@
-FROM gradle:8.1-jdk17 AS builder
+FROM gradle:8.2-jdk17 AS builder
 WORKDIR /app
 COPY settings.gradle build.gradle ./
 COPY gradle/libs.versions.toml ./gradle/
