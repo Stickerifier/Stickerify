@@ -13,7 +13,9 @@ dependencies {
     implementation libs.imageio.webp
     implementation libs.imgscalr
     implementation libs.jave
-    implementation libs.bundles.logback
+    implementation libs.logback.classic
+    implementation libs.logback.core
+    implementation libs.slf4j.api
     implementation libs.telegram.bot.api
     implementation libs.tika
 

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class SubstringHighlighterTest {
+class SubstringHighlighterTest {
 
 	private static final String LOG_MESSAGE = "Received request";
 	private static final String MIME_TYPE = "image/png";
