@@ -1,6 +1,6 @@
 package com.github.stickerifier.stickerify.bot;
 
-import okhttp3.mockwebserver.MockResponse;
+import mockwebserver3.MockResponse;
 import okio.Buffer;
 import okio.Okio;
 
