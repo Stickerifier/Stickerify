@@ -99,8 +99,7 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Checks if passed-in file is a valid animated-sticker: it first checks
-	 * if the file is a {@code gzip} archive, then it reads its content and verifies if it's a valid JSON.
+	 * Checks if the file is a {@code gzip} archive, then it reads its content and verifies if it's a valid JSON.
 	 * Once JSON information are retrieved, they are validated against Telegram's requirements.
 	 *
 	 * @param file the file to check
