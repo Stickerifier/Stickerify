@@ -1,4 +1,4 @@
-name: Qodana Code Quality
+name: Qodana CI
 
 on:
   workflow_dispatch:
@@ -14,9 +14,18 @@ jobs:
       - name: Checkout code changes
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+
+      - name: Setup Java 20
+        uses: actions/setup-java@v3
+        with:
+          java-version: 20
+          distribution: temurin
 
       - name: Qodana Scan
         uses: JetBrains/qodana-action@v2023.2
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          args: -v,${{ env.JAVA_HOME }}:/root/.jdks/jdk
