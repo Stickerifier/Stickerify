@@ -29,3 +29,6 @@ jobs:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
           args: -v,${{ env.JAVA_HOME }}:/root/.jdks/jdk
+          cache-default-branch-only: true
+          post-pr-comment: false
+          push-fixes: none
