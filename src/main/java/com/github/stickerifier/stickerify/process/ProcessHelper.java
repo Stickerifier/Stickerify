@@ -17,6 +17,7 @@ public final class ProcessHelper {
 
 	/**
 	 * Executes passed-in command and ensures it completed successfully.
+	 * The method allows at most 15 processes to run concurrently.
 	 *
 	 * @param command the command to be executed
 	 * @return the instance of the process executed
