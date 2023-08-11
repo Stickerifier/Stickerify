@@ -27,7 +27,7 @@ public final class ProcessHelper {
 			var processExited = process.waitFor(1, MINUTES);
 
 			if (!processExited || process.exitValue() != 0) {
-				throw new TelegramApiException("The command couldn't complete successfully");
+				throw new TelegramApiException("The command {} couldn't complete successfully", command[0]);
 			}
 
 			return process;
