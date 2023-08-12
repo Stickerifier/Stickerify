@@ -7,6 +7,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public final class ResourceHelper {
 
@@ -36,4 +38,26 @@ public final class ResourceHelper {
 		return new File(resource.getFile());
 	}
 
+	public static void deleteTempFiles() throws IOException {
+		try (var files = Files.list(Path.of(System.getProperty("java.io.tmpdir")))) {
+			files.filter(Files::isRegularFile)
+					.map(Path::toFile)
+					.filter(ResourceHelper::stickerifyFiles)
+					.forEach(ResourceHelper::deleteFile);
+		}
+	}
+
+	private static boolean stickerifyFiles(File file) {
+		var fileName = file.getName();
+
+		return fileName.startsWith("Stickerify") || fileName.startsWith("OriginalFile");
+	}
+
+	private static void deleteFile(File file) {
+		try {
+			Files.delete(file.toPath());
+		} catch (IOException e) {
+			abort("The file could not be deleted from the system.");
+		}
+	}
 }
