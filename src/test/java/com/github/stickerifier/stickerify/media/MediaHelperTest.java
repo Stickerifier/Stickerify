@@ -11,12 +11,15 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import ws.schild.jave.EncoderException;
@@ -26,6 +29,9 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.IntStream;
 
 class MediaHelperTest {
 
@@ -189,5 +195,67 @@ class MediaHelperTest {
 		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
 
 		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
+	}
+
+	@Nested
+	@DisplayName("Concurrently convert")
+	class ConcurrencyTest {
+
+		@Test
+		@DisplayName("mov videos")
+		void concurrentMovVideConversions() {
+			var startingVideo = resources.loadResource("long.mov");
+
+			executeConcurrentConversions(startingVideo);
+		}
+
+		private static void executeConcurrentConversions(File inputFile) {
+			final int concurrentRequests = 25;
+			var testFailed = new AtomicBoolean(false);
+
+			try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+				IntStream.range(0, concurrentRequests).forEach(i -> executor.execute(() -> {
+					try {
+						MediaHelper.convert(inputFile);
+					} catch (TelegramApiException e) {
+						testFailed.set(true);
+					}
+				}));
+			}
+
+			assertFalse(testFailed.get(), "Unable to process %d concurrent requests".formatted(concurrentRequests));
+		}
+
+		@Test
+		@DisplayName("webm videos")
+		void concurrentWebmVideConversions() {
+			var startingVideo = resources.loadResource("small_video_sticker.webm");
+
+			executeConcurrentConversions(startingVideo);
+		}
+
+		@Test
+		@DisplayName("gif videos")
+		void concurrentGifVideConversions() {
+			var startingVideo = resources.loadResource("valid.gif");
+
+			executeConcurrentConversions(startingVideo);
+		}
+
+		@Test
+		@DisplayName("webp images")
+		void concurrentWebpImageConversions() {
+			var startingImage = resources.loadResource("valid.webp");
+
+			executeConcurrentConversions(startingImage);
+		}
+
+		@Test
+		@DisplayName("png images")
+		void concurrentPngImageConversions() {
+			var startingImage = resources.createImage(256, 256, "png");
+
+			executeConcurrentConversions(startingImage);
+		}
 	}
 }
