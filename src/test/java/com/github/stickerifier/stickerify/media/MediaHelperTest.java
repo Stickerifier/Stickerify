@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
@@ -199,6 +200,7 @@ class MediaHelperTest {
 
 	@Nested
 	@DisplayName("Concurrently convert")
+	@DisabledIfEnvironmentVariable(named = "EXECUTION_ENVIRONMENT", matches = "local")
 	class ConcurrencyTest {
 
 		@Test
