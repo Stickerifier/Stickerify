@@ -35,4 +35,5 @@ public final class ResourceHelper {
 
 		return new File(resource.getFile());
 	}
+
 }
