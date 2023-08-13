@@ -6,21 +6,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
+import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
 import mockwebserver3.junit5.internal.MockWebServerExtension;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@ClearTempFiles
 @ExtendWith(MockWebServerExtension.class)
 class StickerifyTest {
 
@@ -35,11 +35,6 @@ class StickerifyTest {
 	void setup() {
 		resources = new ResourceHelper(directory);
 		server = new MockWebServer();
-	}
-
-	@AfterAll
-	static void cleanup() throws IOException {
-		ResourceHelper.deleteTempFiles();
 	}
 
 	@Test

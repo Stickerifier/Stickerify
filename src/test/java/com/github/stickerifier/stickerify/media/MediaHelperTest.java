@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
-import org.junit.jupiter.api.AfterAll;
+import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,6 +34,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
+@ClearTempFiles
 class MediaHelperTest {
 
 	@TempDir
@@ -44,11 +45,6 @@ class MediaHelperTest {
 	@BeforeEach
 	void setup() {
 		resources = new ResourceHelper(directory);
-	}
-
-	@AfterAll
-	static void cleanup() throws IOException {
-		ResourceHelper.deleteTempFiles();
 	}
 
 	@Test
