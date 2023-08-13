@@ -1,10 +1,11 @@
 package com.github.stickerifier.stickerify.junit;
 
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -14,9 +15,9 @@ import java.lang.annotation.Target;
  * either with <i>Stickerify-</i> or <i>OriginalFile-</i> inside the temp folder
  * will be deleted <b>after all</b> its tests completed.
  *
- * @see TempFilesCleanerExtension
+ * @see TempFilesCleanupExtension
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
-@ExtendWith(TempFilesCleanerExtension.class)
+@Retention(RUNTIME)
+@Target(TYPE)
+@ExtendWith(TempFilesCleanupExtension.class)
 public @interface ClearTempFiles {}
