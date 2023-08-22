@@ -6,14 +6,11 @@ import com.github.stickerifier.stickerify.telegram.exception.TelegramApiExceptio
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
 
-	private static final int MAX_CONCURRENT_PROCESSES = 15;
-	private static final Map<String, Semaphore> SEMAPHORES = HashMap.newHashMap(2);
+	private static final Semaphore SEMAPHORE = new Semaphore(15);
 
 	/**
 	 * Executes passed-in command and ensures it completed successfully.
@@ -30,22 +27,22 @@ public final class ProcessHelper {
 	 */
 	public static Process executeCommand(final String[] command) throws TelegramApiException {
 		final var commandName = command[0];
-		var semaphore = SEMAPHORES.computeIfAbsent(commandName, v -> new Semaphore(MAX_CONCURRENT_PROCESSES));
 
 		try {
-			semaphore.acquire();
+			SEMAPHORE.acquire();
 			var process = new ProcessBuilder(command).start();
 			var processExited = process.waitFor(1, MINUTES);
 
 			if (!processExited || process.exitValue() != 0) {
-				throw new TelegramApiException("The command {} couldn't complete successfully", commandName);
+				var reason = processExited ? "successfully" : "in time";
+				throw new TelegramApiException("The command {} couldn't complete {}", commandName, reason);
 			}
 
 			return process;
 		} catch (IOException | InterruptedException e) {
 			throw new TelegramApiException(e);
 		} finally {
-			semaphore.release();
+			SEMAPHORE.release();
 		}
 	}
 
