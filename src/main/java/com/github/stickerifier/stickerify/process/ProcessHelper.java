@@ -31,7 +31,7 @@ public final class ProcessHelper {
 		try {
 			SEMAPHORE.acquire();
 			var process = new ProcessBuilder(command).start();
-			var processExited = process.waitFor(1, MINUTES);
+			var processExited = process.waitFor(2, MINUTES);
 
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";

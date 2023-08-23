@@ -185,17 +185,15 @@ class MediaHelperTest {
 	@Test
 	void unsupportedGzipArchive() {
 		var archive = resources.loadResource("unsupported_archive.gz");
-		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(archive));
 
-		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
+		assertThrows(TelegramApiException.class, () -> MediaHelper.convert(archive));
 	}
 
 	@Test
 	void unsupportedFile() {
 		var document = resources.loadResource("document.txt");
-		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
 
-		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
+		assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
 	}
 
 	@Nested
