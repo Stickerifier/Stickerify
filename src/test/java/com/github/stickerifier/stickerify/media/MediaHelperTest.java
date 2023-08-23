@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
-import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
+import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -127,6 +127,14 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void convertMp4WithAudio() throws Exception {
+		var startingVideo = resources.loadResource("video_with_audio.mp4");
+		var result = MediaHelper.convert(startingVideo);
+
+		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
+	}
+
+	@Test
 	void convertShortAndLowFpsVideo() throws Exception {
 		var startingVideo = resources.loadResource("short_low_fps.webm");
 		var result = MediaHelper.convert(startingVideo);
@@ -204,7 +212,7 @@ class MediaHelperTest {
 		}
 
 		private static void executeConcurrentConversions(File inputFile) {
-			final int concurrentRequests = 25;
+			final int concurrentRequests = 50;
 			var testFailed = new AtomicBoolean(false);
 
 			try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -218,6 +226,14 @@ class MediaHelperTest {
 			}
 
 			assertFalse(testFailed.get(), "Unable to process %d concurrent requests".formatted(concurrentRequests));
+		}
+
+		@Test
+		@DisplayName("mp4 videos")
+		void concurrentMp4VideConversions() {
+			var startingVideo = resources.loadResource("video_with_audio.mp4");
+
+			executeConcurrentConversions(startingVideo);
 		}
 
 		@Test

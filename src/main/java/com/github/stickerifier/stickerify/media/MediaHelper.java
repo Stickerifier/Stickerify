@@ -80,7 +80,7 @@ public final class MediaHelper {
 			throw e;
 		}
 
-		throw new TelegramApiException("Passed-in file is not supported");
+		throw new TelegramApiException("The file with {} MIME type is not supported", mimeType);
 	}
 
 	/**
