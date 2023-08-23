@@ -11,7 +11,6 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
@@ -31,7 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 @ClearTempFiles
@@ -211,19 +210,22 @@ class MediaHelperTest {
 
 		private static void executeConcurrentConversions(File inputFile) {
 			final int concurrentRequests = 50;
-			var testFailed = new AtomicBoolean(false);
+			var failedConvertions = new AtomicInteger(0);
 
 			try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 				IntStream.range(0, concurrentRequests).forEach(i -> executor.execute(() -> {
 					try {
 						MediaHelper.convert(inputFile);
 					} catch (TelegramApiException e) {
-						testFailed.set(true);
+						failedConvertions.incrementAndGet();
 					}
 				}));
 			}
 
-			assertFalse(testFailed.get(), "Unable to process %d concurrent requests".formatted(concurrentRequests));
+			int failures = failedConvertions.get();
+			assertThat("Unable to process %d concurrent requests: %d convertions failed".formatted(concurrentRequests, failures),
+					failures,
+					is(equalTo(0)));
 		}
 
 		@Test
