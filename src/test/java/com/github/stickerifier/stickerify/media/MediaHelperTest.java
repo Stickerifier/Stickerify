@@ -203,7 +203,7 @@ class MediaHelperTest {
 
 		@Test
 		@DisplayName("mov videos")
-		void concurrentMovVideConversions() {
+		void concurrentMovVideoConversions() {
 			var startingVideo = resources.loadResource("long.mov");
 
 			executeConcurrentConversions(startingVideo);
@@ -228,7 +228,7 @@ class MediaHelperTest {
 
 		@Test
 		@DisplayName("mp4 videos")
-		void concurrentMp4VideConversions() {
+		void concurrentMp4VideoConversions() {
 			var startingVideo = resources.loadResource("video_with_audio.mp4");
 
 			executeConcurrentConversions(startingVideo);
@@ -236,7 +236,7 @@ class MediaHelperTest {
 
 		@Test
 		@DisplayName("webm videos")
-		void concurrentWebmVideConversions() {
+		void concurrentWebmVideoConversions() {
 			var startingVideo = resources.loadResource("small_video_sticker.webm");
 
 			executeConcurrentConversions(startingVideo);
@@ -244,7 +244,7 @@ class MediaHelperTest {
 
 		@Test
 		@DisplayName("gif videos")
-		void concurrentGifVideConversions() {
+		void concurrentGifVideoConversions() {
 			var startingVideo = resources.loadResource("valid.gif");
 
 			executeConcurrentConversions(startingVideo);
