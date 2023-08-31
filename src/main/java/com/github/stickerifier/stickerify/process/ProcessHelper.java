@@ -10,11 +10,11 @@ import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
 
-	private static final Semaphore SEMAPHORE = new Semaphore(15);
+	private static final Semaphore SEMAPHORE = new Semaphore(5);
 
 	/**
 	 * Executes passed-in command and ensures it completed successfully.
-	 * The method allows at most 15 processes to run concurrently.
+	 * The method allows at most 5 processes to run concurrently.
 	 *
 	 * @param command the command to be executed
 	 * @return the instance of the process executed
@@ -31,7 +31,7 @@ public final class ProcessHelper {
 		try {
 			SEMAPHORE.acquire();
 			var process = new ProcessBuilder(command).start();
-			var processExited = process.waitFor(2, MINUTES);
+			var processExited = process.waitFor(1, MINUTES);
 
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";
