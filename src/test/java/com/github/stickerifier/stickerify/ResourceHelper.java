@@ -10,15 +10,10 @@ import java.io.IOException;
 
 public final class ResourceHelper {
 
-	private final File directory;
-
-	public ResourceHelper(File directory) {
-		this.directory = directory;
-	}
-
 	public File createImage(int width, int height, String extension) {
 		var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		var file = new File(directory, "%d x %d.%s".formatted(width, height, extension));
+		var tempFolder = System.getProperty("java.io.tmpdir");
+		var file = new File(tempFolder, "%d x %d.%s".formatted(width, height, extension));
 
 		try {
 			ImageIO.write(image, extension, file);
