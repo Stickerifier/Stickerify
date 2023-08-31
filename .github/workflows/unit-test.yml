@@ -7,6 +7,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   gradle:
     name: Execute unit tests
@@ -25,8 +28,10 @@ jobs:
         uses: FedericoCarboni/setup-ffmpeg@v2
         id: setup-ffmpeg
 
-      - name: Setup project
+      - name: Setup project and upload dependency graph
         uses: gradle/gradle-build-action@v2
+        with:
+          dependency-graph: generate-and-submit
 
       - name: Execute tests
         run: ./gradlew test --scan
