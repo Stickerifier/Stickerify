@@ -139,7 +139,7 @@ public class Stickerify {
 
 		try {
 			var fileContent = bot.getFileContent(file);
-			var downloadedFile = MediaHelper.createTempFile("OriginalFile-", null);
+			var downloadedFile = File.createTempFile("OriginalFile-", null);
 			Files.write(downloadedFile.toPath(), fileContent);
 
 			return downloadedFile;

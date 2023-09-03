@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.junit.jupiter.api.io.TempDir;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 
@@ -35,11 +36,14 @@ import java.util.stream.IntStream;
 @ClearTempFiles
 class MediaHelperTest {
 
+	@TempDir
+	private File directory;
+
 	private ResourceHelper resources;
 
 	@BeforeEach
 	void setup() {
-		resources = new ResourceHelper();
+		resources = new ResourceHelper(directory);
 	}
 
 	@Test
@@ -122,11 +126,11 @@ class MediaHelperTest {
 	}
 
 	@Test
-	void convertMp4() throws Exception {
-		var startingVideo = resources.loadResource("big_video.mp4");
+	void convertMp4WithAudio() throws Exception {
+		var startingVideo = resources.loadResource("video_with_audio.mp4");
 		var result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(result, 512, 288, 30.0F, 3_000L);
+		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
 	}
 
 	@Test
@@ -227,7 +231,7 @@ class MediaHelperTest {
 		@Test
 		@DisplayName("mp4 videos")
 		void concurrentMp4VideoConversions() {
-			var startingVideo = resources.loadResource("big_video.mp4");
+			var startingVideo = resources.loadResource("video_with_audio.mp4");
 
 			executeConcurrentConversions(startingVideo);
 		}

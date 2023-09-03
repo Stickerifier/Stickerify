@@ -256,7 +256,7 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if an error occurs creating the temp file
 	 */
 	private static File createPngFile(BufferedImage image) throws TelegramApiException {
-		var pngImage = createTempFile("Stickerify-", "png");
+		var pngImage = createTempFile("png");
 
 		try {
 			ImageIO.write(image, "png", pngImage);
@@ -270,17 +270,13 @@ public final class MediaHelper {
 	/**
 	 * Creates a new temp file of the desired type.
 	 *
-	 * @param prefix the name of the new file
 	 * @param fileType the extension of the new file
 	 * @return a new temp file
 	 * @throws TelegramApiException if an error occurs creating the temp file
 	 */
-	public static File createTempFile(String prefix, String fileType) throws TelegramApiException {
-		var tempDir = new File(System.getProperty("java.io.tmpdir"));
-		var suffix = fileType == null ? null : "." + fileType;
-
+	private static File createTempFile(String fileType) throws TelegramApiException {
 		try {
-			return File.createTempFile(prefix, suffix, tempDir);
+			return File.createTempFile("Stickerify-", "." + fileType);
 		} catch (IOException e) {
 			throw new TelegramApiException("An error occurred creating a new temp file", e);
 		}
@@ -352,7 +348,7 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if file conversion is not successful
 	 */
 	private static File convertWithFfmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
-		var webmVideo = createTempFile("Stickerify-", "webm");
+		var webmVideo = createTempFile("webm");
 		var videoDetails = getResultingVideoDetails(mediaInfo);
 
 		var ffmpegCommand = new String[] {

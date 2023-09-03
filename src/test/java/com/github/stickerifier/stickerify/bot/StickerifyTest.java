@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
-import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.telegram.Answer;
+import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
@@ -14,7 +14,9 @@ import mockwebserver3.junit5.internal.MockWebServerExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -22,13 +24,16 @@ import java.nio.charset.StandardCharsets;
 @ExtendWith(MockWebServerExtension.class)
 class StickerifyTest {
 
+	@TempDir
+	private File directory;
+
 	private ResourceHelper resources;
 
 	private MockWebServer server;
 
 	@BeforeEach
 	void setup() {
-		resources = new ResourceHelper();
+		resources = new ResourceHelper(directory);
 		server = new MockWebServer();
 	}
 
