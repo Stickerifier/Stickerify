@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assumptions.abort;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,21 +23,20 @@ public class TempFilesCleanupExtension implements AfterAllCallback {
 	private static void deleteTempFiles() throws IOException {
 		try (var files = Files.list(Path.of(System.getProperty("java.io.tmpdir")))) {
 			files.filter(Files::isRegularFile)
-					.map(Path::toFile)
 					.filter(TempFilesCleanupExtension::stickerifyFiles)
 					.forEach(TempFilesCleanupExtension::deleteFile);
 		}
 	}
 
-	private static boolean stickerifyFiles(File file) {
-		var fileName = file.getName();
+	private static boolean stickerifyFiles(Path path) {
+		var fileName = path.getFileName().toString();
 
 		return fileName.startsWith("Stickerify-") || fileName.startsWith("OriginalFile-");
 	}
 
-	private static void deleteFile(File file) {
+	private static void deleteFile(Path path) {
 		try {
-			Files.delete(file.toPath());
+			Files.delete(path);
 		} catch (IOException e) {
 			abort("The file could not be deleted from the system.");
 		}

@@ -26,8 +26,6 @@ public final class ProcessHelper {
 	 * </ul>
 	 */
 	public static Process executeCommand(final String[] command) throws TelegramApiException {
-		final var commandName = command[0];
-
 		try {
 			SEMAPHORE.acquire();
 			var process = new ProcessBuilder(command).start();
@@ -35,7 +33,7 @@ public final class ProcessHelper {
 
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";
-				throw new TelegramApiException("The command {} couldn't complete {}", commandName, reason);
+				throw new TelegramApiException("The command {} couldn't complete {}", command[0], reason);
 			}
 
 			return process;
