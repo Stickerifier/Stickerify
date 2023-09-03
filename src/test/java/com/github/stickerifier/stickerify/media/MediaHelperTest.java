@@ -54,7 +54,7 @@ class MediaHelperTest {
 		assertImageConsistency(result, 512, 512);
 	}
 
-	private void assertImageConsistency(File result, int expectedWidth, int expectedHeight) throws IOException {
+	private static void assertImageConsistency(File result, int expectedWidth, int expectedHeight) throws IOException {
 		var image = ImageIO.read(result);
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
@@ -102,10 +102,10 @@ class MediaHelperTest {
 		var startingVideo = resources.loadResource("long.mov");
 		var result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(result, 512, 288, 30F, 3_000L);
+		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
 	}
 
-	private void assertVideoConsistency(File result, int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws EncoderException {
+	private static void assertVideoConsistency(File result, int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws EncoderException {
 		var mediaInfo = new MultimediaObject(result, FFMPEG_LOCATOR).getInfo();
 		var videoInfo = mediaInfo.getVideo();
 		var videoSize = videoInfo.getSize();
