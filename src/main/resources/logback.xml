@@ -1,9 +1,10 @@
 <configuration>
 	<conversionRule conversionWord="msg" converterClass="com.github.stickerifier.stickerify.logger.SubstringHighlighter"/>
+	<conversionRule conversionWord="threadId" converterClass="com.github.stickerifier.stickerify.logger.ThreadIdConverter"/>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%highlight([%d{"dd/MM/YYYY HH:mm:ss.SSS' CET'", CET}] %-5level) %boldCyan(%-11logger{0}) %boldYellow(-) %msg%n%red(%ex{3})</pattern>
+			<pattern>%highlight([%d{"dd/MM/YYYY HH:mm:ss.SSS' CET'", CET}] %-5level) %boldCyan([%threadId] %-11logger{0}) %boldYellow(-) %msg%n%red(%ex)</pattern>
 		</encoder>
 	</appender>
 

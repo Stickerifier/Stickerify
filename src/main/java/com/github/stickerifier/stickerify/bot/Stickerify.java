@@ -48,12 +48,19 @@ public class Stickerify {
 	private final Executor executor;
 
 	/**
+	 * Instantiate the bot processing requests with virtual threads.
+	 *
 	 * @see Stickerify
 	 */
 	public Stickerify() {
 		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), Executors.newVirtualThreadPerTaskExecutor());
 	}
 
+	/**
+	 * Instantiate the bot processing requests with an arbitrary executor.
+	 *
+	 * @see Stickerify
+	 */
 	Stickerify(TelegramBot bot, Executor executor) {
 		this.bot = bot;
 		this.executor = executor;

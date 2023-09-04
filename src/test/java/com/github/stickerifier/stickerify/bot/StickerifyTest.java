@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
+import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@ClearTempFiles
 @ExtendWith(MockWebServerExtension.class)
 class StickerifyTest {
 
