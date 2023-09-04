@@ -59,23 +59,28 @@ public final class MediaHelper {
 	 */
 	public static File convert(File inputFile) throws TelegramApiException {
 		var mimeType = detectMimeType(inputFile);
-		if (isSupportedVideo(mimeType)) {
-			return convertToWebm(inputFile);
+
+		try {
+			if (isSupportedVideo(mimeType)) {
+				return convertToWebm(inputFile);
+			}
+
+			if (isAnimatedStickerCompliant(inputFile, mimeType)) {
+				LOGGER.atInfo().log("The animated sticker doesn't need conversion");
+
+				return null;
+			}
+
+			var image = toImage(inputFile);
+			if (image != null) {
+				return convertToPng(image, mimeType);
+			}
+		} catch (TelegramApiException e) {
+			LOGGER.atWarn().setCause(e).log("The file with {} MIME type could not be converted", mimeType);
+			throw e;
 		}
 
-		if (isAnimatedStickerCompliant(inputFile, mimeType)) {
-			LOGGER.atInfo().log("The animated sticker doesn't need conversion");
-
-			return null;
-		}
-
-		var image = toImage(inputFile);
-		if (image != null) {
-			return convertToPng(image, mimeType);
-		}
-
-		LOGGER.atWarn().log("The file with {} MIME type could not be converted", mimeType);
-		throw new TelegramApiException("Passed-in file is not supported");
+		throw new TelegramApiException("The file with {} MIME type is not supported", mimeType);
 	}
 
 	/**

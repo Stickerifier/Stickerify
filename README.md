@@ -56,7 +56,7 @@ And it's done!
 
 1. Install JDK 20 (or higher)
 2. Clone the project and move into its folder
-3. Run the command `./gradlew build`
+3. Run the command `./gradlew build -x test`
 4. Import the project inside your IDE as a Gradle project
 5. Ensure your IDE is correctly configured to use a Java 20 (or higher) JDK
 

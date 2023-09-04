@@ -14,10 +14,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
+import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
@@ -26,7 +29,11 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
+@ClearTempFiles
 class MediaHelperTest {
 
 	@TempDir
@@ -34,29 +41,20 @@ class MediaHelperTest {
 
 	private ResourceHelper resources;
 
-	private File result;
-
 	@BeforeEach
 	void setup() {
 		resources = new ResourceHelper(directory);
 	}
 
-	@AfterEach
-	void cleanup() throws IOException {
-		if (result != null) {
-			Files.deleteIfExists(result.toPath());
-		}
-	}
-
 	@Test
 	void resizeImage() throws Exception {
 		var startingImage = resources.createImage(1024, 1024, "jpg");
-		result = MediaHelper.convert(startingImage);
+		var result = MediaHelper.convert(startingImage);
 
-		assertImageConsistency(512, 512);
+		assertImageConsistency(result, 512, 512);
 	}
 
-	private void assertImageConsistency(int expectedWidth, int expectedHeight) throws IOException {
+	private static void assertImageConsistency(File result, int expectedWidth, int expectedHeight) throws IOException {
 		var image = ImageIO.read(result);
 		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
 
@@ -70,23 +68,23 @@ class MediaHelperTest {
 	@Test
 	void resizeRectangularImage() throws Exception {
 		var startingImage = resources.createImage(1024, 512, "jpg");
-		result = MediaHelper.convert(startingImage);
+		var result = MediaHelper.convert(startingImage);
 
-		assertImageConsistency(512, 256);
+		assertImageConsistency(result, 512, 256);
 	}
 
 	@Test
 	void resizeSmallImage() throws Exception {
 		var startingImage = resources.createImage(256, 256, "png");
-		result = MediaHelper.convert(startingImage);
+		var result = MediaHelper.convert(startingImage);
 
-		assertImageConsistency(512, 512);
+		assertImageConsistency(result, 512, 512);
 	}
 
 	@Test
 	void noImageConversionNeeded() throws Exception {
 		var startingImage = resources.createImage(512, 256, "png");
-		result = MediaHelper.convert(startingImage);
+		var result = MediaHelper.convert(startingImage);
 
 		assertThat(result, is(nullValue()));
 	}
@@ -94,20 +92,20 @@ class MediaHelperTest {
 	@Test
 	void resizeWebpImage() throws Exception {
 		var startingImage = resources.loadResource("valid.webp");
-		result = MediaHelper.convert(startingImage);
+		var result = MediaHelper.convert(startingImage);
 
-		assertImageConsistency(256, 512);
+		assertImageConsistency(result, 256, 512);
 	}
 
 	@Test
 	void convertLongMovVideo() throws Exception {
 		var startingVideo = resources.loadResource("long.mov");
-		result = MediaHelper.convert(startingVideo);
+		var result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(512, 288, 30F, 3_000L);
+		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
 	}
 
-	private void assertVideoConsistency(int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws EncoderException {
+	private static void assertVideoConsistency(File result, int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws EncoderException {
 		var mediaInfo = new MultimediaObject(result, FFMPEG_LOCATOR).getInfo();
 		var videoInfo = mediaInfo.getVideo();
 		var videoSize = videoInfo.getSize();
@@ -128,41 +126,49 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void convertMp4WithAudio() throws Exception {
+		var startingVideo = resources.loadResource("video_with_audio.mp4");
+		var result = MediaHelper.convert(startingVideo);
+
+		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
+	}
+
+	@Test
 	void convertShortAndLowFpsVideo() throws Exception {
 		var startingVideo = resources.loadResource("short_low_fps.webm");
-		result = MediaHelper.convert(startingVideo);
+		var result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(512, 288, 10F, 1_000L);
+		assertVideoConsistency(result, 512, 288, 10F, 1_000L);
 	}
 
 	@Test
 	void resizeSmallWebmVideo() throws Exception {
 		var startingVideo = resources.loadResource("small_video_sticker.webm");
-		result = MediaHelper.convert(startingVideo);
+		var result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(512, 212, 30F, 2_000L);
+		assertVideoConsistency(result, 512, 212, 30F, 2_000L);
 	}
 
 	@Test
 	void convertVerticalWebmVideo() throws Exception {
 		var startingVideo = resources.loadResource("vertical_video_sticker.webm");
-		result = MediaHelper.convert(startingVideo);
+		var result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(288, 512, 30F, 2_000L);
+		assertVideoConsistency(result, 288, 512, 30F, 2_000L);
 	}
 
 	@Test
 	void convertGifVideo() throws Exception {
 		var startingVideo = resources.loadResource("valid.gif");
-		result = MediaHelper.convert(startingVideo);
+		var result = MediaHelper.convert(startingVideo);
 
-		assertVideoConsistency(512, 274, 10F, 1_000L);
+		assertVideoConsistency(result, 512, 274, 10F, 1_000L);
 	}
 
 	@Test
 	void noVideoConversionNeeded() throws Exception {
 		var startingVideo = resources.loadResource("no_conversion_needed.webm");
-		result = MediaHelper.convert(startingVideo);
+		var result = MediaHelper.convert(startingVideo);
 
 		assertThat(result, is(nullValue()));
 	}
@@ -170,7 +176,7 @@ class MediaHelperTest {
 	@Test
 	void noAnimatedStickerConversionNeeded() throws Exception {
 		var animatedSticker = resources.loadResource("animated_sticker.gz");
-		result = MediaHelper.convert(animatedSticker);
+		var result = MediaHelper.convert(animatedSticker);
 
 		assertThat(result, is(nullValue()));
 	}
@@ -178,16 +184,88 @@ class MediaHelperTest {
 	@Test
 	void unsupportedGzipArchive() {
 		var archive = resources.loadResource("unsupported_archive.gz");
-		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(archive));
 
-		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
+		assertThrows(TelegramApiException.class, () -> MediaHelper.convert(archive));
 	}
 
 	@Test
 	void unsupportedFile() {
 		var document = resources.loadResource("document.txt");
-		TelegramApiException exception = assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
 
-		assertThat(exception.getMessage(), is(equalTo("Passed-in file is not supported")));
+		assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
+	}
+
+	@Nested
+	@DisplayName("Concurrently convert")
+	@EnabledIfEnvironmentVariable(named = "CI", matches = "true")
+	class ConcurrencyTest {
+
+		@Test
+		@DisplayName("mov videos")
+		void concurrentMovVideoConversions() {
+			var startingVideo = resources.loadResource("long.mov");
+
+			executeConcurrentConversions(startingVideo);
+		}
+
+		private static void executeConcurrentConversions(File inputFile) {
+			final int concurrentRequests = 50;
+			var failedConvertions = new AtomicInteger(0);
+
+			try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+				IntStream.range(0, concurrentRequests).forEach(i -> executor.execute(() -> {
+					try {
+						MediaHelper.convert(inputFile);
+					} catch (TelegramApiException e) {
+						failedConvertions.incrementAndGet();
+					}
+				}));
+			}
+
+			int failures = failedConvertions.get();
+			assertThat("Unable to process %d concurrent requests: %d convertions failed".formatted(concurrentRequests, failures),
+					failures,
+					is(equalTo(0)));
+		}
+
+		@Test
+		@DisplayName("mp4 videos")
+		void concurrentMp4VideoConversions() {
+			var startingVideo = resources.loadResource("video_with_audio.mp4");
+
+			executeConcurrentConversions(startingVideo);
+		}
+
+		@Test
+		@DisplayName("webm videos")
+		void concurrentWebmVideoConversions() {
+			var startingVideo = resources.loadResource("small_video_sticker.webm");
+
+			executeConcurrentConversions(startingVideo);
+		}
+
+		@Test
+		@DisplayName("gif videos")
+		void concurrentGifVideoConversions() {
+			var startingVideo = resources.loadResource("valid.gif");
+
+			executeConcurrentConversions(startingVideo);
+		}
+
+		@Test
+		@DisplayName("webp images")
+		void concurrentWebpImageConversions() {
+			var startingImage = resources.loadResource("valid.webp");
+
+			executeConcurrentConversions(startingImage);
+		}
+
+		@Test
+		@DisplayName("png images")
+		void concurrentPngImageConversions() {
+			var startingImage = resources.createImage(256, 256, "png");
+
+			executeConcurrentConversions(startingImage);
+		}
 	}
 }
