@@ -25,4 +25,3 @@ jobs:
           use-caches: false
           post-pr-comment: false
           pr-mode: false
-          upload-result: true

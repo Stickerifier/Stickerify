@@ -1,7 +1,7 @@
 version: "1.0"
 profile:
   name: qodana.recommended
-linter: jetbrains/qodana-jvm:latest
+linter: jetbrains/qodana-jvm:2023.2-eap
 bootstrap: |
   cat > .idea/misc.xml << \EOF
   <?xml version="1.0" encoding="UTF-8"?>
