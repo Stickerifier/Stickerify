@@ -66,15 +66,20 @@ public record TelegramRequest(Message message) {
 	public String getDescription() {
 		var description = "request from " + getUsername();
 
-		if (START_COMMAND.equals(message.text())) {
+		if (isNewUser()) {
 			description += NEW_USER;
 		}
 
 		return description;
 	}
 
-	private String getUsername() {
-		return Optional.ofNullable(message.from().username()).orElse("<anonymous>");
+	public boolean isNewUser() {
+		return START_COMMAND.equals(message.text());
+	}
+
+	public String getUsername() {
+		var user = message.from();
+		return Optional.ofNullable(user.username()).orElse(String.valueOf(user.id()));
 	}
 
 	public Answer getAnswerMessage() {

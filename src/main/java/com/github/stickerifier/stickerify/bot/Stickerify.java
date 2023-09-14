@@ -74,7 +74,12 @@ public class Stickerify {
 		updates.forEach(update -> executor.execute(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
-				LOGGER.atInfo().log("Received {}", request.getDescription());
+				LOGGER.atInfo()
+						.addKeyValue("threadId", Thread.currentThread().threadId())
+						.addKeyValue("chatId", request.getChatId())
+						.addKeyValue("userId", request.getUsername())
+						.addKeyValue("newUser", request.isNewUser())
+						.log("Received {}", request.getDescription());
 
 				answer(request);
 			}
