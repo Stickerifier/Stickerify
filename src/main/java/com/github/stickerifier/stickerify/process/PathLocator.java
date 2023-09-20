@@ -21,7 +21,7 @@ public class PathLocator implements ProcessLocator {
 
 	public PathLocator() {
 		try {
-			ffmpegLocation = ProcessHelper.getCommandOutput(FIND_FFMPEG).trim();
+			ffmpegLocation = ProcessHelper.getCommandOutput(FIND_FFMPEG).split(System.lineSeparator())[0];
 
 			LOGGER.atInfo().log("FFmpeg is installed at {}", ffmpegLocation);
 		} catch (TelegramApiException e) {
