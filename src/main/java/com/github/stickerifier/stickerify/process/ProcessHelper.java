@@ -6,6 +6,7 @@ import com.github.stickerifier.stickerify.telegram.exception.TelegramApiExceptio
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
@@ -33,7 +34,7 @@ public final class ProcessHelper {
 
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";
-				throw new TelegramApiException("The command {} couldn't complete {}", command[0], reason);
+				throw new TelegramApiException("The command {} couldn't complete {}:\n{}", command[0], reason, Arrays.toString(command));
 			}
 
 			return process;
