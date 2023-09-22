@@ -353,7 +353,7 @@ public final class MediaHelper {
 
 		var ffmpegCommand = new String[] {
 				"ffmpeg",
-				"-i", quote(file.getAbsolutePath()),
+				"-i", file.getAbsolutePath(),
 				"-vf", "scale=" + videoDetails.width() + ":" + videoDetails.height(),
 				"-r", videoDetails.frameRate(),
 				"-c:v", "libvpx-" + VP9_CODEC,
@@ -362,16 +362,12 @@ public final class MediaHelper {
 				"-g", "60",
 				"-an",
 				"-t", videoDetails.duration(),
-				"-y", quote(webmVideo.getAbsolutePath())
+				"-y", webmVideo.getAbsolutePath()
 		};
 
 		ProcessHelper.executeCommand(ffmpegCommand);
 
 		return webmVideo;
-	}
-
-	private static String quote(String path) {
-		return System.getProperty("os.name").contains("Windows") ?  "\"" + path + "\"" : path;
 	}
 
 	/**
