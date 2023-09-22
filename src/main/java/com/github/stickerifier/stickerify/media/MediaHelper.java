@@ -354,7 +354,8 @@ public final class MediaHelper {
 		var ffmpegCommand = new String[] {
 				"ffmpeg",
 				"-i", file.getAbsolutePath(),
-				"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
+				"-vf", "scale=" + videoDetails.width() + ":" + videoDetails.height(),
+				"-r", videoDetails.frameRate(),
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-b:v", "256k",
 				"-crf", "32",
@@ -385,10 +386,10 @@ public final class MediaHelper {
 		int width = isWidthBigger ? MAX_SIZE : PRESERVE_ASPECT_RATIO;
 		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIZE;
 
-		return new ResultingVideoDetails(width, height, frameRate, String.valueOf(duration));
+		return new ResultingVideoDetails(width, height, String.valueOf(frameRate), String.valueOf(duration));
 	}
 
-	private record ResultingVideoDetails(int width, int height, float frameRate, String duration) {}
+	private record ResultingVideoDetails(int width, int height, String frameRate, String duration) {}
 
 	private MediaHelper() {
 		throw new UnsupportedOperationException();
