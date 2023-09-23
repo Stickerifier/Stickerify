@@ -12,7 +12,8 @@ import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
 
-	private static final Semaphore SEMAPHORE = new Semaphore(5);
+	private static final int MAX_CONCURRENT_PROCESSES = System.getProperty("os.name").contains("Windows") ? 4 : 5;
+	private static final Semaphore SEMAPHORE = new Semaphore(MAX_CONCURRENT_PROCESSES);
 
 	/**
 	 * Executes passed-in command and ensures it completed successfully.
