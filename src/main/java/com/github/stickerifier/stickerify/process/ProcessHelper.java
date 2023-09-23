@@ -1,12 +1,12 @@
 package com.github.stickerifier.stickerify.process;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
@@ -27,14 +27,16 @@ public final class ProcessHelper {
 	 * </ul>
 	 */
 	public static Process executeCommand(final String[] command) throws TelegramApiException {
+		Process process = null;
 		try {
 			SEMAPHORE.acquire();
-			var process = new ProcessBuilder(command).start();
+			process = new ProcessBuilder(command).start();
 			var processExited = process.waitFor(1, MINUTES);
 
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";
-				throw new TelegramApiException("The command {} couldn't complete {}:\n{}", command[0], reason, Arrays.toString(command));
+				var output = new String(process.getErrorStream().readAllBytes(), UTF_8);
+				throw new TelegramApiException("The command {} couldn't complete {}:\n{}", command[0], reason, output);
 			}
 
 			return process;
@@ -42,6 +44,7 @@ public final class ProcessHelper {
 			throw new TelegramApiException(e);
 		} finally {
 			SEMAPHORE.release();
+			Objects.requireNonNull(process).destroy();
 		}
 	}
 
@@ -57,7 +60,7 @@ public final class ProcessHelper {
 		var process = executeCommand(command);
 
 		try {
-			return new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+			return new String(process.getInputStream().readAllBytes(), UTF_8);
 		} catch (IOException e) {
 			throw new TelegramApiException(e);
 		}
