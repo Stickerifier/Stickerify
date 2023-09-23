@@ -6,6 +6,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.Semaphore;
 
@@ -28,6 +29,7 @@ public final class ProcessHelper {
 	 */
 	public static String executeCommand(final String[] command) throws TelegramApiException {
 		Process process = null;
+
 		try {
 			SEMAPHORE.acquire();
 			process = new ProcessBuilder(command).start();
@@ -35,17 +37,21 @@ public final class ProcessHelper {
 
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";
-				var output = new String(process.getErrorStream().readAllBytes(), UTF_8);
+				var output = toString(process.getErrorStream());
 				throw new TelegramApiException("The command {} couldn't complete {}:\n{}", command[0], reason, output);
 			}
 
-			return new String(process.getInputStream().readAllBytes(), UTF_8);
+			return toString(process.getInputStream());
 		} catch (IOException | InterruptedException e) {
 			throw new TelegramApiException(e);
 		} finally {
 			SEMAPHORE.release();
 			Objects.requireNonNull(process).destroy();
 		}
+	}
+
+	private static String toString(InputStream stream) throws IOException {
+		return new String(stream.readAllBytes(), UTF_8);
 	}
 
 	private ProcessHelper() {
