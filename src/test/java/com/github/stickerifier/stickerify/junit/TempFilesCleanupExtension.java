@@ -39,6 +39,7 @@ public class TempFilesCleanupExtension implements AfterAllCallback {
 	private static void deleteFile(Path path) {
 		try {
 			Files.delete(path);
+
 			LOGGER.atTrace().log("The file {} has been deleted", path.getFileName());
 		} catch (IOException e) {
 			LOGGER.atWarn().setCause(e).log("The file {} could not be deleted from the system", path.getFileName());

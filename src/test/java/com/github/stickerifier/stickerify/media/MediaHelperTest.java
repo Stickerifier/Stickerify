@@ -210,22 +210,22 @@ class MediaHelperTest {
 
 		private static void executeConcurrentConversions(File inputFile) {
 			final int concurrentRequests = 50;
-			var failedConvertions = new AtomicInteger(0);
+			var failedConversions = new AtomicInteger(0);
 
 			try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 				IntStream.range(0, concurrentRequests).forEach(i -> executor.execute(() -> {
 					try {
 						MediaHelper.convert(inputFile);
 					} catch (TelegramApiException e) {
-						failedConvertions.incrementAndGet();
+						failedConversions.incrementAndGet();
 					}
 				}));
 			}
 
-			int failures = failedConvertions.get();
-			assertThat("Unable to process %d concurrent requests: %d convertions failed".formatted(concurrentRequests, failures),
-					failures,
-					is(equalTo(0)));
+			int failures = failedConversions.get();
+			var errorMessage = "Unable to process %d concurrent requests: %d conversions failed".formatted(concurrentRequests, failures);
+
+			assertThat(errorMessage, failures, is(equalTo(0)));
 		}
 
 		@Test

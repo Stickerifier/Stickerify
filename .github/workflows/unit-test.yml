@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  gradle:
+  tests:
     name: Execute unit tests
     runs-on: ${{ matrix.os }}
     strategy:

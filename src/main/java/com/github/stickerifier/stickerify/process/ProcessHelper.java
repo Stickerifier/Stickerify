@@ -12,12 +12,14 @@ import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
 
-	private static final int MAX_CONCURRENT_PROCESSES = System.getProperty("os.name").contains("Windows") ? 4 : 5;
+	static final boolean IS_WINDOWS = System.getProperty("os.name").contains("Windows");
+	private static final int MAX_CONCURRENT_PROCESSES = IS_WINDOWS ? 4 : 5;
 	private static final Semaphore SEMAPHORE = new Semaphore(MAX_CONCURRENT_PROCESSES);
 
 	/**
 	 * Executes passed-in command and ensures it completed successfully.
-	 * The method allows at most 5 processes to run concurrently.
+	 * Based on the operating system, the method limits the number of processes running concurrently:
+	 * on Windows they will be at most 4, on every other system they will be at most 5.
 	 *
 	 * @param command the command to be executed
 	 * @return the output of the command
@@ -39,7 +41,7 @@ public final class ProcessHelper {
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";
 				var output = toString(process.getErrorStream());
-				throw new TelegramApiException("The command {} couldn't complete {}:\n{}", command[0], reason, output);
+				throw new TelegramApiException("The command {} couldn't complete {}: {}", command[0], reason, output);
 			}
 
 			return toString(process.getInputStream());
