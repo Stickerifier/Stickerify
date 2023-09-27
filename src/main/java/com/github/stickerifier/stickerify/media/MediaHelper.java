@@ -353,6 +353,7 @@ public final class MediaHelper {
 
 		var ffmpegCommand = new String[] {
 				"ffmpeg",
+				"-v", "error",
 				"-i", file.getAbsolutePath(),
 				"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
 				"-c:v", "libvpx-" + VP9_CODEC,

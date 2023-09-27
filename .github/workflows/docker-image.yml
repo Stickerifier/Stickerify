@@ -8,8 +8,8 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build Docker image
+  docker:
+    name: Build and upload Docker image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code changes
