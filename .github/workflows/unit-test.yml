@@ -21,11 +21,11 @@ jobs:
       - name: Checkout code changes
         uses: actions/checkout@v4
 
-      - name: Setup Java 20
+      - name: Setup Java 21
         uses: actions/setup-java@v3
         with:
-          java-version: 20
-          distribution: temurin
+          java-version: 21
+          distribution: openjdk
 
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v2

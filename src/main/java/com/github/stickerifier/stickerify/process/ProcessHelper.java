@@ -7,7 +7,6 @@ import com.github.stickerifier.stickerify.telegram.exception.TelegramApiExceptio
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
@@ -49,7 +48,9 @@ public final class ProcessHelper {
 			throw new TelegramApiException(e);
 		} finally {
 			SEMAPHORE.release();
-			Objects.requireNonNull(process).destroy();
+			if (process != null) {
+				process.destroy();
+			}
 		}
 	}
 

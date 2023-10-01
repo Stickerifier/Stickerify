@@ -3,12 +3,11 @@
 .gradle/
 .idea/
 build/
-gradle/wrapper/
 src/test/
 src/main/resources/images/
 .gitignore
 *.md
-gradlew*
+gradlew.bat
 LICENSE
 .editorconfig
 Dockerfile
