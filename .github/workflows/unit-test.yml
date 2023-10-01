@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 21
-          distribution: openjdk
+          distribution: temurin
 
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v2
