@@ -7,12 +7,11 @@ import com.github.stickerifier.stickerify.telegram.exception.TelegramApiExceptio
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
 
-	static final boolean IS_WINDOWS = System.getProperty("os.name").contains("Windows");
+	static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
 	private static final int MAX_CONCURRENT_PROCESSES = IS_WINDOWS ? 4 : 5;
 	private static final Semaphore SEMAPHORE = new Semaphore(MAX_CONCURRENT_PROCESSES);
 
@@ -49,7 +48,9 @@ public final class ProcessHelper {
 			throw new TelegramApiException(e);
 		} finally {
 			SEMAPHORE.release();
-			Objects.requireNonNull(process).destroy();
+			if (process != null) {
+				process.destroy();
+			}
 		}
 	}
 

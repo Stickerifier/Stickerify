@@ -1,18 +1,19 @@
-FROM gradle:8.3-jdk17 AS builder
+FROM openjdk:21 AS builder
 WORKDIR /app
-COPY settings.gradle build.gradle ./
-COPY gradle/libs.versions.toml ./gradle/
+COPY settings.gradle build.gradle gradlew ./
+COPY gradle ./gradle
+RUN \
+  --mount=type=cache,target=/var/cache/dnf \
+  microdnf install findutils
 RUN \
   --mount=type=cache,target=/home/gradle/.gradle/caches \
-  gradle dependencies --no-daemon
+  ./gradlew dependencies --no-daemon
 COPY . .
-RUN gradle shadowJar --no-daemon
+RUN ./gradlew shadowJar --no-daemon
 
-FROM eclipse-temurin:20 AS bot
+FROM openjdk:21 AS bot
 WORKDIR /app
-RUN \
-  --mount=type=cache,target=/var/cache/apt \
-  apt-get -y update && apt-get -y upgrade && \
-  apt-get install -y --no-install-recommends ffmpeg
+COPY --from=mwader/static-ffmpeg:6.0 /ffmpeg /usr/local/bin/
 COPY --from=builder /app/build/libs .
+ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 CMD ["java", "--enable-preview", "-jar", "Stickerify-shadow.jar"]
