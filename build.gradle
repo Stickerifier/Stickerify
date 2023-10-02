@@ -22,6 +22,12 @@ dependencies {
     testImplementation libs.hamcrest
     testImplementation libs.junit
     testImplementation libs.mockwebserver
+
+    constraints {
+        implementation(libs.okio) {
+            because 'CVE-2023-3635: Okio Signed to Unsigned Conversion Error vulnerability'
+        }
+    }
 }
 
 group = 'com.github.stickerifier'
@@ -47,7 +53,7 @@ application {
 }
 
 shadowJar {
-    archiveBaseName.set('Stickerify')
-    archiveClassifier.set('shadow')
-    archiveVersion.set('')
+    archiveBaseName = 'Stickerify'
+    archiveClassifier = 'shadow'
+    archiveVersion = ''
 }
