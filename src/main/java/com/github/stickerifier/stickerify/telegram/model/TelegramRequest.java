@@ -35,11 +35,7 @@ public record TelegramRequest(Message message) {
 				.filter(Objects::nonNull)
 				.findFirst()
 				.map(inputFile -> switch (inputFile) {
-					case PhotoSize[] photos when photos.length > 0 -> Arrays.stream(photos)
-							.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
-							.filter(TelegramFile::canBeDownloaded)
-							.max(comparing(TelegramFile::size))
-							.orElse(TelegramFile.TOO_LARGE);
+					case PhotoSize[] photos when photos.length > 0 -> getTelegramFile(photos);
 					case Document document -> new TelegramFile(document.fileId(), document.fileSize());
 					case Sticker sticker -> new TelegramFile(sticker.fileId(), sticker.fileSize());
 					case Video video -> new TelegramFile(video.fileId(), video.fileSize());
@@ -47,6 +43,14 @@ public record TelegramRequest(Message message) {
 					default -> TelegramFile.NOT_SUPPORTED;
 				})
 				.orElse(null);
+	}
+
+	private TelegramFile getTelegramFile(PhotoSize[] photos) {
+		return Arrays.stream(photos)
+				.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
+				.filter(TelegramFile::canBeDownloaded)
+				.max(comparing(TelegramFile::size))
+				.orElse(TelegramFile.TOO_LARGE);
 	}
 
 	public Long getChatId() {
@@ -74,7 +78,9 @@ public record TelegramRequest(Message message) {
 	}
 
 	private String getUsername() {
-		return Optional.ofNullable(message.from().username()).orElse("<anonymous>");
+		return Optional.ofNullable(message.from().username())
+				.map(username -> "@" + username)
+				.orElse("id:" + message.from().id());
 	}
 
 	public Answer getAnswerMessage() {
