@@ -161,7 +161,7 @@ public class Stickerify {
 		try {
 			execute(answerWithText);
 		} catch (TelegramApiException e) {
-			LOGGER.atError().log("Unable to reply to {} with {}", request, answerWithText);
+			LOGGER.atError().setCause(e).log("Unable to reply to {}", request);
 		}
 	}
 
@@ -172,7 +172,7 @@ public class Stickerify {
 			return response;
 		}
 
-		throw new TelegramApiException("Telegram couldn't execute the {} request", request.getMethod());
+		throw new TelegramApiException("Telegram couldn't execute the {} request: {}", request.getMethod(), response.description());
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
