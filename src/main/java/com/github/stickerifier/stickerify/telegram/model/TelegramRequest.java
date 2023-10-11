@@ -29,13 +29,9 @@ public record TelegramRequest(Message message) {
 	private static final String HELP_COMMAND = "/help";
 
 	public TelegramFile getFile() {
-		return Stream.of(message.photo(), message.document(), message.sticker(),
-						message.video(), message.videoNote(),
-						message.audio(), message.voice())
-				.filter(Objects::nonNull)
-				.findFirst()
-				.map(inputFile -> switch (inputFile) {
-					case PhotoSize[] photos when photos.length > 0 -> getTelegramFile(photos);
+		return getMessageMedia()
+				.map(media -> switch (media) {
+					case PhotoSize[] photos when photos.length > 0 -> getBestPhoto(photos);
 					case Document document -> new TelegramFile(document.fileId(), document.fileSize());
 					case Sticker sticker -> new TelegramFile(sticker.fileId(), sticker.fileSize());
 					case Video video -> new TelegramFile(video.fileId(), video.fileSize());
@@ -45,7 +41,15 @@ public record TelegramRequest(Message message) {
 				.orElse(null);
 	}
 
-	private TelegramFile getTelegramFile(PhotoSize[] photos) {
+	private Optional<?> getMessageMedia() {
+		return Stream.of(message.photo(), message.document(), message.sticker(),
+						message.video(), message.videoNote(),
+						message.audio(), message.voice())
+				.filter(Objects::nonNull)
+				.findFirst();
+	}
+
+	private TelegramFile getBestPhoto(PhotoSize[] photos) {
 		return Arrays.stream(photos)
 				.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
 				.filter(TelegramFile::canBeDownloaded)
