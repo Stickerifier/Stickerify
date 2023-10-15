@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.github.stickerifier.stickerify.ResourceHelper;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
-import com.pengrad.telegrambot.model.Animation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -183,12 +182,13 @@ class MediaHelperTest {
 	}
 
 	@Test
-	void isAnimationLowFpsCompliant() throws Exception{
-		var animatedSticker= resources.loadResource("low_fps_animated_sticker.tgs");
+	void noLowFpsAnimatedStickerConversionNeeded() throws Exception {
+		var animatedSticker = resources.loadResource("low_fps_animated_sticker.tgs");
 		var result = MediaHelper.convert(animatedSticker);
-		assertThat(result,is(nullValue()));
 
+		assertThat(result,is(nullValue()));
 	}
+
 	@Test
 	void unsupportedGzipArchive() {
 		var archive = resources.loadResource("unsupported_archive.gz");
