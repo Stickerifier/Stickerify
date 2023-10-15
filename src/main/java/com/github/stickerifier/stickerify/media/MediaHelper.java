@@ -149,7 +149,7 @@ public final class MediaHelper {
 	 * @return {@code true} if the animation is compliant
 	 */
 	private static boolean isAnimationCompliant(AnimationDetails animation) {
-		return animation != null && animation.frameRate() == ANIMATION_FRAMERATE
+		return animation != null && animation.frameRate() <= ANIMATION_FRAMERATE
 				&& animation.end() - animation.start() <= MAX_ANIMATION_DURATION_SECONDS
 				&& animation.width() == MAX_SIZE && animation.width() == animation.height();
 	}

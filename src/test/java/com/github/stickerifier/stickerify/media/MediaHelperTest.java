@@ -182,6 +182,14 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void noLowFpsAnimatedStickerConversionNeeded() throws Exception {
+		var animatedSticker = resources.loadResource("low_fps_animated_sticker.tgs");
+		var result = MediaHelper.convert(animatedSticker);
+
+		assertThat(result, is(nullValue()));
+	}
+
+	@Test
 	void unsupportedGzipArchive() {
 		var archive = resources.loadResource("unsupported_archive.gz");
 
