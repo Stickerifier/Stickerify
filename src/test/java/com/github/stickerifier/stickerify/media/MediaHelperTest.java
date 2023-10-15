@@ -186,7 +186,7 @@ class MediaHelperTest {
 		var animatedSticker = resources.loadResource("low_fps_animated_sticker.tgs");
 		var result = MediaHelper.convert(animatedSticker);
 
-		assertThat(result,is(nullValue()));
+		assertThat(result, is(nullValue()));
 	}
 
 	@Test
