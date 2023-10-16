@@ -175,7 +175,7 @@ class MediaHelperTest {
 
 	@Test
 	void noAnimatedStickerConversionNeeded() throws Exception {
-		var animatedSticker = resources.loadResource("animated_sticker.gz");
+		var animatedSticker = resources.loadResource("animated_sticker.tgs");
 		var result = MediaHelper.convert(animatedSticker);
 
 		assertThat(result, is(nullValue()));

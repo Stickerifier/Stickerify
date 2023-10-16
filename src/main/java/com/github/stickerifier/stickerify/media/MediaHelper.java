@@ -1,9 +1,9 @@
 package com.github.stickerifier.stickerify.media;
 
-import static com.github.stickerifier.stickerify.media.MediaConstraints.ANIMATION_FRAMERATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAMERATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
@@ -133,13 +133,11 @@ public final class MediaHelper {
 		return false;
 	}
 
-	private record AnimationDetails(
-			@SerializedName("w") int width,
-			@SerializedName("h") int height,
-			@SerializedName("fr") int frameRate,
-			@SerializedName("ip") int start,
-			@SerializedName("op") int end
-	) {}
+	private record AnimationDetails(@SerializedName("w") int width, @SerializedName("h") int height, @SerializedName("fr") int frameRate, @SerializedName("ip") float start, @SerializedName("op") float end) {
+		private float duration() {
+			return (end() - start()) / frameRate();
+		}
+	}
 
 	/**
 	 * Checks if passed-in animation is already compliant with Telegram's requisites.
@@ -149,9 +147,10 @@ public final class MediaHelper {
 	 * @return {@code true} if the animation is compliant
 	 */
 	private static boolean isAnimationCompliant(AnimationDetails animation) {
-		return animation != null && animation.frameRate() <= ANIMATION_FRAMERATE
-				&& animation.end() - animation.start() <= MAX_ANIMATION_DURATION_SECONDS
-				&& animation.width() == MAX_SIZE && animation.width() == animation.height();
+		return animation != null
+				&& animation.frameRate() <= MAX_ANIMATION_FRAMERATE
+				&& animation.duration() <= MAX_ANIMATION_DURATION_SECONDS
+				&& animation.width() == MAX_SIZE && animation.height() == MAX_SIZE;
 	}
 
 	/**
