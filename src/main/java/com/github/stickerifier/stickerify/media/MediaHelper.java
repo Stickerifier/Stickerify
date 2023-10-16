@@ -135,7 +135,7 @@ public final class MediaHelper {
 
 	private record AnimationDetails(@SerializedName("w") int width, @SerializedName("h") int height, @SerializedName("fr") int frameRate, @SerializedName("ip") float start, @SerializedName("op") float end) {
 		private float duration() {
-			return (end - start) / frameRate;
+			return (end() - start()) / frameRate();
 		}
 	}
 
