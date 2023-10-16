@@ -31,8 +31,8 @@ jobs:
           images: |
             rob93c/stickerify
           tags: |
-            type=ref,event=latest,enable=${{ github.ref != 'refs/heads/main' }}
-            type=ref,event=branch
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch,enable=${{ github.ref != 'refs/heads/main' }}
             type=ref,event=pr
 
       - name: Upload Docker image
