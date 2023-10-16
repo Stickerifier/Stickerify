@@ -16,8 +16,8 @@ public final class MediaConstraints {
 	static final String MATROSKA_FORMAT = "matroska";
 	static final long MAX_VIDEO_FILE_SIZE = 256_000L;
 	static final long MAX_ANIMATION_FILE_SIZE = 64_000L;
-	static final int ANIMATION_FRAMERATE = 60;
-	static final int MAX_ANIMATION_DURATION_SECONDS = 180;
+	static final int MAX_ANIMATION_FRAMERATE = 60;
+	static final int MAX_ANIMATION_DURATION_SECONDS = 3;
 
 	private MediaConstraints() {
 		throw new UnsupportedOperationException();

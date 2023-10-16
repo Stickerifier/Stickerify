@@ -111,8 +111,8 @@ class StickerifyTest {
 	@Test
 	void fileAlreadyValid() throws Exception {
 		server.enqueue(MockResponses.ANIMATED_STICKER);
-		server.enqueue(MockResponses.fileInfo("animated_sticker.gz"));
-		server.enqueue(MockResponses.fileDownload(resources.loadResource("animated_sticker.gz")));
+		server.enqueue(MockResponses.fileInfo("animated_sticker.tgs"));
+		server.enqueue(MockResponses.fileDownload(resources.loadResource("animated_sticker.tgs")));
 
 		startBot();
 
@@ -121,10 +121,10 @@ class StickerifyTest {
 
 		var getFile = server.takeRequest();
 		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=animated_sticker.gz", getFile.getBody().readUtf8());
+		assertEquals("file_id=animated_sticker.tgs", getFile.getBody().readUtf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/animated_sticker.gz", download.getPath());
+		assertEquals("/files/token/animated_sticker.tgs", download.getPath());
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());

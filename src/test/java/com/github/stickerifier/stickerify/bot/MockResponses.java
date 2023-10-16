@@ -103,7 +103,7 @@ public final class MockResponses {
 							id: 1
 						},
 						sticker: {
-							file_id: "animated_sticker.gz",
+							file_id: "animated_sticker.tgs",
 							file_size: 64000
 						}
 					}
