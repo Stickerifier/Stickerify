@@ -1,6 +1,6 @@
 plugins {
+    alias(libs.plugins.runtime)
     alias(libs.plugins.shadow)
-    id 'application'
     id 'java'
 }
 
@@ -50,6 +50,11 @@ test {
 
 application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
+}
+
+runtime {
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+    modules = ['java.base', 'java.desktop', 'java.naming', 'java.sql']
 }
 
 shadowJar {

@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk AS builder
+FROM eclipse-temurin AS builder
 WORKDIR /app
 COPY settings.gradle build.gradle gradlew ./
 COPY gradle ./gradle
@@ -7,9 +7,9 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
 COPY . .
 RUN ./gradlew shadowJar --no-daemon
 
-FROM eclipse-temurin:21-jre-alpine AS bot
-WORKDIR /app
+FROM gcr.io/distroless/base AS bot
+COPY --from=builder /app/build/jre ./jre
 COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=mwader/static-ffmpeg:6.0 /ffmpeg /usr/local/bin/
 ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
-CMD ["java", "-jar", "Stickerify-shadow.jar"]
+CMD ["jre/bin/java", "-jar", "Stickerify-shadow.jar"]

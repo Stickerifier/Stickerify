@@ -5,6 +5,7 @@
 build/
 src/test/
 src/main/resources/images/
+.gitattributes
 .gitignore
 *.md
 gradlew.bat
