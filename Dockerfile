@@ -12,4 +12,4 @@ COPY --from=builder /app/build/jre ./jre
 COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=mwader/static-ffmpeg:6.0 /ffmpeg /usr/local/bin/
 ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
-CMD ["./jre/bin/java", "-jar", "Stickerify-shadow.jar"]
+CMD ["jre/bin/java", "-jar", "Stickerify-shadow.jar"]
