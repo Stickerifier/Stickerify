@@ -24,6 +24,8 @@ public final class ResourceHelper {
 			ImageIO.write(image, extension, file);
 		} catch (IOException e) {
 			abort("Image could not be written to file [%s].".formatted(file.getName()));
+		} finally {
+			image.flush();
 		}
 
 		return file;
