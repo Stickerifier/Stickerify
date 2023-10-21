@@ -204,13 +204,13 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
 	private static File convertToPng(BufferedImage image, String mimeType) throws TelegramApiException {
-		if (isImageCompliant(image, mimeType)) {
-			LOGGER.atInfo().log("The image doesn't need conversion");
-
-			return null;
-		}
-
 		try {
+			if (isImageCompliant(image, mimeType)) {
+				LOGGER.atInfo().log("The image doesn't need conversion");
+
+				return null;
+			}
+
 			return createPngFile(resizeImage(image));
 		} finally {
 			image.flush();
