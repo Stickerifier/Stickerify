@@ -74,7 +74,7 @@ public record TelegramRequest(Message message) {
 	public String getDescription() {
 		var description = "request from " + getUsername();
 
-		if (START_COMMAND.equals(message.text())) {
+		if (START_COMMAND.equalsIgnoreCase(message.text())) {
 			description += NEW_USER;
 		}
 
@@ -88,11 +88,12 @@ public record TelegramRequest(Message message) {
 	}
 
 	public Answer getAnswerMessage() {
-		return isHelpCommand() ? HELP : ABOUT;
+		return isHelpOrStartCommand() ? HELP : ABOUT;
 	}
 
-	private boolean isHelpCommand() {
-		return HELP_COMMAND.equalsIgnoreCase(message.text());
+	private boolean isHelpOrStartCommand() {
+		return HELP_COMMAND.equalsIgnoreCase(message.text()) ||
+				START_COMMAND.equalsIgnoreCase(message.text());
 	}
 
 	@Override
