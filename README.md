@@ -35,7 +35,7 @@ Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answe
     style B fill: #2889ba, stroke: #e0e0e0, color: #e0e0e0
     C -->|Yes| D{Does file need conversion?}
     C -->|No| E(Error message)
-    B -->|Request has only text| F{Is help command?}
+    B -->|Request has only text| F{Is help or start command?}
     F -->|Yes| G(Show bot usage)
     F -->|No| H(About message)
     D -->|Yes| J(Convert file)

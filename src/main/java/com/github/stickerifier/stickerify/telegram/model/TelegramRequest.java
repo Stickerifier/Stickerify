@@ -88,11 +88,12 @@ public record TelegramRequest(Message message) {
 	}
 
 	public Answer getAnswerMessage() {
-		return isHelpCommand() ? HELP : ABOUT;
+		return isHelpOrStartCommand() ? HELP : ABOUT;
 	}
 
-	private boolean isHelpCommand() {
-		return HELP_COMMAND.equalsIgnoreCase(message.text());
+	private boolean isHelpOrStartCommand() {
+		return HELP_COMMAND.equalsIgnoreCase(message.text())
+				|| START_COMMAND.equals(message.text());
 	}
 
 	@Override

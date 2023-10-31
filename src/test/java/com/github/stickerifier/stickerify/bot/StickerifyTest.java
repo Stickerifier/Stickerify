@@ -48,7 +48,7 @@ class StickerifyTest {
 
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
-		assertResponseContainsMessage(sendMessage, Answer.ABOUT);
+		assertResponseContainsMessage(sendMessage, Answer.HELP);
 	}
 
 	private void startBot() {
