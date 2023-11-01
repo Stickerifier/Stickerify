@@ -3,7 +3,7 @@ profile:
   name: qodana.recommended
 include:
   - name: VulnerableLibrariesGlobal
-linter: jetbrains/qodana-jvm:2023.2
+linter: jetbrains/qodana-jvm:2023.3-eap
 bootstrap: |
   cat > .idea/misc.xml << \EOF
   <?xml version="1.0" encoding="UTF-8"?>
