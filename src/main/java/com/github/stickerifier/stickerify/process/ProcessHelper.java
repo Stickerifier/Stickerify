@@ -54,7 +54,14 @@ public final class ProcessHelper {
 		}
 	}
 
-	private static String readStream(InputStream stream) throws IOException {
+	/**
+	 * Processes the content of the stream and retrieves its UTF-8 string representation.
+	 *
+	 * @param stream the stream to be decoded
+	 * @return the UTF-8 representation of passed-in stream
+	 * @throws IOException if an error occurs reading stream's bytes
+	 */
+	public static String readStream(InputStream stream) throws IOException {
 		return new String(stream.readAllBytes(), UTF_8);
 	}
 
