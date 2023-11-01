@@ -211,12 +211,12 @@ class MediaHelperTest {
 		@Test
 		@DisplayName("mov videos")
 		void concurrentMovVideoConversions() {
-			var startingVideo = resources.loadResource("long.mov");
+			var movVideo = resources.loadResource("long.mov");
 
-			executeConcurrentConversions(startingVideo);
+			executeConcurrentConversionsOf(movVideo);
 		}
 
-		private static void executeConcurrentConversions(File inputFile) {
+		private static void executeConcurrentConversionsOf(File inputFile) {
 			final int concurrentRequests = 50;
 			var failedConversions = new AtomicInteger(0);
 
@@ -239,41 +239,41 @@ class MediaHelperTest {
 		@Test
 		@DisplayName("mp4 videos")
 		void concurrentMp4VideoConversions() {
-			var startingVideo = resources.loadResource("video_with_audio.mp4");
+			var mp4Video = resources.loadResource("video_with_audio.mp4");
 
-			executeConcurrentConversions(startingVideo);
+			executeConcurrentConversionsOf(mp4Video);
 		}
 
 		@Test
 		@DisplayName("webm videos")
 		void concurrentWebmVideoConversions() {
-			var startingVideo = resources.loadResource("small_video_sticker.webm");
+			var webmVideo = resources.loadResource("small_video_sticker.webm");
 
-			executeConcurrentConversions(startingVideo);
+			executeConcurrentConversionsOf(webmVideo);
 		}
 
 		@Test
 		@DisplayName("gif videos")
 		void concurrentGifVideoConversions() {
-			var startingVideo = resources.loadResource("valid.gif");
+			var gifVideo = resources.loadResource("valid.gif");
 
-			executeConcurrentConversions(startingVideo);
+			executeConcurrentConversionsOf(gifVideo);
 		}
 
 		@Test
 		@DisplayName("webp images")
 		void concurrentWebpImageConversions() {
-			var startingImage = resources.loadResource("valid.webp");
+			var webpImage = resources.loadResource("valid.webp");
 
-			executeConcurrentConversions(startingImage);
+			executeConcurrentConversionsOf(webpImage);
 		}
 
 		@Test
 		@DisplayName("png images")
 		void concurrentPngImageConversions() {
-			var startingImage = resources.createImage(256, 256, "png");
+			var pngImage = resources.createImage(256, 256, "png");
 
-			executeConcurrentConversions(startingImage);
+			executeConcurrentConversionsOf(pngImage);
 		}
 	}
 }

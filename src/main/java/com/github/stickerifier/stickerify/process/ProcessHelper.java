@@ -39,11 +39,11 @@ public final class ProcessHelper {
 
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";
-				var output = toString(process.getErrorStream());
+				var output = readStream(process.getErrorStream());
 				throw new TelegramApiException("The command {} couldn't complete {}: {}", command[0], reason, output);
 			}
 
-			return toString(process.getInputStream());
+			return readStream(process.getInputStream());
 		} catch (IOException | InterruptedException e) {
 			throw new TelegramApiException(e);
 		} finally {
@@ -54,7 +54,7 @@ public final class ProcessHelper {
 		}
 	}
 
-	private static String toString(InputStream stream) throws IOException {
+	private static String readStream(InputStream stream) throws IOException {
 		return new String(stream.readAllBytes(), UTF_8);
 	}
 

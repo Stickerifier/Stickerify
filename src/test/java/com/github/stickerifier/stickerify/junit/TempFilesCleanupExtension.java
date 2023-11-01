@@ -22,21 +22,21 @@ public class TempFilesCleanupExtension implements AfterAllCallback {
 		deleteTempFiles();
 	}
 
-	private static void deleteTempFiles() throws IOException {
-		try (var files = Files.list(Path.of(System.getProperty("java.io.tmpdir")))) {
-			files.filter(Files::isRegularFile)
-					.filter(TempFilesCleanupExtension::stickerifyFiles)
-					.forEach(TempFilesCleanupExtension::deleteFile);
+	private void deleteTempFiles() throws IOException {
+		var tempFolder = System.getProperty("java.io.tmpdir");
+
+		try (var files = Files.list(Path.of(tempFolder))) {
+			files.filter(this::stickerifyFiles).forEach(this::deleteFile);
 		}
 	}
 
-	private static boolean stickerifyFiles(Path path) {
+	private boolean stickerifyFiles(Path path) {
 		var fileName = path.getFileName().toString();
 
-		return fileName.startsWith("Stickerify-") || fileName.startsWith("OriginalFile-");
+		return Files.isRegularFile(path) && (fileName.startsWith("Stickerify-") || fileName.startsWith("OriginalFile-"));
 	}
 
-	private static void deleteFile(Path path) {
+	private void deleteFile(Path path) {
 		try {
 			Files.delete(path);
 
