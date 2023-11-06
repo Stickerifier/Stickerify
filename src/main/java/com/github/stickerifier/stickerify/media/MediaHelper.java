@@ -9,6 +9,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDE
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.stickerifier.stickerify.process.PathLocator;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
@@ -115,7 +116,7 @@ public final class MediaHelper {
 			String uncompressedContent = "";
 
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
-				uncompressedContent = ProcessHelper.readStream(gzipInputStream);
+				uncompressedContent = new String(gzipInputStream.readAllBytes(), UTF_8);
 			} catch (IOException e) {
 				LOGGER.atError().log("Unable to retrieve gzip content from file {}", file.getName());
 			}

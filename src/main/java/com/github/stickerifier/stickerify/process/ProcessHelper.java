@@ -61,7 +61,7 @@ public final class ProcessHelper {
 	 * @return the UTF-8 representation of passed-in stream
 	 * @throws IOException if an error occurs reading stream's bytes
 	 */
-	public static String readStream(InputStream stream) throws IOException {
+	private static String readStream(InputStream stream) throws IOException {
 		return new String(stream.readAllBytes(), UTF_8);
 	}
 
