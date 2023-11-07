@@ -48,8 +48,8 @@ class MediaHelperTest {
 
 	@Test
 	void resizeImage() throws Exception {
-		var startingImage = resources.createImage(1024, 1024, "jpg");
-		var result = MediaHelper.convert(startingImage);
+		var jpgImage = resources.createImage(1024, 1024, "jpg");
+		var result = MediaHelper.convert(jpgImage);
 
 		assertImageConsistency(result, 512, 512);
 	}
@@ -67,40 +67,40 @@ class MediaHelperTest {
 
 	@Test
 	void resizeRectangularImage() throws Exception {
-		var startingImage = resources.createImage(1024, 512, "jpg");
-		var result = MediaHelper.convert(startingImage);
+		var jpgImage = resources.createImage(1024, 512, "jpg");
+		var result = MediaHelper.convert(jpgImage);
 
 		assertImageConsistency(result, 512, 256);
 	}
 
 	@Test
 	void resizeSmallImage() throws Exception {
-		var startingImage = resources.createImage(256, 256, "png");
-		var result = MediaHelper.convert(startingImage);
+		var pngImage = resources.createImage(256, 256, "png");
+		var result = MediaHelper.convert(pngImage);
 
 		assertImageConsistency(result, 512, 512);
 	}
 
 	@Test
 	void noImageConversionNeeded() throws Exception {
-		var startingImage = resources.createImage(512, 256, "png");
-		var result = MediaHelper.convert(startingImage);
+		var pngImage = resources.createImage(512, 256, "png");
+		var result = MediaHelper.convert(pngImage);
 
 		assertThat(result, is(nullValue()));
 	}
 
 	@Test
 	void resizeWebpImage() throws Exception {
-		var startingImage = resources.loadResource("valid.webp");
-		var result = MediaHelper.convert(startingImage);
+		var webpImage = resources.loadResource("valid.webp");
+		var result = MediaHelper.convert(webpImage);
 
 		assertImageConsistency(result, 256, 512);
 	}
 
 	@Test
 	void convertLongMovVideo() throws Exception {
-		var startingVideo = resources.loadResource("long.mov");
-		var result = MediaHelper.convert(startingVideo);
+		var movVideo = resources.loadResource("long.mov");
+		var result = MediaHelper.convert(movVideo);
 
 		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
 	}
@@ -127,48 +127,48 @@ class MediaHelperTest {
 
 	@Test
 	void convertMp4WithAudio() throws Exception {
-		var startingVideo = resources.loadResource("video_with_audio.mp4");
-		var result = MediaHelper.convert(startingVideo);
+		var mp4Video = resources.loadResource("video_with_audio.mp4");
+		var result = MediaHelper.convert(mp4Video);
 
 		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
 	}
 
 	@Test
 	void convertShortAndLowFpsVideo() throws Exception {
-		var startingVideo = resources.loadResource("short_low_fps.webm");
-		var result = MediaHelper.convert(startingVideo);
+		var webmVideo = resources.loadResource("short_low_fps.webm");
+		var result = MediaHelper.convert(webmVideo);
 
 		assertVideoConsistency(result, 512, 288, 10F, 1_000L);
 	}
 
 	@Test
 	void resizeSmallWebmVideo() throws Exception {
-		var startingVideo = resources.loadResource("small_video_sticker.webm");
-		var result = MediaHelper.convert(startingVideo);
+		var webmVideo = resources.loadResource("small_video_sticker.webm");
+		var result = MediaHelper.convert(webmVideo);
 
 		assertVideoConsistency(result, 512, 212, 30F, 2_000L);
 	}
 
 	@Test
 	void convertVerticalWebmVideo() throws Exception {
-		var startingVideo = resources.loadResource("vertical_video_sticker.webm");
-		var result = MediaHelper.convert(startingVideo);
+		var webmVideo = resources.loadResource("vertical_video_sticker.webm");
+		var result = MediaHelper.convert(webmVideo);
 
 		assertVideoConsistency(result, 288, 512, 30F, 2_000L);
 	}
 
 	@Test
 	void convertGifVideo() throws Exception {
-		var startingVideo = resources.loadResource("valid.gif");
-		var result = MediaHelper.convert(startingVideo);
+		var gifVideo = resources.loadResource("valid.gif");
+		var result = MediaHelper.convert(gifVideo);
 
 		assertVideoConsistency(result, 512, 274, 10F, 1_000L);
 	}
 
 	@Test
 	void noVideoConversionNeeded() throws Exception {
-		var startingVideo = resources.loadResource("no_conversion_needed.webm");
-		var result = MediaHelper.convert(startingVideo);
+		var webmVideo = resources.loadResource("no_conversion_needed.webm");
+		var result = MediaHelper.convert(webmVideo);
 
 		assertThat(result, is(nullValue()));
 	}
@@ -211,12 +211,12 @@ class MediaHelperTest {
 		@Test
 		@DisplayName("mov videos")
 		void concurrentMovVideoConversions() {
-			var startingVideo = resources.loadResource("long.mov");
+			var movVideo = resources.loadResource("long.mov");
 
-			executeConcurrentConversions(startingVideo);
+			executeConcurrentConversionsOf(movVideo);
 		}
 
-		private static void executeConcurrentConversions(File inputFile) {
+		private static void executeConcurrentConversionsOf(File inputFile) {
 			final int concurrentRequests = 50;
 			var failedConversions = new AtomicInteger(0);
 
@@ -239,41 +239,41 @@ class MediaHelperTest {
 		@Test
 		@DisplayName("mp4 videos")
 		void concurrentMp4VideoConversions() {
-			var startingVideo = resources.loadResource("video_with_audio.mp4");
+			var mp4Video = resources.loadResource("video_with_audio.mp4");
 
-			executeConcurrentConversions(startingVideo);
+			executeConcurrentConversionsOf(mp4Video);
 		}
 
 		@Test
 		@DisplayName("webm videos")
 		void concurrentWebmVideoConversions() {
-			var startingVideo = resources.loadResource("small_video_sticker.webm");
+			var webmVideo = resources.loadResource("small_video_sticker.webm");
 
-			executeConcurrentConversions(startingVideo);
+			executeConcurrentConversionsOf(webmVideo);
 		}
 
 		@Test
 		@DisplayName("gif videos")
 		void concurrentGifVideoConversions() {
-			var startingVideo = resources.loadResource("valid.gif");
+			var gifVideo = resources.loadResource("valid.gif");
 
-			executeConcurrentConversions(startingVideo);
+			executeConcurrentConversionsOf(gifVideo);
 		}
 
 		@Test
 		@DisplayName("webp images")
 		void concurrentWebpImageConversions() {
-			var startingImage = resources.loadResource("valid.webp");
+			var webpImage = resources.loadResource("valid.webp");
 
-			executeConcurrentConversions(startingImage);
+			executeConcurrentConversionsOf(webpImage);
 		}
 
 		@Test
 		@DisplayName("png images")
 		void concurrentPngImageConversions() {
-			var startingImage = resources.createImage(256, 256, "png");
+			var pngImage = resources.createImage(256, 256, "png");
 
-			executeConcurrentConversions(startingImage);
+			executeConcurrentConversionsOf(pngImage);
 		}
 	}
 }

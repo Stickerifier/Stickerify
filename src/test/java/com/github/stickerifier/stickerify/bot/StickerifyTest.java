@@ -1,12 +1,13 @@
 package com.github.stickerifier.stickerify.bot;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.stickerifier.stickerify.ResourceHelper;
-import com.github.stickerifier.stickerify.telegram.Answer;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
+import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @ClearTempFiles
 @ExtendWith(MockWebServerExtension.class)
@@ -62,7 +62,7 @@ class StickerifyTest {
 	}
 
 	private static void assertResponseContainsMessage(RecordedRequest request, Answer answer) {
-		var message = URLEncoder.encode(answer.getText(), StandardCharsets.UTF_8);
+		var message = URLEncoder.encode(answer.getText(), UTF_8);
 		assertThat(request.getBody().readUtf8(), containsString(message));
 	}
 
@@ -268,5 +268,4 @@ class StickerifyTest {
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
 		assertResponseContainsMessage(sendMessage, Answer.ERROR);
 	}
-
 }

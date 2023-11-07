@@ -19,6 +19,7 @@ dependencies {
     implementation libs.telegram.bot.api
     implementation libs.tika
 
+    testRuntimeOnly libs.junit.platform
     testImplementation libs.hamcrest
     testImplementation libs.junit
     testImplementation libs.mockwebserver
