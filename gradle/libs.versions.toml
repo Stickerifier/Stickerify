@@ -6,7 +6,7 @@ gson = "com.google.code.gson:gson:2.10.1"
 hamcrest = "org.hamcrest:hamcrest-core:2.2"
 imageio-webp = "com.twelvemonkeys.imageio:imageio-webp:3.10.1"
 imgscalr = "org.imgscalr:imgscalr-lib:4.2"
-jave = "ws.schild:jave-core:3.3.1"
+jave = "ws.schild:jave-core:3.4.0"
 junit = "org.junit.jupiter:junit-jupiter:5.10.1"
 junit-platform = "org.junit.platform:junit-platform-launcher:1.10.1"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
