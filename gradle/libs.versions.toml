@@ -1,5 +1,5 @@
 [versions]
-logback = "1.4.11"
+logback = "1.4.12"
 
 [libraries]
 gson = "com.google.code.gson:gson:2.10.1"
