@@ -127,8 +127,12 @@ public class Stickerify {
 				execute(answerWithFile);
 			}
 		} catch (TelegramApiException e) {
-			LOGGER.atWarn().setCause(e).log("Unable to reply to {} with processed file", request.getDescription());
-			answerText(ERROR, request);
+			if (e.getMessage().contains("Bad Request: message to reply not found")) {
+				LOGGER.atInfo().log("Unable to reply to {} because the message sent has been deleted", request.getDescription());
+			} else {
+				LOGGER.atWarn().setCause(e).log("Unable to reply to {} with processed file", request.getDescription());
+				answerText(ERROR, request);
+			}
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
