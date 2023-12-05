@@ -316,6 +316,7 @@ public final class MediaHelper {
 	 */
 	private static MultimediaInfo retrieveMultimediaInfo(File file) throws TelegramApiException {
 		try {
+			logVideoInformation(file);
 			return new MultimediaObject(file, FFMPEG_LOCATOR).getInfo();
 		} catch (EncoderException e) {
 			logVideoInformation(file);
