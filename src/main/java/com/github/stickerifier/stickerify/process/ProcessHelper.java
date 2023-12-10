@@ -43,7 +43,7 @@ public final class ProcessHelper {
 				throw new TelegramApiException("The command {} couldn't complete {}: {}", command[0], reason, output);
 			}
 
-			return readStream(process.getInputStream());
+			return readProcessOutput(process);
 		} catch (IOException | InterruptedException e) {
 			throw new TelegramApiException(e);
 		} finally {
@@ -63,6 +63,21 @@ public final class ProcessHelper {
 	 */
 	private static String readStream(InputStream stream) throws IOException {
 		return new String(stream.readAllBytes(), UTF_8);
+	}
+
+	/**
+	 * Reads the content of the input stream of the process.
+	 * If the input stream is empty, the content of the error stream is returned.
+	 *
+	 * @param process the process
+	 * @return the output of the process
+	 * @throws IOException if an error occurs reading stream's bytes
+	 */
+	private static String readProcessOutput(Process process) throws IOException {
+		var inputStream = readStream(process.getInputStream());
+		var output = inputStream.isEmpty() ? readStream(process.getErrorStream()) : inputStream;
+
+		return output.trim();
 	}
 
 	private ProcessHelper() {
