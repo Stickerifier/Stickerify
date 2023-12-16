@@ -318,29 +318,8 @@ public final class MediaHelper {
 		try {
 			return new MultimediaObject(file, FFMPEG_LOCATOR).getInfo();
 		} catch (EncoderException e) {
-			logVideoInformation(file);
-			throw new TelegramApiException(e);
+			throw new TelegramApiException("The video could not be processed successfully", e);
 		}
-	}
-
-	/**
-	 * Logs the multimedia information of passed-in video file.
-	 *
-	 * @param file the video to retrieve information from
-	 * @throws TelegramApiException if an error occurred processing the video
-	 */
-	private static void logVideoInformation(File file) throws TelegramApiException {
-		var ffprobeCommand = new String[] {
-				"ffprobe",
-				"-v", "quiet",
-				"-show_format",
-				"-show_streams",
-				file.getAbsolutePath()
-		};
-
-		var videoInformation = ProcessHelper.executeCommand(ffprobeCommand);
-
-		LOGGER.atWarn().log("The video could not be processed successfully\n{}", videoInformation);
 	}
 
 	/**
