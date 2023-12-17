@@ -8,7 +8,7 @@ import java.io.File;
 
 public final class MockResponses {
 
-	static final MockResponse START_MESSAGE = new MockResponse().setBody("""
+	static final MockResponse START_MESSAGE = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -25,9 +25,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse HELP_MESSAGE = new MockResponse().setBody("""
+	static final MockResponse HELP_MESSAGE = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -44,9 +44,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse FILE_NOT_SUPPORTED = new MockResponse().setBody("""
+	static final MockResponse FILE_NOT_SUPPORTED = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -65,9 +65,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse FILE_TOO_BIG = new MockResponse().setBody("""
+	static final MockResponse FILE_TOO_BIG = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -87,9 +87,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse ANIMATED_STICKER = new MockResponse().setBody("""
+	static final MockResponse ANIMATED_STICKER = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -109,9 +109,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse PNG_FILE = new MockResponse().setBody("""
+	static final MockResponse PNG_FILE = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -131,9 +131,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse WEBP_FILE = new MockResponse().setBody("""
+	static final MockResponse WEBP_FILE = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -153,9 +153,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse MOV_FILE = new MockResponse().setBody("""
+	static final MockResponse MOV_FILE = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -175,9 +175,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse WEBM_FILE = new MockResponse().setBody("""
+	static final MockResponse WEBM_FILE = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -197,9 +197,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse GIF_FILE = new MockResponse().setBody("""
+	static final MockResponse GIF_FILE = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -219,9 +219,9 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
-	static final MockResponse DOCUMENT = new MockResponse().setBody("""
+	static final MockResponse DOCUMENT = new MockResponse.Builder().body("""
 			{
 				ok: true,
 				result: [{
@@ -241,10 +241,10 @@ public final class MockResponses {
 					}
 				}]
 			}
-			""");
+			""").build();
 
 	static MockResponse fileInfo(String id) {
-		return new MockResponse().setBody("""
+		return new MockResponse.Builder().body("""
 				{
 					ok: true,
 					result: {
@@ -252,13 +252,13 @@ public final class MockResponses {
 						file_path: "%s"
 					}
 				}
-				""".formatted(id, id));
+				""".formatted(id, id)).build();
 	}
 
 	static MockResponse fileDownload(File file) throws Exception {
 		try (var buffer = new Buffer(); var source = Okio.source(file)) {
 			buffer.writeAll(source);
-			return new MockResponse().setBody(buffer);
+			return new MockResponse.Builder().body(buffer).build();
 		}
 	}
 
