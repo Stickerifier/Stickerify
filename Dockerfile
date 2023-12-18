@@ -11,6 +11,5 @@ FROM gcr.io/distroless/base-nossl AS bot
 COPY --from=builder /app/build/jre ./jre
 COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=mwader/static-ffmpeg /ffmpeg /usr/local/bin/
-COPY --from=mwader/static-ffmpeg /ffprobe /usr/local/bin/
 ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 CMD ["jre/bin/java", "-jar", "Stickerify-shadow.jar"]
