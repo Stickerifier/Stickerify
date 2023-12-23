@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class SubstringHighlighterTest {
 
 	private static final String LOG_MESSAGE = "Received request";
-	private static final String MIME_TYPE = "image/png";
+	private static final String MIME_TYPE = "image/vnd.microsoft.icon";
 	private static final String LOG_MESSAGE_WITH_MIME_TYPE = LOG_MESSAGE + " with " + MIME_TYPE + " MIME type";
 
 	private SubstringHighlighter substringHighlighter;
