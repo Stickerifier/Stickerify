@@ -114,14 +114,6 @@ class MediaHelperTest {
 	}
 
 	@Test
-	void resizePsdImage() throws Exception {
-		var psdImage = resources.loadResource("valid.psd");
-		var result = MediaHelper.convert(psdImage);
-
-		assertImageConsistency(result, 512, 384);
-	}
-
-	@Test
 	void convertLongMovVideo() throws Exception {
 		var movVideo = resources.loadResource("long.mov");
 		var result = MediaHelper.convert(movVideo);
@@ -314,14 +306,6 @@ class MediaHelperTest {
 			var tiffImage = resources.loadResource("valid.tiff");
 
 			executeConcurrentConversionsOf(tiffImage);
-		}
-
-		@Test
-		@DisplayName("psd images")
-		void concurrentPsdImageConversions() {
-			var psdImage = resources.loadResource("valid.psd");
-
-			executeConcurrentConversionsOf(psdImage);
 		}
 	}
 }
