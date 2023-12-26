@@ -95,7 +95,7 @@ public final class MediaHelper {
 		try {
 			mimeType = new Tika().detect(file);
 
-			LOGGER.atInfo().log("The file has {} MIME type", mimeType);
+			LOGGER.atDebug().log("The file has {} MIME type", mimeType);
 		} catch (IOException e) {
 			LOGGER.atError().log("Unable to retrieve MIME type for file {}", file.getName());
 		}
