@@ -98,14 +98,6 @@ class MediaHelperTest {
 	}
 
 	@Test
-	void resizeFaviconImage() throws Exception {
-		var faviconImage = resources.loadResource("favicon.ico");
-		var result = MediaHelper.convert(faviconImage);
-
-		assertImageConsistency(result, 512, 512);
-	}
-
-	@Test
 	void resizeTiffImage() throws Exception {
 		var tiffImage = resources.loadResource("valid.tiff");
 		var result = MediaHelper.convert(tiffImage);
@@ -290,14 +282,6 @@ class MediaHelperTest {
 			var pngImage = resources.createImage(256, 256, "png");
 
 			executeConcurrentConversionsOf(pngImage);
-		}
-
-		@Test
-		@DisplayName("ico images")
-		void concurrentFaviconImageConversions() {
-			var faviconImage = resources.loadResource("favicon.ico");
-
-			executeConcurrentConversionsOf(faviconImage);
 		}
 
 		@Test
