@@ -98,27 +98,11 @@ class MediaHelperTest {
 	}
 
 	@Test
-	void resizeFaviconImage() throws Exception {
-		var faviconImage = resources.loadResource("favicon.ico");
-		var result = MediaHelper.convert(faviconImage);
-
-		assertImageConsistency(result, 512, 512);
-	}
-
-	@Test
 	void resizeTiffImage() throws Exception {
 		var tiffImage = resources.loadResource("valid.tiff");
 		var result = MediaHelper.convert(tiffImage);
 
 		assertImageConsistency(result, 512, 342);
-	}
-
-	@Test
-	void resizePsdImage() throws Exception {
-		var psdImage = resources.loadResource("valid.psd");
-		var result = MediaHelper.convert(psdImage);
-
-		assertImageConsistency(result, 512, 384);
 	}
 
 	@Test
@@ -301,27 +285,11 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@DisplayName("ico images")
-		void concurrentFaviconImageConversions() {
-			var faviconImage = resources.loadResource("favicon.ico");
-
-			executeConcurrentConversionsOf(faviconImage);
-		}
-
-		@Test
 		@DisplayName("tiff images")
 		void concurrentTiffImageConversions() {
 			var tiffImage = resources.loadResource("valid.tiff");
 
 			executeConcurrentConversionsOf(tiffImage);
-		}
-
-		@Test
-		@DisplayName("psd images")
-		void concurrentPsdImageConversions() {
-			var psdImage = resources.loadResource("valid.psd");
-
-			executeConcurrentConversionsOf(psdImage);
 		}
 	}
 }

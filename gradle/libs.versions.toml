@@ -1,13 +1,10 @@
 [versions]
 logback = "1.4.14"
-twelvemonkeys = "3.10.1"
 
 [libraries]
 gson = "com.google.code.gson:gson:2.10.1"
 hamcrest = "org.hamcrest:hamcrest-core:2.2"
-imageio-bmp = { module = "com.twelvemonkeys.imageio:imageio-bmp", version.ref = "twelvemonkeys" }
-imageio-psd = { module = "com.twelvemonkeys.imageio:imageio-psd", version.ref = "twelvemonkeys" }
-imageio-webp = { module = "com.twelvemonkeys.imageio:imageio-webp", version.ref = "twelvemonkeys" }
+imageio-webp = "com.twelvemonkeys.imageio:imageio-webp:3.10.1"
 imgscalr = "org.imgscalr:imgscalr-lib:4.2"
 jave = "ws.schild:jave-core:3.4.0"
 junit = "org.junit.jupiter:junit-jupiter:5.10.1"
