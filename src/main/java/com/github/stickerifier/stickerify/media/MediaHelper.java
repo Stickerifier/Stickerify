@@ -40,6 +40,8 @@ public final class MediaHelper {
 
 	static {
 		System.setProperty("java.awt.headless", "true");
+
+		ImageIO.scanForPlugins();
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
