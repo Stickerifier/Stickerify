@@ -5,7 +5,8 @@ COPY gradle ./gradle
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     ./gradlew dependencies --no-daemon
 COPY . .
-RUN ./gradlew runtime --no-daemon
+RUN java --version \
+    ./gradlew runtime --no-daemon
 
 FROM gcr.io/distroless/base-nossl AS bot
 COPY --from=builder /app/build/jre ./jre
