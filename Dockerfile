@@ -3,7 +3,7 @@ WORKDIR /app
 COPY settings.gradle build.gradle gradlew ./
 COPY gradle ./gradle
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
-  ./gradlew dependencies --no-daemon
+    ./gradlew dependencies --no-daemon
 COPY . .
 RUN ./gradlew runtime --no-daemon
 
