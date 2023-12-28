@@ -10,6 +10,8 @@ repositories {
 
 dependencies {
     implementation libs.gson
+    implementation libs.imageio.bmp
+    implementation libs.imageio.psd
     implementation libs.imageio.webp
     implementation libs.imgscalr
     implementation libs.jave
