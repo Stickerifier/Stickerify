@@ -47,7 +47,8 @@ public final class MediaHelper {
 	private static final Gson GSON = new Gson();
 	static final ProcessLocator FFMPEG_LOCATOR = new PathLocator();
 	private static final int PRESERVE_ASPECT_RATIO = -2;
-	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm", "video/mp4", "application/x-matroska");
+	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm",
+			"video/mp4", "video/x-m4v", "application/x-matroska");
 
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.
