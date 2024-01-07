@@ -158,6 +158,14 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void convertM4vWithAudio() throws Exception {
+		var m4vVideo = resources.loadResource("video_with_audio.m4v");
+		var result = MediaHelper.convert(m4vVideo);
+
+		assertVideoConsistency(result, 512, 214, 23.98F, 3_000L);
+	}
+
+	@Test
 	void convertShortAndLowFpsVideo() throws Exception {
 		var webmVideo = resources.loadResource("short_low_fps.webm");
 		var result = MediaHelper.convert(webmVideo);
@@ -266,6 +274,14 @@ class MediaHelperTest {
 			var mp4Video = resources.loadResource("video_with_audio.mp4");
 
 			executeConcurrentConversionsOf(mp4Video);
+		}
+
+		@Test
+		@DisplayName("m4v videos")
+		void concurrentM4vVideoConversions() {
+			var m4vVideo = resources.loadResource("video_with_audio.m4v");
+
+			executeConcurrentConversionsOf(m4vVideo);
 		}
 
 		@Test
