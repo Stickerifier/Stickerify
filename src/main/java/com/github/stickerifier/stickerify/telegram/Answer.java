@@ -34,6 +34,11 @@ public enum Answer {
 			The file conversion was unsuccessful: only images, gifs, standard and video stickers are supported\\.
 
 			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
+			""", true),
+	CORRUPTED("""
+			The conversion was unsuccessful: the video might be corrupted and it cannot be processed\\.
+
+			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
 			""", true);
 
 	private final String text;

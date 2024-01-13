@@ -1,5 +1,6 @@
 package com.github.stickerifier.stickerify.bot;
 
+import static com.github.stickerifier.stickerify.telegram.Answer.CORRUPTED;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
@@ -152,6 +153,7 @@ public class Stickerify {
 			LOGGER.atInfo().log("Unable to reply to {} because the message sent has been deleted", request.getDescription());
 		} else if (e.getMessage().equals("The video could not be processed successfully")) {
 			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
+			answerText(CORRUPTED, request);
 		} else {
 			LOGGER.atWarn().setCause(e).log("Unable to reply to {} with processed file", request.getDescription());
 			answerText(ERROR, request);
