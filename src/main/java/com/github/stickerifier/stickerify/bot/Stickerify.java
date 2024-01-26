@@ -151,11 +151,11 @@ public class Stickerify {
 	private void processFailure(TelegramRequest request, TelegramApiException e) {
 		if (e.getMessage().endsWith("Bad Request: message to reply not found")) {
 			LOGGER.atInfo().log("Unable to reply to {} because the message sent has been deleted", request.getDescription());
-		} else if (e.getMessage().equals("The video could not be processed successfully")) {
-			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
+		} else if ("The video could not be processed successfully".equals(e.getMessage())) {
+			LOGGER.atWarn().setCause(e).log("Unable to reply to {}: the file is corrupted", request.getDescription());
 			answerText(CORRUPTED, request);
 		} else {
-			LOGGER.atWarn().setCause(e).log("Unable to reply to {} with processed file", request.getDescription());
+			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
 			answerText(ERROR, request);
 		}
 	}
