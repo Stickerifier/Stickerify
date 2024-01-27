@@ -1,11 +1,11 @@
 package com.github.stickerifier.stickerify.bot;
 
+import static com.github.stickerifier.stickerify.ResourceHelper.loadResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.github.stickerifier.stickerify.ResourceHelper;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
@@ -104,7 +104,7 @@ class StickerifyTest {
 	void fileAlreadyValid() throws Exception {
 		server.enqueue(MockResponses.ANIMATED_STICKER);
 		server.enqueue(MockResponses.fileInfo("animated_sticker.tgs"));
-		server.enqueue(MockResponses.fileDownload(ResourceHelper.load("animated_sticker.tgs")));
+		server.enqueue(MockResponses.fileDownload(loadResource("animated_sticker.tgs")));
 
 		startBot();
 
@@ -127,7 +127,7 @@ class StickerifyTest {
 	void convertedPng() throws Exception {
 		server.enqueue(MockResponses.PNG_FILE);
 		server.enqueue(MockResponses.fileInfo("image.png"));
-		server.enqueue(MockResponses.fileDownload(ResourceHelper.load("big.png")));
+		server.enqueue(MockResponses.fileDownload(loadResource("big.png")));
 
 		startBot();
 
@@ -150,7 +150,7 @@ class StickerifyTest {
 	void convertedWebp() throws Exception {
 		server.enqueue(MockResponses.WEBP_FILE);
 		server.enqueue(MockResponses.fileInfo("valid.webp"));
-		server.enqueue(MockResponses.fileDownload(ResourceHelper.load("valid.webp")));
+		server.enqueue(MockResponses.fileDownload(loadResource("valid.webp")));
 
 		startBot();
 
@@ -173,7 +173,7 @@ class StickerifyTest {
 	void convertedMov() throws Exception {
 		server.enqueue(MockResponses.MOV_FILE);
 		server.enqueue(MockResponses.fileInfo("long.mov"));
-		server.enqueue(MockResponses.fileDownload(ResourceHelper.load("long.mov")));
+		server.enqueue(MockResponses.fileDownload(loadResource("long.mov")));
 
 		startBot();
 
@@ -196,7 +196,7 @@ class StickerifyTest {
 	void convertedWebm() throws Exception {
 		server.enqueue(MockResponses.WEBM_FILE);
 		server.enqueue(MockResponses.fileInfo("short_low_fps.webm"));
-		server.enqueue(MockResponses.fileDownload(ResourceHelper.load("short_low_fps.webm")));
+		server.enqueue(MockResponses.fileDownload(loadResource("short_low_fps.webm")));
 
 		startBot();
 
@@ -219,7 +219,7 @@ class StickerifyTest {
 	void convertedGif() throws Exception {
 		server.enqueue(MockResponses.GIF_FILE);
 		server.enqueue(MockResponses.fileInfo("valid.gif"));
-		server.enqueue(MockResponses.fileDownload(ResourceHelper.load("valid.gif")));
+		server.enqueue(MockResponses.fileDownload(loadResource("valid.gif")));
 
 		startBot();
 
@@ -242,7 +242,7 @@ class StickerifyTest {
 	void documentNotSupported() throws Exception {
 		server.enqueue(MockResponses.DOCUMENT);
 		server.enqueue(MockResponses.fileInfo("document.txt"));
-		server.enqueue(MockResponses.fileDownload(ResourceHelper.load("document.txt")));
+		server.enqueue(MockResponses.fileDownload(loadResource("document.txt")));
 
 		startBot();
 
@@ -265,7 +265,7 @@ class StickerifyTest {
 	void corruptedVideo() throws Exception {
 		server.enqueue(MockResponses.CORRUPTED_FILE);
 		server.enqueue(MockResponses.fileInfo("corrupted.mp4"));
-		server.enqueue(MockResponses.fileDownload(ResourceHelper.load("corrupted.mp4")));
+		server.enqueue(MockResponses.fileDownload(loadResource("corrupted.mp4")));
 
 		startBot();
 
