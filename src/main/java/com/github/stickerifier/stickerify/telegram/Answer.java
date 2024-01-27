@@ -11,7 +11,7 @@ public enum Answer {
 			Based on what you send, I will answer the following:
 			\\- the converted media, if you sent a supported file \\(images, gifs, standard and video stickers are supported\\)
 			\\- no file, if you sent a media already suiting Telegram's requirements
-			\\- an error message, if you sent an unsupported file
+			\\- an error message, if you sent either an unsupported or a corrupted file
 			\\- an informative message for any message without a file
 			"""),
 	FILE_READY("""
