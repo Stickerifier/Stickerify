@@ -26,9 +26,12 @@ jobs:
         id: setup-ffmpeg
 
       - name: Setup project and upload dependency graph
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v3
         with:
           dependency-graph: generate-and-submit
+          build-scan-publish: true
+          build-scan-terms-of-service-url: "https://gradle.com/terms-of-service"
+          build-scan-terms-of-service-agree: "yes"
 
       - name: Execute tests
-        run: ./gradlew test --scan
+        run: ./gradlew test
