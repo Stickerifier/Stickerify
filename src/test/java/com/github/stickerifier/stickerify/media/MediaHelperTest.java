@@ -56,13 +56,17 @@ class MediaHelperTest {
 
 	private static void assertImageConsistency(File result, int expectedWidth, int expectedHeight) throws IOException {
 		var image = ImageIO.read(result);
-		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
+		var actualExtension = getExtension(result);
 
 		assertAll("Image validation failed",
 				() -> assertThat("image's extension must be png", actualExtension, is(equalTo(".png"))),
 				() -> assertThat("image's width is not correct", image.getWidth(), is(equalTo(expectedWidth))),
 				() -> assertThat("image's height is not correct", image.getHeight(), is(equalTo(expectedHeight)))
 		);
+	}
+
+	private static String getExtension(File file) {
+		return file.getName().substring(file.getName().lastIndexOf('.'));
 	}
 
 	@Test
@@ -134,7 +138,7 @@ class MediaHelperTest {
 		var videoInfo = mediaInfo.getVideo();
 		var videoSize = videoInfo.getSize();
 
-		var actualExtension = result.getName().substring(result.getName().lastIndexOf('.'));
+		var actualExtension = getExtension(result);
 
 		assertAll("Video validation failed",
 				() -> assertThat("video's extension must be webm", actualExtension, is(equalTo(".webm"))),

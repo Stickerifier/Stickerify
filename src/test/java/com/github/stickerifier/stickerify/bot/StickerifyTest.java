@@ -268,4 +268,27 @@ class StickerifyTest {
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
 		assertResponseContainsMessage(sendMessage, Answer.ERROR);
 	}
+
+	@Test
+	void corruptedVideo() throws Exception {
+		server.enqueue(MockResponses.CORRUPTED_FILE);
+		server.enqueue(MockResponses.fileInfo("corrupted.mp4"));
+		server.enqueue(MockResponses.fileDownload(resources.loadResource("corrupted.mp4")));
+
+		startBot();
+
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+
+		var getFile = server.takeRequest();
+		assertEquals("/api/token/getFile", getFile.getPath());
+		assertEquals("file_id=corrupted.mp4", getFile.getBody().readUtf8());
+
+		var download = server.takeRequest();
+		assertEquals("/files/token/corrupted.mp4", download.getPath());
+
+		var sendMessage = server.takeRequest();
+		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertResponseContainsMessage(sendMessage, Answer.CORRUPTED);
+	}
 }
