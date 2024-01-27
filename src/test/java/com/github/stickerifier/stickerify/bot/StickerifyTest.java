@@ -126,7 +126,7 @@ class StickerifyTest {
 	@Test
 	void convertedPng() throws Exception {
 		server.enqueue(MockResponses.PNG_FILE);
-		server.enqueue(MockResponses.fileInfo("image.png"));
+		server.enqueue(MockResponses.fileInfo("big.png"));
 		server.enqueue(MockResponses.fileDownload(loadResource("big.png")));
 
 		startBot();
@@ -136,10 +136,10 @@ class StickerifyTest {
 
 		var getFile = server.takeRequest();
 		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=image.png", getFile.getBody().readUtf8());
+		assertEquals("file_id=big.png", getFile.getBody().readUtf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/image.png", download.getPath());
+		assertEquals("/files/token/big.png", download.getPath());
 
 		var sendDocument = server.takeRequest();
 		assertEquals("/api/token/sendDocument", sendDocument.getPath());

@@ -137,7 +137,7 @@ public final class MockResponses {
 							},
 							photo: [
 								{
-									file_id: "image.png",
+									file_id: "big.png",
 									file_size: 200000
 								}
 							]
