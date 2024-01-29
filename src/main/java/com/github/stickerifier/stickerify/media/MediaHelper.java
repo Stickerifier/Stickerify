@@ -339,6 +339,7 @@ public final class MediaHelper {
 		return isSizeCompliant(videoSize.getWidth(), videoSize.getHeight())
 				&& videoInfo.getFrameRate() <= MAX_VIDEO_FRAMES
 				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
+				&& mediaInfo.getDuration() > 0L
 				&& mediaInfo.getDuration() <= MAX_VIDEO_DURATION_MILLIS
 				&& mediaInfo.getAudio() == null
 				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat())

@@ -24,7 +24,7 @@ Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answe
 * the converted media, if you sent a supported file (images, gifs, videos, and existing Telegram stickers are supported)
   that needed conversion
 * no file, if you sent a media already suiting Telegram's requirements
-* an error message, if you sent an unsupported file
+* an error message, if you sent either an unsupported or a corrupted file
 * an informative message for any message without a file
 
 ```mermaid
@@ -67,7 +67,7 @@ After you successfully set up the project, you will have to go through the follo
 1. Chat with [BotFather](https://t.me/BotFather) and ask it to create a new bot
 2. Copy the token it provided you and either:
     * set it as the value of a new environment variable named `STICKERIFY_TOKEN`
-    * use it as the value passed to the `super(botToken)` constructor inside `Stickerify`
+    * use it as the value passed to the `super(botToken)` constructor inside the class `Stickerify`
 3. Install [FFmpeg](https://ffmpeg.org/download.html)
 4. Run the `Main` class to start the bot, it will be now able to answer messages in Telegram
 
@@ -75,7 +75,7 @@ After you successfully set up the project, you will have to go through the follo
 
 1. Install [Docker](https://docs.docker.com/get-docker/)
 2. Prepare the Docker image either:
-    * building it with the command:
+    * moving into the project folder and building the image with the command:
        ```shell
        docker build -t rob93c/stickerify .
        ```

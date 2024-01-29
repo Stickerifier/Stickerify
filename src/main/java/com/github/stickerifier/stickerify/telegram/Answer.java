@@ -11,7 +11,7 @@ public enum Answer {
 			Based on what you send, I will answer the following:
 			\\- the converted media, if you sent a supported file \\(images, gifs, standard and video stickers are supported\\)
 			\\- no file, if you sent a media already suiting Telegram's requirements
-			\\- an error message, if you sent an unsupported file
+			\\- an error message, if you sent either an unsupported or a corrupted file
 			\\- an informative message for any message without a file
 			"""),
 	FILE_READY("""
@@ -32,6 +32,11 @@ public enum Answer {
 			"""),
 	ERROR("""
 			The file conversion was unsuccessful: only images, gifs, standard and video stickers are supported\\.
+
+			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
+			""", true),
+	CORRUPTED("""
+			The conversion was unsuccessful: the video might be corrupted and it cannot be processed\\.
 
 			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
 			""", true);
