@@ -11,8 +11,8 @@ imageio-psd = { module = "com.twelvemonkeys.imageio:imageio-psd", version.ref = 
 imageio-webp = { module = "com.twelvemonkeys.imageio:imageio-webp", version.ref = "twelvemonkeys" }
 imgscalr = "org.imgscalr:imgscalr-lib:4.2"
 jave = "ws.schild:jave-core:3.4.0"
-junit = "org.junit.jupiter:junit-jupiter:5.10.1"
-junit-platform = "org.junit.platform:junit-platform-launcher:1.10.1"
+junit = "org.junit.jupiter:junit-jupiter:5.10.2"
+junit-platform = "org.junit.platform:junit-platform-launcher:1.10.2"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.12"
