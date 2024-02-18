@@ -16,6 +16,14 @@ public final class HighlightHelper {
 		return ESC_START + color + ESC_END;
 	}
 
+	/**
+	 * Enriches the {@code message} string with ANSI color codes to highlight it in green.
+	 * Then, the string continues with the color specified by {@code previousColor}.
+	 *
+	 * @param message the message to be highlighted
+	 * @param previousColor the color to use after the highlighted text
+	 * @return the highlighted text
+	 */
 	static String greenHighlight(final String message, String previousColor) {
 		return START_GREEN + message + previousColor;
 	}
