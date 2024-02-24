@@ -1,8 +1,8 @@
 package com.github.stickerifier.stickerify.logger;
 
+import static com.github.stickerifier.stickerify.logger.HighlightHelper.START_GREEN;
 import static com.github.stickerifier.stickerify.logger.MessageHighlighter.CONTINUE_WHITE;
 import static com.github.stickerifier.stickerify.logger.MessageHighlighter.HIGHLIGHTED_NEW_USER;
-import static com.github.stickerifier.stickerify.logger.HighlightHelper.START_GREEN;
 import static com.github.stickerifier.stickerify.telegram.model.TelegramRequest.NEW_USER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

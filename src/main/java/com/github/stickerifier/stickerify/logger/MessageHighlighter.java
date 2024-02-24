@@ -5,8 +5,8 @@ import static ch.qos.logback.core.pattern.color.ANSIConstants.DEFAULT_FG;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.RESET;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.YELLOW_FG;
 import static com.github.stickerifier.stickerify.logger.HighlightHelper.changeColorTo;
-import static com.github.stickerifier.stickerify.logger.HighlightHelper.retrieveMimeType;
 import static com.github.stickerifier.stickerify.logger.HighlightHelper.greenHighlight;
+import static com.github.stickerifier.stickerify.logger.HighlightHelper.retrieveMimeType;
 import static com.github.stickerifier.stickerify.telegram.model.TelegramRequest.NEW_USER;
 
 import ch.qos.logback.classic.pattern.MessageConverter;
