@@ -150,9 +150,9 @@ public class Stickerify {
 
 	private void processFailure(TelegramRequest request, TelegramApiException e) {
 		if (e.getMessage().endsWith("Bad Request: message to reply not found")) {
-			LOGGER.atInfo().log("Unable to reply to {} because the message sent has been deleted", request.getDescription());
+			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", request.getDescription());
 		} else if ("The video could not be processed successfully".equals(e.getMessage())) {
-			LOGGER.atWarn().setCause(e).log("Unable to reply to {}: the file is corrupted", request.getDescription());
+			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
 			answerText(CORRUPTED, request);
 		} else {
 			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
@@ -173,7 +173,7 @@ public class Stickerify {
 		try {
 			execute(answerWithText);
 		} catch (TelegramApiException e) {
-			LOGGER.atError().setCause(e).log("Unable to reply to {}", request);
+			LOGGER.atError().setCause(e).log("Unable to reply to the {}", request);
 		}
 	}
 
