@@ -17,7 +17,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -38,7 +38,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -59,7 +59,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -82,7 +82,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -106,7 +106,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -130,7 +130,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -156,7 +156,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -182,7 +182,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -206,7 +206,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -230,7 +230,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -254,7 +254,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
@@ -278,7 +278,7 @@ public final class MockResponses {
 						message: {
 							message_id: 1,
 							from: {
-								username: "User"
+								id: 123456
 							},
 							chat: {
 								id: 1
