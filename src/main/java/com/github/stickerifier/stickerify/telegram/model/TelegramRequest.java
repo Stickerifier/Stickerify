@@ -67,12 +67,12 @@ public record TelegramRequest(Message message) {
 
 	/**
 	 * Creates a String describing the current request,
-	 * writing <b>only</b> the username and if the sender is a new user.
+	 * writing <b>only</b> the user identifier and if the sender is a new user.
 	 *
 	 * @return the description of the request
 	 */
 	public String getDescription() {
-		var description = "request from " + getUsername();
+		var description = "request from user " + getUserId();
 
 		if (START_COMMAND.equals(message.text())) {
 			description += NEW_USER;
@@ -81,10 +81,8 @@ public record TelegramRequest(Message message) {
 		return description;
 	}
 
-	private String getUsername() {
-		return Optional.ofNullable(message.from().username())
-				.map(username -> "@" + username)
-				.orElse("id:" + message.from().id());
+	private Long getUserId() {
+		return message.from().id();
 	}
 
 	public Answer getAnswerMessage() {
@@ -103,7 +101,7 @@ public record TelegramRequest(Message message) {
 
 		return "request ["
 				+ "chat=" + getChatId()
-				+ ", from=" + getUsername()
+				+ ", from=" + getUserId()
 				+ writeIfNotEmpty("file", file)
 				+ writeIfNotEmpty("text", text)
 				+ "]";
