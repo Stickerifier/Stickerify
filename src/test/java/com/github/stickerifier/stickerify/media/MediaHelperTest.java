@@ -2,6 +2,7 @@ package com.github.stickerifier.stickerify.media;
 
 import static com.github.stickerifier.stickerify.ResourceHelper.loadResource;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static com.github.stickerifier.stickerify.media.MediaHelper.FFMPEG_LOCATOR;
@@ -49,7 +50,8 @@ class MediaHelperTest {
 		assertAll("Image validation failed",
 				() -> assertThat("image's extension must be png", actualExtension, is(equalTo(".png"))),
 				() -> assertThat("image's width is not correct", image.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat("image's height is not correct", image.getHeight(), is(equalTo(expectedHeight)))
+				() -> assertThat("image's height is not correct", image.getHeight(), is(equalTo(expectedHeight))),
+				() -> assertThat("image size should not exceed 512 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_IMAGE_FILE_SIZE)))
 		);
 	}
 

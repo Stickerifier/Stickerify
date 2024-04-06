@@ -28,6 +28,7 @@ import ws.schild.jave.info.MultimediaInfo;
 import ws.schild.jave.process.ProcessLocator;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -179,8 +180,16 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if an error occurred processing passed-in file
 	 */
 	private static BufferedImage toImage(File file) throws TelegramApiException {
-		try {
-			return ImageIO.read(file);
+		try (var input = ImageIO.createImageInputStream(file)) {
+			var reader = ImageIO.getImageReaders(input).next();
+
+			try {
+				reader.setInput(input);
+
+				return reader.read(0, new ImageReadParam());
+			} finally {
+				reader.dispose();
+			}
 		} catch (IOException e) {
 			throw new TelegramApiException("Unable to retrieve the image from passed-in file", e);
 		}
