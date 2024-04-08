@@ -181,7 +181,14 @@ public final class MediaHelper {
 	 */
 	private static BufferedImage toImage(File file) throws TelegramApiException {
 		try (var input = ImageIO.createImageInputStream(file)) {
-			var reader = ImageIO.getImageReaders(input).next();
+			var readers = ImageIO.getImageReaders(input);
+
+			if (!readers.hasNext()) {
+				LOGGER.atInfo().log("The file isn't a valid image");
+				return null;
+			}
+
+			var reader = readers.next();
 
 			try {
 				reader.setInput(input);
