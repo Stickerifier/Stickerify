@@ -15,7 +15,7 @@ junit = "org.junit.jupiter:junit-jupiter:5.10.2"
 junit-platform = "org.junit.platform:junit-platform-launcher:1.10.2"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
-mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.12"
+mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.13"
 okio = "com.squareup.okio:okio:3.9.0"
 slf4j-api = "org.slf4j:slf4j-api:2.0.13"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:7.2.1"
