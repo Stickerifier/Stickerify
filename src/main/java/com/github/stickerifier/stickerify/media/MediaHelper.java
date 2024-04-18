@@ -4,6 +4,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAMERATE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
@@ -28,7 +29,6 @@ import ws.schild.jave.info.MultimediaInfo;
 import ws.schild.jave.process.ProcessLocator;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,7 +75,9 @@ public final class MediaHelper {
 
 			var image = toImage(inputFile);
 			if (image != null) {
-				return convertToPng(image, mimeType);
+				boolean isFileSizeCompliant = isFileSizeLowerThan(inputFile, MAX_IMAGE_FILE_SIZE);
+
+				return convertToPng(image, mimeType, isFileSizeCompliant);
 			}
 		} catch (TelegramApiException e) {
 			LOGGER.atWarn().setCause(e).log("The file with {} MIME type could not be converted", mimeType);
@@ -180,23 +182,8 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if an error occurred processing passed-in file
 	 */
 	private static BufferedImage toImage(File file) throws TelegramApiException {
-		try (var input = ImageIO.createImageInputStream(file)) {
-			var readers = ImageIO.getImageReaders(input);
-
-			if (!readers.hasNext()) {
-				LOGGER.atInfo().log("The file isn't a valid image");
-				return null;
-			}
-
-			var reader = readers.next();
-
-			try {
-				reader.setInput(input);
-
-				return reader.read(0, new ImageReadParam());
-			} finally {
-				reader.dispose();
-			}
+		try {
+			return ImageIO.read(file);
 		} catch (IOException e) {
 			throw new TelegramApiException("Unable to retrieve the image from passed-in file", e);
 		}
@@ -217,12 +204,13 @@ public final class MediaHelper {
 	 *
 	 * @param image the image to convert to png
 	 * @param mimeType the MIME type of the file
+	 * @param isFileSizeCompliant {@code true} if the file does not exceed Telegram's limit
 	 * @return converted image, {@code null} if no conversion was required
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
-	private static File convertToPng(BufferedImage image, String mimeType) throws TelegramApiException {
+	private static File convertToPng(BufferedImage image, String mimeType, boolean isFileSizeCompliant) throws TelegramApiException {
 		try {
-			if (isImageCompliant(image, mimeType)) {
+			if (isImageCompliant(image, mimeType) && isFileSizeCompliant) {
 				LOGGER.atInfo().log("The image doesn't need conversion");
 
 				return null;

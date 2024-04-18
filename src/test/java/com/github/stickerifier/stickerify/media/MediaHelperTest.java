@@ -116,6 +116,14 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void resizeDetailedImage() throws Exception {
+		var detailedImage = loadResource("detailed.jpg");
+		var result = MediaHelper.convert(detailedImage);
+
+		assertImageConsistency(result, 512, 512);
+	}
+
+	@Test
 	void convertLongMovVideo() throws Exception {
 		var movVideo = loadResource("long.mov");
 		var result = MediaHelper.convert(movVideo);
