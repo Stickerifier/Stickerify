@@ -18,6 +18,8 @@ import com.github.stickerifier.stickerify.telegram.exception.TelegramApiExceptio
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import com.googlecode.pngtastic.core.PngImage;
+import com.googlecode.pngtastic.core.PngOptimizer;
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Mode;
@@ -258,6 +260,7 @@ public final class MediaHelper {
 
 	/**
 	 * Creates a new <i>.png</i> file from passed-in {@code image}.
+	 * If the resulting image exceeds Telegram's threshold, it will be optimized using {@link PngOptimizer}.
 	 *
 	 * @param image the image to convert to png
 	 * @return png image
@@ -268,6 +271,11 @@ public final class MediaHelper {
 
 		try {
 			ImageIO.write(image, "png", pngImage);
+
+			if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
+				var imagePath = pngImage.getPath();
+				new PngOptimizer().optimize(new PngImage(imagePath, "INFO"), imagePath, false, null);
+			}
 		} catch (IOException e) {
 			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
 		} finally {
