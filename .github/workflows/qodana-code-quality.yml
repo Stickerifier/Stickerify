@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Execute analysis
-        uses: JetBrains/qodana-action@v2023.3
+        uses: JetBrains/qodana-action@main
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
