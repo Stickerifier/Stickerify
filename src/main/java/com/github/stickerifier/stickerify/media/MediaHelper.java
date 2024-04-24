@@ -14,6 +14,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.stickerifier.stickerify.process.PathLocator;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
+import com.github.stickerifier.stickerify.telegram.exception.MediaOptimizationException;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -265,6 +266,7 @@ public final class MediaHelper {
 	 * @param image the image to convert to png
 	 * @return png image
 	 * @throws TelegramApiException if an error occurs creating the temp file
+	 * @throws MediaOptimizationException if the image size could not be reduced enough to meet Telegram's requirements
 	 */
 	private static File createPngFile(BufferedImage image) throws TelegramApiException {
 		var pngImage = createTempFile("png");
@@ -275,6 +277,10 @@ public final class MediaHelper {
 			if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
 				var imagePath = pngImage.getPath();
 				new PngOptimizer().optimize(new PngImage(imagePath, "INFO"), imagePath, false, null);
+
+				if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
+					throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
+				}
 			}
 		} catch (IOException e) {
 			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);

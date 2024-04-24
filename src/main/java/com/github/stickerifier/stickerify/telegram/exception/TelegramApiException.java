@@ -2,7 +2,7 @@ package com.github.stickerifier.stickerify.telegram.exception;
 
 import org.slf4j.helpers.MessageFormatter;
 
-public final class TelegramApiException extends Exception {
+public class TelegramApiException extends Exception {
 	public TelegramApiException(String message) {
 		super(message);
 	}
