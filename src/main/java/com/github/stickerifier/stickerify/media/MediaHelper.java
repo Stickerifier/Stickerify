@@ -275,12 +275,7 @@ public final class MediaHelper {
 			ImageIO.write(image, "png", pngImage);
 
 			if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
-				var imagePath = pngImage.getPath();
-				new PngOptimizer().optimize(new PngImage(imagePath, "INFO"), imagePath, false, null);
-
-				if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
-					throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
-				}
+				optimizeImage(pngImage);
 			}
 		} catch (IOException e) {
 			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
@@ -289,6 +284,22 @@ public final class MediaHelper {
 		}
 
 		return pngImage;
+	}
+
+	/**
+	 * Performs an optimization aimed to reduce the image's size using {@link PngOptimizer}.
+	 *
+	 * @param pngImage the file to optimize
+	 * @throws IOException if the optimization process fails
+	 * @throws TelegramApiException if the image size could not be reduced enough to meet Telegram's requirements
+	 */
+	private static void optimizeImage(File pngImage) throws IOException, TelegramApiException {
+		var imagePath = pngImage.getPath();
+		new PngOptimizer().optimize(new PngImage(imagePath, "INFO"), imagePath, false, null);
+
+		if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
+			throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
+		}
 	}
 
 	/**
