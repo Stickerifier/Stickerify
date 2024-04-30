@@ -18,6 +18,23 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Execute tests
+        run: ./gradlew test
+
+      - name: Generate coverage data
+        run: |
+          mkdir -p .qodana/code-coverage
+          cp -R build/kover/bin-reports/* .qodana/code-coverage/
+
+      - name: Archive coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-coverage-data.zip
+          path: .qodana/code-coverage
+
       - name: Execute analysis
         uses: JetBrains/qodana-action@main
         env:

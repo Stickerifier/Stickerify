@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.kover)
     alias(libs.plugins.runtime)
     alias(libs.plugins.shadow)
     id 'java'
@@ -35,6 +36,14 @@ dependencies {
     }
 }
 
+koverReport {
+    filters {
+        includes {
+            classes("com.github.stickerifier.*")
+        }
+    }
+}
+
 group = 'com.github.stickerifier'
 version = '1.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
@@ -51,6 +60,7 @@ tasks.withType(JavaCompile).configureEach {
 
 test {
     useJUnitPlatform()
+    finalizedBy(tasks.koverVerify)
 }
 
 application {

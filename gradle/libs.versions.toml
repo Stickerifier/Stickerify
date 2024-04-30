@@ -23,5 +23,6 @@ telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:7.2.1"
 tika = "org.apache.tika:tika-core:2.9.2"
 
 [plugins]
+kover = "org.jetbrains.kotlinx.kover:0.7.6"
 runtime = "org.beryx.runtime:1.13.1"
 shadow = "com.github.johnrengelman.shadow:8.1.1"
