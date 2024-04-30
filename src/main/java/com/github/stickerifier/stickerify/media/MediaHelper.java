@@ -4,6 +4,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAMERATE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
@@ -13,10 +14,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.stickerifier.stickerify.process.PathLocator;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
+import com.github.stickerifier.stickerify.telegram.exception.MediaOptimizationException;
 import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import com.googlecode.pngtastic.core.PngImage;
+import com.googlecode.pngtastic.core.PngOptimizer;
 import org.apache.tika.Tika;
 import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Mode;
@@ -74,7 +78,9 @@ public final class MediaHelper {
 
 			var image = toImage(inputFile);
 			if (image != null) {
-				return convertToPng(image, mimeType);
+				boolean isFileSizeCompliant = isFileSizeLowerThan(inputFile, MAX_IMAGE_FILE_SIZE);
+
+				return convertToPng(image, mimeType, isFileSizeCompliant);
 			}
 		} catch (TelegramApiException e) {
 			LOGGER.atWarn().setCause(e).log("The file with {} MIME type could not be converted", mimeType);
@@ -201,12 +207,13 @@ public final class MediaHelper {
 	 *
 	 * @param image the image to convert to png
 	 * @param mimeType the MIME type of the file
+	 * @param isFileSizeCompliant {@code true} if the file does not exceed Telegram's limit
 	 * @return converted image, {@code null} if no conversion was required
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
-	private static File convertToPng(BufferedImage image, String mimeType) throws TelegramApiException {
+	private static File convertToPng(BufferedImage image, String mimeType, boolean isFileSizeCompliant) throws TelegramApiException {
 		try {
-			if (isImageCompliant(image, mimeType)) {
+			if (isImageCompliant(image, mimeType) && isFileSizeCompliant) {
 				LOGGER.atInfo().log("The image doesn't need conversion");
 
 				return null;
@@ -254,16 +261,22 @@ public final class MediaHelper {
 
 	/**
 	 * Creates a new <i>.png</i> file from passed-in {@code image}.
+	 * If the resulting image exceeds Telegram's threshold, it will be optimized using {@link PngOptimizer}.
 	 *
 	 * @param image the image to convert to png
 	 * @return png image
 	 * @throws TelegramApiException if an error occurs creating the temp file
+	 * @throws MediaOptimizationException if the image size could not be reduced enough to meet Telegram's requirements
 	 */
 	private static File createPngFile(BufferedImage image) throws TelegramApiException {
 		var pngImage = createTempFile("png");
 
 		try {
 			ImageIO.write(image, "png", pngImage);
+
+			if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
+				optimizeImage(pngImage);
+			}
 		} catch (IOException e) {
 			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
 		} finally {
@@ -271,6 +284,22 @@ public final class MediaHelper {
 		}
 
 		return pngImage;
+	}
+
+	/**
+	 * Performs an optimization aimed to reduce the image's size using {@link PngOptimizer}.
+	 *
+	 * @param pngImage the file to optimize
+	 * @throws IOException if the optimization process fails
+	 * @throws TelegramApiException if the image size could not be reduced enough to meet Telegram's requirements
+	 */
+	private static void optimizeImage(File pngImage) throws IOException, TelegramApiException {
+		var imagePath = pngImage.getPath();
+		new PngOptimizer().optimize(new PngImage(imagePath, "INFO"), imagePath, false, null);
+
+		if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
+			throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
+		}
 	}
 
 	/**

@@ -14,6 +14,7 @@ public final class MediaConstraints {
 	static final long MAX_VIDEO_DURATION_MILLIS = 3_000L;
 	static final String VP9_CODEC = "vp9";
 	static final String MATROSKA_FORMAT = "matroska";
+	static final long MAX_IMAGE_FILE_SIZE = 512_000L;
 	static final long MAX_VIDEO_FILE_SIZE = 256_000L;
 	static final long MAX_ANIMATION_FILE_SIZE = 64_000L;
 	static final int MAX_ANIMATION_FRAMERATE = 60;
