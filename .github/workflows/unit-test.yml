@@ -14,6 +14,8 @@ jobs:
   tests:
     name: Execute unit tests
     runs-on: ${{ matrix.os }}
+    env:
+      EnableConcurrencyTests: true
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-13 ]
@@ -30,8 +32,8 @@ jobs:
         with:
           dependency-graph: generate-and-submit
           build-scan-publish: true
-          build-scan-terms-of-service-url: "https://gradle.com/terms-of-service"
-          build-scan-terms-of-service-agree: "yes"
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
 
       - name: Execute tests
         run: ./gradlew test

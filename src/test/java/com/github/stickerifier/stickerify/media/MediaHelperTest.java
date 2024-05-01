@@ -239,7 +239,7 @@ class MediaHelperTest {
 
 	@Nested
 	@DisplayName("Concurrently convert")
-	@EnabledIfEnvironmentVariable(named = "CI", matches = "true")
+	@EnabledIfEnvironmentVariable(named = "EnableConcurrencyTests", matches = "true")
 	class ConcurrencyTest {
 
 		@Test
