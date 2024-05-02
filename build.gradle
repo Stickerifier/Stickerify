@@ -47,6 +47,15 @@ jacocoTestReport {
         xml.required = true
         xml.outputLocation = file(".qodana/code-coverage/report.xml")
     }
+
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: ['**/ThreadIdConverter.class',
+                                        '**/MediaConstraints.class',
+                                        '**/stickerify/telegram/**',
+                                        '**/stickerify/runner**'])
+        })
+    }
 }
 
 group = 'com.github.stickerifier'
