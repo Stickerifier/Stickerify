@@ -37,3 +37,12 @@ jobs:
 
       - name: Execute tests
         run: ./gradlew test
+
+      - name: Execute analysis
+        uses: JetBrains/qodana-action@main
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          use-caches: false
+          post-pr-comment: false
+          pr-mode: false
