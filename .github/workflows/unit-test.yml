@@ -15,7 +15,7 @@ jobs:
     name: Execute unit tests
     runs-on: ${{ matrix.os }}
     env:
-      EnableConcurrencyTests: true
+      ENABLE_CONCURRENCY_TESTS: true
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-13 ]
