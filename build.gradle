@@ -52,8 +52,9 @@ jacocoTestReport {
         classDirectories = files(classDirectories.files.collect {
             fileTree(dir: it, exclude: ['**/ThreadIdConverter.class',
                                         '**/MediaConstraints.class',
-                                        '**/stickerify/telegram/**',
-                                        '**/stickerify/runner**'])
+                                        '**/stickerify/process/**',
+                                        '**/stickerify/runner**',
+                                        '**/stickerify/telegram/**'])
         })
     }
 }
