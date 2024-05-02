@@ -18,21 +18,20 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Execute tests
         run: ./gradlew test
 
-      - name: Generate coverage data
-        run: |
-          mkdir -p .qodana/code-coverage
-          cp -R build/kover/bin-reports/* .qodana/code-coverage/
-
       - name: Archive coverage data
         uses: actions/upload-artifact@v4
         with:
-          name: gradle-coverage-data.zip
+          name: gradle-coverage-data-jacoco
           path: .qodana/code-coverage
 
       - name: Execute analysis

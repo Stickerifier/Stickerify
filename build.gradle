@@ -36,10 +36,20 @@ dependencies {
     }
 }
 
+kover {
+    useJacoco()
+}
+
 koverReport {
     filters {
         includes {
             classes("com.github.stickerifier.*")
+        }
+    }
+    defaults {
+        xml {
+            onCheck = false
+            setReportFile(layout.projectDirectory.file(".qodana/code-coverage/result.xml").asFile)
         }
     }
 }
@@ -60,7 +70,7 @@ tasks.withType(JavaCompile).configureEach {
 
 test {
     useJUnitPlatform()
-    finalizedBy(tasks.koverVerify)
+    finalizedBy(tasks.koverXmlReport)
 }
 
 application {
