@@ -1,8 +1,8 @@
 plugins {
-    alias(libs.plugins.kover)
     alias(libs.plugins.runtime)
     alias(libs.plugins.shadow)
     id 'java'
+    id 'jacoco'
 }
 
 repositories {
@@ -36,21 +36,16 @@ dependencies {
     }
 }
 
-kover {
-    useJacoco()
+jacoco {
+    toolVersion = "0.8.12"
+    reportsDirectory = layout.projectDirectory.dir(".qodana/code-coverage")
 }
 
-koverReport {
-    filters {
-        includes {
-            classes("com.github.stickerifier.*")
-        }
-    }
-    defaults {
-        xml {
-            onCheck = false
-            setReportFile(layout.projectDirectory.file(".qodana/code-coverage/result.xml").asFile)
-        }
+jacocoTestReport {
+    reports {
+        html.required = false
+        xml.required = true
+        xml.outputLocation = file(".qodana/code-coverage/report.xml")
     }
 }
 
@@ -70,7 +65,7 @@ tasks.withType(JavaCompile).configureEach {
 
 test {
     useJUnitPlatform()
-    finalizedBy(tasks.koverXmlReport)
+    finalizedBy(jacocoTestReport)
 }
 
 application {
