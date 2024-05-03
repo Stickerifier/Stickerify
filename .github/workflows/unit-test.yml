@@ -36,3 +36,28 @@ jobs:
 
       - name: Execute tests
         run: ./gradlew test
+
+  qodana:
+    name: Perform Qodana analysis
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code changes
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Execute analysis
+        uses: JetBrains/qodana-action@main
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          use-caches: false
+          post-pr-comment: false
+          pr-mode: false
+
+      - name: Upload results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
