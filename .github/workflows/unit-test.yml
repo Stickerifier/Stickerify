@@ -62,7 +62,8 @@ jobs:
           path: .qodana/code-coverage
 
       - name: Extract coverage report
-        run: unzip -qq .qodana/code-coverage/coverage_report
+        run: unzip -qq coverage_report
+        working-directory: .qodana/code-coverage
 
       - name: Execute analysis
         uses: JetBrains/qodana-action@main
