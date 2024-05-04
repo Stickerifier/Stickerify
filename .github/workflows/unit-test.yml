@@ -43,7 +43,7 @@ jobs:
           name: coverage_report
           path: .qodana/code-coverage/report.xml
           retention-days: 1
-          overwrite: true
+          if-no-files-found: error
 
   qodana:
     name: Perform Qodana analysis
@@ -67,6 +67,7 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
+          args: "--baseline,qodana.baseline.json"
           use-caches: false
           post-pr-comment: false
           pr-mode: false
