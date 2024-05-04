@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.runtime)
     alias(libs.plugins.shadow)
     id 'java'
+    id 'jacoco'
 }
 
 repositories {
@@ -35,6 +36,24 @@ dependencies {
     }
 }
 
+jacocoTestReport {
+    reports {
+        html.required = false
+        xml.required = true
+        xml.outputLocation = file(".qodana/code-coverage/report.xml")
+    }
+
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: ['**/ThreadIdConverter.class',
+                                        '**/MediaConstraints.class',
+                                        '**/stickerify/process/**',
+                                        '**/stickerify/runner**',
+                                        '**/stickerify/telegram/**'])
+        })
+    }
+}
+
 group = 'com.github.stickerifier'
 version = '1.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
@@ -51,6 +70,7 @@ tasks.withType(JavaCompile).configureEach {
 
 test {
     useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
 }
 
 application {

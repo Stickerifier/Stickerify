@@ -9,12 +9,14 @@ on:
 
 permissions:
   contents: write
+  security-events: write
 
 jobs:
   tests:
     name: Execute unit tests
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-13 ]
     steps:
@@ -23,15 +25,55 @@ jobs:
 
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
-        id: setup-ffmpeg
 
       - name: Setup project and upload dependency graph
         uses: gradle/actions/setup-gradle@v3
         with:
           dependency-graph: generate-and-submit
           build-scan-publish: true
-          build-scan-terms-of-service-url: "https://gradle.com/terms-of-service"
-          build-scan-terms-of-service-agree: "yes"
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
 
       - name: Execute tests
         run: ./gradlew test
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux'
+        with:
+          name: coverage_report
+          path: .qodana/code-coverage/report.xml
+          retention-days: 1
+          if-no-files-found: error
+
+  qodana:
+    name: Perform Qodana analysis
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code changes
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage_report
+          path: .qodana/code-coverage
+
+      - name: Execute analysis
+        uses: JetBrains/qodana-action@main
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          args: "--baseline,qodana.baseline.json"
+          use-caches: false
+          post-pr-comment: false
+          pr-mode: false
+
+      - name: Upload results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
