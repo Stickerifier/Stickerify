@@ -37,6 +37,7 @@ jobs:
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux'
         with:
           name: coverage_report
           path: .qodana/code-coverage/report.xml
@@ -61,7 +62,7 @@ jobs:
           path: .qodana/code-coverage
 
       - name: Extract coverage report
-        run: unzip -qq coverage_report
+        run: unzip -qq .qodana/code-coverage/coverage_report
 
       - name: Execute analysis
         uses: JetBrains/qodana-action@main
