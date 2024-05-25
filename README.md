@@ -1,18 +1,18 @@
-# <img src="src/main/resources/images/stickerify.svg" align="right" width="100">[Stickerify](https://t.me/StickerifyImageBot)
+# <img src="src/main/resources/images/stickerify.svg" alt="Stickerify Logo" align="right" width="100">[Stickerify](https://t.me/StickerifyImageBot)
 
 Telegram bot to convert medias in the format required to be used as Telegram stickers
 
 ## Table of contents
 
-* [How to use the bot](#How-to-use-the-bot)
-* [How to create a new sticker](#How-to-create-a-new-sticker)
-* [How to set up the project](#How-to-set-up-the-project)
-* [How to run the bot locally](#How-to-run-the-bot-locally)
-* [How to launch the bot using Docker](#How-to-launch-the-bot-using-Docker)
-* [How to contribute to the project](#How-to-contribute-to-the-project)
-* [Hacktoberfest](#Hacktoberfest)
-* [Useful information](#Useful-information)
-* [License](#License)
+* [How to use the bot](#how-to-use-the-bot)
+* [How to create a new sticker](#how-to-create-a-new-sticker)
+* [How to set up the project](#how-to-set-up-the-project)
+* [How to run the bot locally](#how-to-run-the-bot-locally)
+* [How to launch the bot using Docker](#how-to-launch-the-bot-using-docker)
+* [How to contribute to the project](#how-to-contribute-to-the-project)
+* [Hacktoberfest](#hacktoberfest)
+* [Useful information](#useful-information)
+* [License](#license)
 
 ## How to use the bot
 
@@ -76,15 +76,20 @@ After you successfully set up the project, you will have to go through the follo
 1. Install [Docker](https://docs.docker.com/get-docker/)
 2. Prepare the Docker image either:
     * moving into the project folder and building the image with the command:
-       ```shell
-       docker build -t rob93c/stickerify .
-       ```
+
+      ```shell
+      docker build -t rob93c/stickerify .
+      ```
+
     * pulling the image from [Docker Hub](https://hub.docker.com/):
+
        ```shell
        docker pull rob93c/stickerify
        ```
+
 3. Now you just need to run the Docker image passing the token (`{{TOKEN}}`) retrieved
    from [BotFather](https://t.me/BotFather):
+
    ```shell
    docker run -e "STICKERIFY_TOKEN={{TOKEN}}" rob93c/stickerify
    ```
@@ -93,16 +98,16 @@ After you successfully set up the project, you will have to go through the follo
 
 Take a look at this project's contributing guidelines [here](CONTRIBUTING.md).
 
-Have any question? Feel free to [open a new discussion](https://github.com/Stickerifier/Stickerify/discussions/new).
+Have any question? Consider [opening a new discussion](https://github.com/Stickerifier/Stickerify/discussions/new).
 
 ## Hacktoberfest
 
-[Hacktoberfest](https://hacktoberfest.com/) is an event aiming to encourage people to contribute to open source projects
+[Hacktoberfest](https://hacktoberfest.com/) is an event aiming to encourage people to contribute to open-source projects
 every October.
 This project adheres to this initiative and welcomes any hacktoberfest-related improvement!
 
 If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as part of this event, first read
-the [contributing guidelines](CONTRIBUTING.md) and then feel free to open a new issue _and/or_ pull request.
+the [contributing guidelines](CONTRIBUTING.md) and then consider opening a new issue _and/or_ pull request.
 
 If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-accepted`,
 therefore counting towards the 4 contributions goal.
