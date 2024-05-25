@@ -103,7 +103,7 @@ public final class MediaHelper {
 			mimeType = new Tika().detect(file);
 
 			LOGGER.atDebug().log("The file has {} MIME type", mimeType);
-		} catch (IOException e) {
+		} catch (IOException _) {
 			LOGGER.atError().log("Unable to retrieve MIME type for file {}", file.getName());
 		}
 
@@ -132,7 +132,7 @@ public final class MediaHelper {
 				var sticker = GSON.fromJson(uncompressedContent, AnimationDetails.class);
 
 				return isAnimationCompliant(sticker) && isFileSizeLowerThan(file, MAX_ANIMATION_FILE_SIZE);
-			} catch (JsonSyntaxException e) {
+			} catch (JsonSyntaxException _) {
 				LOGGER.atInfo().log("The archive isn't an animated sticker");
 			}
 		}

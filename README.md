@@ -54,11 +54,11 @@ And it's done!
 
 ## How to set up the project
 
-1. Install JDK 21 (or higher)
+1. Install JDK 22 (or higher)
 2. Clone the project and move into its folder
 3. Run the command `./gradlew build -x test`
 4. Import the project inside your IDE as a Gradle project
-5. Ensure your IDE is correctly configured to use a Java 21 (or higher) JDK
+5. Ensure your IDE is correctly configured to use a Java 22 (or higher) JDK
 
 ## How to run the bot locally
 
