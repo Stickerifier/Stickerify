@@ -77,9 +77,9 @@ After you successfully set up the project, you will have to go through the follo
 2. Prepare the Docker image either:
     * moving into the project folder and building the image with the command:
 
-      ```shell
-      docker build -t rob93c/stickerify .
-      ```
+       ```shell
+       docker build -t rob93c/stickerify .
+       ```
 
     * pulling the image from [Docker Hub](https://hub.docker.com/):
 
