@@ -4,4 +4,4 @@ profile:
 include:
   - name: VulnerableLibrariesGlobal
 linter: jetbrains/qodana-jvm:latest
-projectJDK: temurin-21
+projectJDK: temurin-22

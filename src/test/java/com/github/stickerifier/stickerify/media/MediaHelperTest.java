@@ -255,10 +255,10 @@ class MediaHelperTest {
 			var failedConversions = new AtomicInteger(0);
 
 			try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-				IntStream.range(0, concurrentRequests).forEach(i -> executor.execute(() -> {
+				IntStream.range(0, concurrentRequests).forEach(_ -> executor.execute(() -> {
 					try {
 						MediaHelper.convert(inputFile);
-					} catch (TelegramApiException e) {
+					} catch (TelegramApiException _) {
 						failedConversions.incrementAndGet();
 					}
 				}));
