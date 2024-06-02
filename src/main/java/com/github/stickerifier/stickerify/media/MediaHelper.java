@@ -44,6 +44,7 @@ public final class MediaHelper {
 
 	static {
 		System.setProperty("java.awt.headless", "true");
+		ImageIO.setUseCache(false);
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
@@ -120,7 +121,7 @@ public final class MediaHelper {
 	 */
 	private static boolean isAnimatedStickerCompliant(File file, String mimeType) throws TelegramApiException {
 		if ("application/gzip".equals(mimeType)) {
-			String uncompressedContent = "";
+			var uncompressedContent = "";
 
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
 				uncompressedContent = new String(gzipInputStream.readAllBytes(), UTF_8);
