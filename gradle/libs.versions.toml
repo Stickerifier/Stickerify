@@ -1,6 +1,6 @@
 [versions]
 logback = "1.5.6"
-twelvemonkeys = "3.10.1"
+twelvemonkeys = "3.11.0"
 
 [libraries]
 gson = "com.google.code.gson:gson:2.11.0"
