@@ -39,6 +39,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          provenance: mode=max
+          sbom: true
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
           cache-from: type=gha
