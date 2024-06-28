@@ -7,9 +7,6 @@ on:
     branches:
       - main
 
-permissions:
-  pull-requests: write
-
 jobs:
   docker:
     name: Build and upload Docker image
@@ -48,11 +45,3 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Analyze with Docker Scout
-        uses: docker/scout-action@v1
-        with:
-          command: cves,recommendations,compare,sbom
-          to-latest: true
-          ignore-unchanged: true
-          only-fixed: true
