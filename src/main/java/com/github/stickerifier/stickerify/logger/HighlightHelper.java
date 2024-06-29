@@ -33,4 +33,8 @@ public final class HighlightHelper {
 
 		return matcher.find() ? matcher.group(1) : null;
 	}
+
+	static String replaceFirst(String message, String textToReplace, String replacement) {
+		return message.replaceFirst(Pattern.quote(textToReplace), replacement);
+	}
 }

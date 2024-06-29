@@ -6,14 +6,13 @@ import static ch.qos.logback.core.pattern.color.ANSIConstants.RESET;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.YELLOW_FG;
 import static com.github.stickerifier.stickerify.logger.HighlightHelper.changeColorTo;
 import static com.github.stickerifier.stickerify.logger.HighlightHelper.greenHighlight;
+import static com.github.stickerifier.stickerify.logger.HighlightHelper.replaceFirst;
 import static com.github.stickerifier.stickerify.logger.HighlightHelper.retrieveMimeType;
 import static com.github.stickerifier.stickerify.telegram.model.TelegramRequest.NEW_USER;
 
 import ch.qos.logback.classic.pattern.MessageConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.pattern.Converter;
-
-import java.util.regex.Pattern;
 
 /**
  * Custom converter class to be used by Logback in order to highlight important substrings.
@@ -43,9 +42,5 @@ public class MessageHighlighter extends MessageConverter {
 		}
 
 		return message;
-	}
-
-	private static String replaceFirst(String message, String textToReplace, String replacement) {
-		return message.replaceFirst(Pattern.quote(textToReplace), replacement);
 	}
 }
