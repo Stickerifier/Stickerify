@@ -32,16 +32,20 @@ public class MessageHighlighter extends MessageConverter {
 
 		if (message != null) {
 			if (message.contains(NEW_USER)) {
-				return message.replaceFirst(Pattern.quote(NEW_USER), HIGHLIGHTED_NEW_USER);
+				return replaceFirst(message, NEW_USER, HIGHLIGHTED_NEW_USER);
 			}
 
 			var mimeType = retrieveMimeType(message);
 			if (mimeType != null) {
 				var highlightedMimeType = greenHighlight(mimeType, CONTINUE_WHITE);
-				return message.replaceFirst(mimeType, highlightedMimeType);
+				return replaceFirst(message, mimeType, highlightedMimeType);
 			}
 		}
 
 		return message;
+	}
+
+	private static String replaceFirst(String message, String textToReplace, String replacement) {
+		return message.replaceFirst(Pattern.quote(textToReplace), replacement);
 	}
 }
