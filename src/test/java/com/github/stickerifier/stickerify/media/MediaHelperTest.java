@@ -6,6 +6,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAG
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static com.github.stickerifier.stickerify.media.MediaHelper.FFMPEG_LOCATOR;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -28,7 +29,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -119,6 +120,14 @@ class MediaHelperTest {
 	void resizeDetailedImage() throws Exception {
 		var detailedImage = loadResource("detailed.jpg");
 		var result = MediaHelper.convert(detailedImage);
+
+		assertImageConsistency(result, 512, 512);
+	}
+
+	@Test
+	void resizeSvgImage() throws Exception {
+		var svgImage = loadResource("valid.svg");
+		var result = MediaHelper.convert(svgImage);
 
 		assertImageConsistency(result, 512, 512);
 	}
@@ -253,19 +262,21 @@ class MediaHelperTest {
 		private static void executeConcurrentConversionsOf(File inputFile) {
 			final int concurrentRequests = 50;
 			var failedConversions = new AtomicInteger(0);
+			var failureReasons = ConcurrentHashMap.newKeySet();
 
-			try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+			try (var executor = newFixedThreadPool(5, Thread.ofVirtual().factory())) {
 				IntStream.range(0, concurrentRequests).forEach(_ -> executor.execute(() -> {
 					try {
 						MediaHelper.convert(inputFile);
-					} catch (TelegramApiException _) {
+					} catch (Throwable e) {
 						failedConversions.incrementAndGet();
+						failureReasons.add(e.getMessage());
 					}
 				}));
 			}
 
 			int failures = failedConversions.get();
-			var errorMessage = "Unable to process %d concurrent requests: %d conversions failed".formatted(concurrentRequests, failures);
+			var errorMessage = "Unable to process %d concurrent requests: %d conversions failed: %s".formatted(concurrentRequests, failures, failureReasons);
 
 			assertThat(errorMessage, failures, is(equalTo(0)));
 		}
@@ -346,6 +357,14 @@ class MediaHelperTest {
 		@DisplayName("psd images")
 		void concurrentPsdImageConversions() {
 			var psdImage = loadResource("valid.psd");
+
+			executeConcurrentConversionsOf(psdImage);
+		}
+
+		@Test
+		@DisplayName("svg images")
+		void concurrentSvgImageConversions() {
+			var psdImage = loadResource("valid.svg");
 
 			executeConcurrentConversionsOf(psdImage);
 		}

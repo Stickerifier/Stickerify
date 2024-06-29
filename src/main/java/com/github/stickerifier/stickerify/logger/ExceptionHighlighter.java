@@ -4,6 +4,7 @@ import static ch.qos.logback.core.pattern.color.ANSIConstants.RED_FG;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.RESET;
 import static com.github.stickerifier.stickerify.logger.HighlightHelper.changeColorTo;
 import static com.github.stickerifier.stickerify.logger.HighlightHelper.greenHighlight;
+import static com.github.stickerifier.stickerify.logger.HighlightHelper.replaceFirst;
 import static com.github.stickerifier.stickerify.logger.HighlightHelper.retrieveMimeType;
 
 import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
@@ -29,8 +30,8 @@ public class ExceptionHighlighter extends ThrowableProxyConverter {
 			var mimeType = retrieveMimeType(exceptionMessage);
 
 			if (mimeType != null) {
-				var highlightedMessage = exceptionMessage.replace(mimeType, greenHighlight(mimeType, CONTINUE_RED));
-				return fullMessage.replaceFirst(exceptionMessage, highlightedMessage);
+				var highlightedMessage = replaceFirst(exceptionMessage, mimeType, greenHighlight(mimeType, CONTINUE_RED));
+				return replaceFirst(fullMessage, exceptionMessage, highlightedMessage);
 			}
 		}
 

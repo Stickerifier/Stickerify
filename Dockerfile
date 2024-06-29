@@ -7,7 +7,7 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
 COPY . .
 RUN ./gradlew runtime --no-daemon
 
-FROM gcr.io/distroless/base-nossl AS bot
+FROM gcr.io/distroless/base-nossl:nonroot AS bot
 COPY --from=builder /app/build/jre ./jre
 COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=mwader/static-ffmpeg /ffmpeg /usr/local/bin/
