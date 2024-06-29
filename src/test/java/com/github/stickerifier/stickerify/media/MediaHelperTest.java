@@ -124,6 +124,14 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void resizeSvgImage() throws Exception {
+		var svgImage = loadResource("valid.svg");
+		var result = MediaHelper.convert(svgImage);
+
+		assertImageConsistency(result, 512, 512);
+	}
+
+	@Test
 	void convertLongMovVideo() throws Exception {
 		var movVideo = loadResource("long.mov");
 		var result = MediaHelper.convert(movVideo);
@@ -258,7 +266,7 @@ class MediaHelperTest {
 				IntStream.range(0, concurrentRequests).forEach(_ -> executor.execute(() -> {
 					try {
 						MediaHelper.convert(inputFile);
-					} catch (TelegramApiException _) {
+					} catch (Throwable _) {
 						failedConversions.incrementAndGet();
 					}
 				}));
@@ -346,6 +354,14 @@ class MediaHelperTest {
 		@DisplayName("psd images")
 		void concurrentPsdImageConversions() {
 			var psdImage = loadResource("valid.psd");
+
+			executeConcurrentConversionsOf(psdImage);
+		}
+
+		@Test
+		@DisplayName("svg images")
+		void concurrentSvgImageConversions() {
+			var psdImage = loadResource("valid.svg");
 
 			executeConcurrentConversionsOf(psdImage);
 		}
