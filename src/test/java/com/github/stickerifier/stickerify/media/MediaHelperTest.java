@@ -6,7 +6,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAG
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static com.github.stickerifier.stickerify.media.MediaHelper.FFMPEG_LOCATOR;
-import static java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -264,7 +264,7 @@ class MediaHelperTest {
 			var failedConversions = new AtomicInteger(0);
 			var failureReasons = ConcurrentHashMap.newKeySet();
 
-			try (var executor = newVirtualThreadPerTaskExecutor()) {
+			try (var executor = newFixedThreadPool(5, Thread.ofVirtual().factory())) {
 				IntStream.range(0, concurrentRequests).forEach(_ -> executor.execute(() -> {
 					try {
 						MediaHelper.convert(inputFile);

@@ -7,6 +7,7 @@ import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
@@ -33,7 +34,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Telegram bot to convert medias in the format required to be used as Telegram stickers.
@@ -44,6 +45,7 @@ public class Stickerify {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
+	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
 
 	private final TelegramBot bot;
 	private final Executor executor;
@@ -54,7 +56,7 @@ public class Stickerify {
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), Executors.newVirtualThreadPerTaskExecutor());
+		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), newFixedThreadPool(getMaxConcurrentThreads(), VIRTUAL_THREAD_FACTORY));
 	}
 
 	/**
@@ -195,5 +197,10 @@ public class Stickerify {
 				LOGGER.atError().setCause(e).log("An error occurred trying to delete temp file {}", path);
 			}
 		}
+	}
+
+	private static int getMaxConcurrentThreads() {
+		var value = System.getenv("CONCURRENT_THREADS");
+		return value == null ? 5 : Integer.parseInt(value);
 	}
 }
