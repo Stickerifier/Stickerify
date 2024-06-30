@@ -11,16 +11,12 @@ import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 @ClearTempFiles
 class StickerifyTest {
@@ -38,23 +34,9 @@ class StickerifyTest {
 		var bot = new TelegramBot.Builder("token")
 				.apiUrl(server.url("api/").toString())
 				.fileApiUrl(server.url("files/").toString())
-				.updateListenerSleep(500)
 				.build();
 
-		var executorService = new ThreadPoolExecutor(
-				0,
-				1,
-				0L, TimeUnit.SECONDS,
-				new SynchronousQueue<>(),
-				new ThreadPoolExecutor.CallerRunsPolicy()
-		) {
-			@Override
-			public void execute(@NotNull Runnable command) {
-				getRejectedExecutionHandler().rejectedExecution(command, this);
-			}
-		};
-
-		return new Stickerify(bot, executorService);
+		return new Stickerify(bot);
 	}
 
 	@AfterEach

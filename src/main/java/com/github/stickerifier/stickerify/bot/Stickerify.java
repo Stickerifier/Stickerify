@@ -7,7 +7,6 @@ import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
-import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
@@ -21,7 +20,6 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.GetFile;
-import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -35,9 +33,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.StructuredTaskScope;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -48,11 +45,9 @@ import java.util.concurrent.ThreadFactory;
 public class Stickerify implements AutoCloseable, ExceptionHandler, UpdatesListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
-	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
 
 	private final TelegramBot bot;
-	private final ExecutorService executorService;
 	private final Semaphore semaphore = new Semaphore(getMaxConcurrentThreads());
 
 	/**
@@ -61,31 +56,25 @@ public class Stickerify implements AutoCloseable, ExceptionHandler, UpdatesListe
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), newThreadPerTaskExecutor(VIRTUAL_THREAD_FACTORY));
+		var token = System.getenv("STICKERIFY_TOKEN");
+		this(new TelegramBot(token));
 	}
 
-	/**
-	 * Instantiate the bot processing requests with an arbitrary executor.
-	 *
-	 * @see Stickerify
-	 */
-	Stickerify(TelegramBot bot, ExecutorService executorService) {
+	Stickerify(TelegramBot bot) {
 		this.bot = bot;
-		this.executorService = executorService;
 	}
 
 	/**
 	 * Starts listening for new Updates
 	 */
 	public void start() {
-		bot.setUpdatesListener(this, this, new GetUpdates().timeout(50));
+		bot.setUpdatesListener(this, this);
 	}
 
 	@Override
 	public void close() {
 		bot.removeGetUpdatesListener();
 		bot.shutdown();
-		executorService.close();
 	}
 
 	@Override
@@ -95,16 +84,15 @@ public class Stickerify implements AutoCloseable, ExceptionHandler, UpdatesListe
 
 	@Override
 	public int process(List<Update> updates) {
-		var callables = updates.stream()
-				.map(Update::message)
-				.filter(Objects::nonNull)
-				.map(TelegramRequest::new)
-				.peek((request) -> LOGGER.atInfo().log("Received {}", request.getDescription()))
-				.<Callable<Void>>map((request) -> () -> { answer(request); return null; })
-				.toList();
+		try (var scope = new StructuredTaskScope<>(null, VIRTUAL_THREAD_FACTORY)) {
+			updates.stream()
+					.map(Update::message)
+					.filter(Objects::nonNull)
+					.map(TelegramRequest::new)
+					.peek(request -> LOGGER.atInfo().log("Received {}", request.getDescription()))
+					.forEach(request -> scope.fork(() -> { answer(request); return null; }));
 
-		try {
-			executorService.invokeAll(callables);
+			scope.join();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
