@@ -7,7 +7,7 @@ import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
@@ -16,6 +16,7 @@ import com.github.stickerifier.stickerify.telegram.model.TelegramFile;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.TelegramException;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
@@ -32,8 +33,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -41,14 +45,15 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author Roberto Cella
  */
-public class Stickerify {
+public class Stickerify implements AutoCloseable, ExceptionHandler, UpdatesListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
 
 	private final TelegramBot bot;
-	private final Executor executor;
+	private final ExecutorService executorService;
+	private final Semaphore semaphore = new Semaphore(getMaxConcurrentThreads());
 
 	/**
 	 * Instantiate the bot processing requests with virtual threads.
@@ -56,7 +61,7 @@ public class Stickerify {
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), newFixedThreadPool(getMaxConcurrentThreads(), VIRTUAL_THREAD_FACTORY));
+		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), newThreadPerTaskExecutor(VIRTUAL_THREAD_FACTORY));
 	}
 
 	/**
@@ -64,24 +69,45 @@ public class Stickerify {
 	 *
 	 * @see Stickerify
 	 */
-	Stickerify(TelegramBot bot, Executor executor) {
+	Stickerify(TelegramBot bot, ExecutorService executorService) {
 		this.bot = bot;
-		this.executor = executor;
-
-		ExceptionHandler exceptionHandler = e -> LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
-
-		bot.setUpdatesListener(this::handleUpdates, exceptionHandler, new GetUpdates().timeout(50));
+		this.executorService = executorService;
 	}
 
-	private int handleUpdates(List<Update> updates) {
-		updates.forEach(update -> executor.execute(() -> {
-			if (update.message() != null) {
-				var request = new TelegramRequest(update.message());
-				LOGGER.atInfo().log("Received {}", request.getDescription());
+	/**
+	 * Starts listening for new Updates
+	 */
+	public void start() {
+		bot.setUpdatesListener(this, this, new GetUpdates().timeout(50));
+	}
 
-				answer(request);
-			}
-		}));
+	@Override
+	public void close() {
+		bot.removeGetUpdatesListener();
+		bot.shutdown();
+		executorService.close();
+	}
+
+	@Override
+	public void onException(TelegramException e) {
+		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
+	}
+
+	@Override
+	public int process(List<Update> updates) {
+		var callables = updates.stream()
+				.map(Update::message)
+				.filter(Objects::nonNull)
+				.map(TelegramRequest::new)
+				.peek((request) -> LOGGER.atInfo().log("Received {}", request.getDescription()))
+				.<Callable<Void>>map((request) -> () -> { answer(request); return null; })
+				.toList();
+
+		try {
+			executorService.invokeAll(callables);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 
 		return UpdatesListener.CONFIRMED_UPDATES_ALL;
 	}
@@ -92,7 +118,7 @@ public class Stickerify {
 		if (file != null) {
 			answerFile(request, file);
 		} else {
-			answerText(request);
+			answerText(request.getAnswerMessage(), request);
 		}
 	}
 
@@ -115,7 +141,7 @@ public class Stickerify {
 			var originalFile = retrieveFile(fileId);
 			pathsToDelete.add(originalFile.toPath());
 
-			var outputFile = MediaHelper.convert(originalFile);
+			var outputFile = convertMedia(originalFile);
 
 			if (outputFile == null) {
 				answerText(FILE_ALREADY_VALID, request);
@@ -150,6 +176,20 @@ public class Stickerify {
 		}
 	}
 
+	private File convertMedia(File inputFile) throws TelegramApiException {
+		try {
+			semaphore.acquire();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+
+		try {
+			return MediaHelper.convert(inputFile);
+		} finally {
+			semaphore.release();
+		}
+	}
+
 	private void processFailure(TelegramRequest request, TelegramApiException e) {
 		if (e.getMessage().endsWith("Bad Request: message to reply not found")) {
 			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", request.getDescription());
@@ -160,10 +200,6 @@ public class Stickerify {
 			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
 			answerText(ERROR, request);
 		}
-	}
-
-	private void answerText(TelegramRequest request) {
-		answerText(request.getAnswerMessage(), request);
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {

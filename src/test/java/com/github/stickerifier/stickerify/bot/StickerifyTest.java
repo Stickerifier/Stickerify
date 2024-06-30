@@ -11,29 +11,63 @@ import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
-import mockwebserver3.junit5.internal.MockWebServerExtension;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @ClearTempFiles
-@ExtendWith(MockWebServerExtension.class)
 class StickerifyTest {
 
 	private MockWebServer server;
+	private Stickerify bot;
 
 	@BeforeEach
 	void setup() {
-		server = new MockWebServer();
+		this.server = new MockWebServer();
+		this.bot = makeBot();
+	}
+
+	private Stickerify makeBot() {
+		var bot = new TelegramBot.Builder("token")
+				.apiUrl(server.url("api/").toString())
+				.fileApiUrl(server.url("files/").toString())
+				.updateListenerSleep(500)
+				.build();
+
+		var executorService = new ThreadPoolExecutor(
+				0,
+				1,
+				0L, TimeUnit.SECONDS,
+				new SynchronousQueue<>(),
+				new ThreadPoolExecutor.CallerRunsPolicy()
+		) {
+			@Override
+			public void execute(@NotNull Runnable command) {
+				getRejectedExecutionHandler().rejectedExecution(command, this);
+			}
+		};
+
+		return new Stickerify(bot, executorService);
+	}
+
+	@AfterEach
+	void cleanup() throws IOException {
+		bot.close();
+		server.close();
 	}
 
 	@Test
 	void startMessage() throws Exception {
 		server.enqueue(MockResponses.START_MESSAGE);
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -41,16 +75,6 @@ class StickerifyTest {
 		var sendMessage = server.takeRequest();
 		assertEquals("/api/token/sendMessage", sendMessage.getPath());
 		assertResponseContainsMessage(sendMessage, Answer.HELP);
-	}
-
-	private void startBot() {
-		var bot = new TelegramBot.Builder("token")
-				.apiUrl(server.url("api/").toString())
-				.fileApiUrl(server.url("files/").toString())
-				.updateListenerSleep(500)
-				.build();
-
-		new Stickerify(bot, Runnable::run);
 	}
 
 	private static void assertResponseContainsMessage(RecordedRequest request, Answer answer) {
@@ -62,7 +86,7 @@ class StickerifyTest {
 	void helpMessage() throws Exception {
 		server.enqueue(MockResponses.HELP_MESSAGE);
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -76,7 +100,7 @@ class StickerifyTest {
 	void fileNotSupported() throws Exception {
 		server.enqueue(MockResponses.FILE_NOT_SUPPORTED);
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -90,7 +114,7 @@ class StickerifyTest {
 	void fileTooBig() throws Exception {
 		server.enqueue(MockResponses.FILE_TOO_BIG);
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -106,7 +130,7 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("animated_sticker.tgs"));
 		server.enqueue(MockResponses.fileDownload(loadResource("animated_sticker.tgs")));
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -129,7 +153,7 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("big.png"));
 		server.enqueue(MockResponses.fileDownload(loadResource("big.png")));
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -152,7 +176,7 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("valid.webp"));
 		server.enqueue(MockResponses.fileDownload(loadResource("valid.webp")));
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -175,7 +199,7 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("long.mov"));
 		server.enqueue(MockResponses.fileDownload(loadResource("long.mov")));
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -198,7 +222,7 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("short_low_fps.webm"));
 		server.enqueue(MockResponses.fileDownload(loadResource("short_low_fps.webm")));
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -221,7 +245,7 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("valid.gif"));
 		server.enqueue(MockResponses.fileDownload(loadResource("valid.gif")));
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -244,7 +268,7 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("document.txt"));
 		server.enqueue(MockResponses.fileDownload(loadResource("document.txt")));
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
@@ -267,7 +291,7 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("corrupted.mp4"));
 		server.enqueue(MockResponses.fileDownload(loadResource("corrupted.mp4")));
 
-		startBot();
+		bot.start();
 
 		var getUpdates = server.takeRequest();
 		assertEquals("/api/token/getUpdates", getUpdates.getPath());
