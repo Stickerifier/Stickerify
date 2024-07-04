@@ -12,6 +12,7 @@ Telegram bot to convert medias in the format required to be used as Telegram sti
 * [How to contribute to the project](#how-to-contribute-to-the-project)
 * [Hacktoberfest](#hacktoberfest)
 * [Useful information](#useful-information)
+* [Privacy policy](#privacy-policy)
 * [License](#license)
 
 ## How to use the bot
@@ -121,6 +122,10 @@ therefore counting towards the 4 contributions goal.
 * Image conversion uses [ImageIO](https://docs.oracle.com/en/java/javase/20/docs/api/java.desktop/javax/imageio/ImageIO.html), [TwelveMonkeys](https://github.com/haraldk/TwelveMonkeys), [imgscalr](https://github.com/rkalla/imgscalr), and [Pngtastic](https://github.com/depsypher/pngtastic)
 * Animated sticker validation uses [Gson](https://github.com/google/gson)
 * MIME type analysis is performed using [Apache Tika](https://tika.apache.org/)
+
+## Privacy Policy
+
+The privacy policy can be found [**here**](PRIVACY_POLICY.md).
 
 ## License
 
