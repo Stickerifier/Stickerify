@@ -50,6 +50,27 @@ public final class MockResponses {
 			}
 			""").build();
 
+	static final MockResponse PRIVACY_MESSAGE = new MockResponse.Builder().body("""
+			{
+				ok: true,
+				result: [
+					{
+						update_id: 1,
+						message: {
+							message_id: 1,
+							from: {
+								id: 123456
+							},
+							chat: {
+								id: 1
+							},
+							text: "/privacy"
+						}
+					}
+				]
+			}
+			""").build();
+
 	static final MockResponse FILE_NOT_SUPPORTED = new MockResponse.Builder().body("""
 			{
 				ok: true,

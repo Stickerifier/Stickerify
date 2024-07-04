@@ -73,6 +73,20 @@ class StickerifyTest {
 	}
 
 	@Test
+	void privacyMessage() throws Exception {
+		server.enqueue(MockResponses.PRIVACY_MESSAGE);
+
+		startBot();
+
+		var getUpdates = server.takeRequest();
+		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+
+		var sendMessage = server.takeRequest();
+		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertResponseContainsMessage(sendMessage, Answer.PRIVACY_POLICY);
+	}
+
+	@Test
 	void fileNotSupported() throws Exception {
 		server.enqueue(MockResponses.FILE_NOT_SUPPORTED);
 
