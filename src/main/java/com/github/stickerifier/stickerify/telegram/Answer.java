@@ -41,10 +41,10 @@ public enum Answer {
 			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
 			""", true),
 	PRIVACY_POLICY("""
-			You can view our privacy policy by visiting [this link](https://github.com/Stickerifier/Stickerify/blob/main/PRIVACY_POLICY.md)\\.
+			You can view our privacy policy by visiting [this link](https://stickerifier.github.io/Stickerify/PRIVACY_POLICY.html)\\.
 
 			If you have any questions or concerns, feel free to reach out to us\\.
-			""", true);
+			""");
 
 	private final String text;
 	private final boolean disableWebPreview;
