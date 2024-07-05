@@ -2,6 +2,7 @@ package com.github.stickerifier.stickerify.telegram.model;
 
 import static com.github.stickerifier.stickerify.telegram.Answer.ABOUT;
 import static com.github.stickerifier.stickerify.telegram.Answer.HELP;
+import static com.github.stickerifier.stickerify.telegram.Answer.PRIVACY_POLICY;
 import static java.util.Comparator.comparing;
 
 import com.github.stickerifier.stickerify.telegram.Answer;
@@ -27,6 +28,7 @@ public record TelegramRequest(Message message) {
 	public static final String NEW_USER = " (new user)";
 	private static final String START_COMMAND = "/start";
 	private static final String HELP_COMMAND = "/help";
+	private static final String PRIVACY_COMMAND = "/privacy";
 
 	public TelegramFile getFile() {
 		return getMessageMedia()
@@ -86,12 +88,11 @@ public record TelegramRequest(Message message) {
 	}
 
 	public Answer getAnswerMessage() {
-		return isHelpOrStartCommand() ? HELP : ABOUT;
-	}
-
-	private boolean isHelpOrStartCommand() {
-		return HELP_COMMAND.equalsIgnoreCase(message.text())
-				|| START_COMMAND.equals(message.text());
+		return switch (message.text()) {
+			case HELP_COMMAND, START_COMMAND -> HELP;
+			case PRIVACY_COMMAND -> PRIVACY_POLICY;
+			default -> ABOUT;
+		};
 	}
 
 	@Override

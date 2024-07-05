@@ -39,6 +39,11 @@ public enum Answer {
 			The conversion was unsuccessful: the video might be corrupted and it cannot be processed\\.
 
 			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
+			""", true),
+	PRIVACY_POLICY("""
+			You can view our privacy policy by visiting [this link](https://github.com/Stickerifier/Stickerify/blob/main/PRIVACY_POLICY.md)\\.
+
+			If you have any questions or concerns, feel free to reach out to us\\.
 			""", true);
 
 	private final String text;
