@@ -89,10 +89,10 @@ public class Stickerify {
 	private void answer(TelegramRequest request) {
 		var file = request.getFile();
 
-		if (file == null) {
-			answerText(request);
-		} else {
+		if (file != null) {
 			answerFile(request, file);
+		} else {
+			answerText(request);
 		}
 	}
 
