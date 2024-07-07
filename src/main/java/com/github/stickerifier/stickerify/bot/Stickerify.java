@@ -163,6 +163,11 @@ public class Stickerify {
 	}
 
 	private void answerText(TelegramRequest request) {
+		var message = request.message();
+		if (message.text() == null) {
+			LOGGER.atInfo().log("An unhandled message type has been received: {}", message);
+		}
+
 		answerText(request.getAnswerMessage(), request);
 	}
 
