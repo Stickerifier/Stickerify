@@ -91,7 +91,7 @@ public record TelegramRequest(Message message) {
 		return switch (message.text()) {
 			case HELP_COMMAND, START_COMMAND -> HELP;
 			case PRIVACY_COMMAND -> PRIVACY_POLICY;
-			default -> ABOUT;
+			case null, default -> ABOUT;
 		};
 	}
 
