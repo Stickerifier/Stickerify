@@ -151,7 +151,7 @@ public class Stickerify {
 	}
 
 	private void processFailure(TelegramRequest request, TelegramApiException e) {
-		if (e.getMessage().endsWith("Bad Request: message to reply not found")) {
+		if (e.getMessage().endsWith("Bad Request: message to be replied not found")) {
 			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", request.getDescription());
 		} else if ("The video could not be processed successfully".equals(e.getMessage())) {
 			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
