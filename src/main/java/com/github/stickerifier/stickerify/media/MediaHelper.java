@@ -186,6 +186,8 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if an error occurred processing passed-in file
 	 */
 	private static BufferedImage toImage(File file) throws TelegramApiException {
+		LOGGER.atTrace().log("Loading image information");
+
 		try {
 			return ImageIO.read(file);
 		} catch (IOException e) {
@@ -257,6 +259,8 @@ public final class MediaHelper {
 	 * @return resized image
 	 */
 	private static BufferedImage resizeImage(BufferedImage image) {
+		LOGGER.atTrace().log("Resizing image");
+
 		return Scalr.resize(image, Mode.AUTOMATIC, MAX_SIZE);
 	}
 
@@ -271,6 +275,8 @@ public final class MediaHelper {
 	 */
 	private static File createPngFile(BufferedImage image) throws TelegramApiException {
 		var pngImage = createTempFile("png");
+
+		LOGGER.atTrace().log("Writing output image file");
 
 		try {
 			ImageIO.write(image, "png", pngImage);
@@ -295,6 +301,8 @@ public final class MediaHelper {
 	 * @throws TelegramApiException if the image size could not be reduced enough to meet Telegram's requirements
 	 */
 	private static void optimizeImage(File pngImage) throws IOException, TelegramApiException {
+		LOGGER.atTrace().log("Optimizing image size");
+
 		var imagePath = pngImage.getPath();
 		new PngOptimizer().optimize(new PngImage(imagePath, "INFO"), imagePath, false, null);
 
