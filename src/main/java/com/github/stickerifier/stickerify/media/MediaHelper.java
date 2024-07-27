@@ -290,6 +290,8 @@ public final class MediaHelper {
 			image.flush();
 		}
 
+		LOGGER.atTrace().log("Image conversion completed successfully");
+
 		return pngImage;
 	}
 
