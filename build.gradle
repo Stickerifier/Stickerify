@@ -47,8 +47,7 @@ jacocoTestReport {
 
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: ['**/ThreadIdConverter.class',
-                                        '**/MediaConstraints.class',
+            fileTree(dir: it, exclude: ['**/MediaConstraints.class',
                                         '**/stickerify/process/**',
                                         '**/stickerify/runner**',
                                         '**/stickerify/telegram/**'])

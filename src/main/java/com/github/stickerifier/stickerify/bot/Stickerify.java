@@ -115,6 +115,7 @@ public class Stickerify {
 			var originalFile = retrieveFile(fileId);
 			pathsToDelete.add(originalFile.toPath());
 
+			LOGGER.atTrace().log("Converting file {}", fileId);
 			var outputFile = MediaHelper.convert(originalFile);
 
 			if (outputFile == null) {
