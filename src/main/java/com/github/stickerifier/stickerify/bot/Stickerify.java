@@ -152,14 +152,26 @@ public class Stickerify {
 	}
 
 	private void processFailure(TelegramRequest request, TelegramApiException e) {
-		if (e.getMessage().endsWith("Bad Request: message to be replied not found")) {
-			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", request.getDescription());
-		} else if ("The video could not be processed successfully".equals(e.getMessage())) {
+		processTelegramFailure(request.getDescription(), e, false);
+
+		if ("The video could not be processed successfully".equals(e.getMessage())) {
 			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
 			answerText(CORRUPTED, request);
 		} else {
 			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
 			answerText(ERROR, request);
+		}
+	}
+
+	private void processTelegramFailure(String requestDescription, TelegramApiException e, boolean logUnmatchedFailure) {
+		var exceptionMessage = e.getMessage();
+
+		if (exceptionMessage.endsWith("Bad Request: message to be replied not found")) {
+			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", requestDescription);
+		} else if (exceptionMessage.endsWith("Forbidden: bot was blocked by the user")) {
+			LOGGER.atInfo().log("Unable to reply to the {}: the user blocked the bot", requestDescription);
+		} else if (logUnmatchedFailure) {
+			LOGGER.atError().setCause(e).log("Unable to reply to the {}", requestDescription);
 		}
 	}
 
@@ -181,7 +193,7 @@ public class Stickerify {
 		try {
 			execute(answerWithText);
 		} catch (TelegramApiException e) {
-			LOGGER.atError().setCause(e).log("Unable to reply to the {}", request);
+			processTelegramFailure(request.getDescription(), e, true);
 		}
 	}
 
