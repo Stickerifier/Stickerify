@@ -5,7 +5,7 @@ twelvemonkeys = "3.11.0"
 [libraries]
 batik = "org.apache.xmlgraphics:batik-transcoder:1.17"
 gson = "com.google.code.gson:gson:2.11.0"
-hamcrest = "org.hamcrest:hamcrest-core:2.2"
+hamcrest = "org.hamcrest:hamcrest-core:3.0"
 imageio-batik = { module = "com.twelvemonkeys.imageio:imageio-batik", version.ref = "twelvemonkeys" }
 imageio-bmp = { module = "com.twelvemonkeys.imageio:imageio-bmp", version.ref = "twelvemonkeys" }
 imageio-jpeg = { module = "com.twelvemonkeys.imageio:imageio-jpeg", version.ref = "twelvemonkeys" }
