@@ -9,6 +9,7 @@ import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import com.github.stickerifier.stickerify.exception.BaseException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.TelegramApiException;
@@ -153,8 +154,10 @@ public class Stickerify {
 		}
 	}
 
-	private void processFailure(TelegramRequest request, Exception e) {
-		processTelegramFailure(request.getDescription(), e, false);
+	private void processFailure(TelegramRequest request, BaseException e) {
+		if (e instanceof TelegramApiException telegramException) {
+			processTelegramFailure(request.getDescription(), telegramException, false);
+		}
 
 		if ("The video could not be processed successfully".equals(e.getMessage())) {
 			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
@@ -165,7 +168,7 @@ public class Stickerify {
 		}
 	}
 
-	private void processTelegramFailure(String requestDescription, Exception e, boolean logUnmatchedFailure) {
+	private void processTelegramFailure(String requestDescription, TelegramApiException e, boolean logUnmatchedFailure) {
 		var exceptionMessage = e.getMessage();
 
 		if (exceptionMessage.endsWith("Bad Request: message to be replied not found")) {
