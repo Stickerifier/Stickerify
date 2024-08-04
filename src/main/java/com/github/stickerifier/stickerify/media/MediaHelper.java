@@ -120,6 +120,7 @@ public final class MediaHelper {
 	 * @param file the file to check
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
+	 * @throws FileOperationException if an error occurred retrieving the size of the file
 	 */
 	private static boolean isAnimatedStickerCompliant(File file, String mimeType) throws FileOperationException {
 		if ("application/gzip".equals(mimeType)) {
