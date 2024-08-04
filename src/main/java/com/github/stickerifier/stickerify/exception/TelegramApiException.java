@@ -1,20 +1,8 @@
-package com.github.stickerifier.stickerify.telegram.exception;
+package com.github.stickerifier.stickerify.exception;
 
 import org.slf4j.helpers.MessageFormatter;
 
 public class TelegramApiException extends Exception {
-	public TelegramApiException(String message) {
-		super(message);
-	}
-
-	public TelegramApiException(Throwable cause) {
-		super(cause);
-	}
-
-	public TelegramApiException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
 	/**
 	 * Creates an exception with a parameterized message: each {@code {}}
 	 * will be replaced with the corresponding element in {@code parameters}.
@@ -25,5 +13,9 @@ public class TelegramApiException extends Exception {
 	 */
 	public TelegramApiException(String message, Object... parameters) {
 		this(MessageFormatter.basicArrayFormat(message, parameters));
+	}
+
+	private TelegramApiException(String message) {
+		super(message);
 	}
 }

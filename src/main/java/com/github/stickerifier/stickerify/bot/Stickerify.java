@@ -9,9 +9,11 @@ import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import com.github.stickerifier.stickerify.exception.FileOperationException;
+import com.github.stickerifier.stickerify.exception.MediaException;
+import com.github.stickerifier.stickerify.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
-import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.telegram.model.TelegramFile;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import com.pengrad.telegrambot.ExceptionHandler;
@@ -130,14 +132,14 @@ public class Stickerify {
 
 				execute(answerWithFile);
 			}
-		} catch (TelegramApiException e) {
+		} catch (TelegramApiException | MediaException e) {
 			processFailure(request, e);
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
 	}
 
-	private File retrieveFile(String fileId) throws TelegramApiException {
+	private File retrieveFile(String fileId) throws TelegramApiException, FileOperationException {
 		var file = execute(new GetFile(fileId)).file();
 
 		try {
@@ -147,11 +149,11 @@ public class Stickerify {
 
 			return downloadedFile;
 		} catch (IOException e) {
-			throw new TelegramApiException(e);
+			throw new FileOperationException(e);
 		}
 	}
 
-	private void processFailure(TelegramRequest request, TelegramApiException e) {
+	private void processFailure(TelegramRequest request, Exception e) {
 		processTelegramFailure(request.getDescription(), e, false);
 
 		if ("The video could not be processed successfully".equals(e.getMessage())) {
@@ -163,7 +165,7 @@ public class Stickerify {
 		}
 	}
 
-	private void processTelegramFailure(String requestDescription, TelegramApiException e, boolean logUnmatchedFailure) {
+	private void processTelegramFailure(String requestDescription, Exception e, boolean logUnmatchedFailure) {
 		var exceptionMessage = e.getMessage();
 
 		if (exceptionMessage.endsWith("Bad Request: message to be replied not found")) {

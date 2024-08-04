@@ -12,10 +12,12 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDE
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.github.stickerifier.stickerify.exception.FileOperationException;
+import com.github.stickerifier.stickerify.exception.MediaException;
+import com.github.stickerifier.stickerify.exception.MediaOptimizationException;
+import com.github.stickerifier.stickerify.exception.ProcessException;
 import com.github.stickerifier.stickerify.process.PathLocator;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
-import com.github.stickerifier.stickerify.telegram.exception.MediaOptimizationException;
-import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
@@ -61,9 +63,9 @@ public final class MediaHelper {
 	 *
 	 * @param inputFile the file to convert
 	 * @return a resized and converted file
-	 * @throws TelegramApiException if the file is not supported or if the conversion failed
+	 * @throws MediaException if the file is not supported or if the conversion failed
 	 */
-	public static File convert(File inputFile) throws TelegramApiException {
+	public static File convert(File inputFile) throws MediaException {
 		var mimeType = detectMimeType(inputFile);
 
 		try {
@@ -83,12 +85,12 @@ public final class MediaHelper {
 
 				return convertToPng(image, mimeType, isFileSizeCompliant);
 			}
-		} catch (TelegramApiException e) {
+		} catch (MediaException e) {
 			LOGGER.atWarn().setCause(e).log("The file with {} MIME type could not be converted", mimeType);
 			throw e;
 		}
 
-		throw new TelegramApiException("The file with {} MIME type is not supported", mimeType);
+		throw new MediaException("The file with {} MIME type is not supported", mimeType);
 	}
 
 	/**
@@ -119,7 +121,7 @@ public final class MediaHelper {
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
 	 */
-	private static boolean isAnimatedStickerCompliant(File file, String mimeType) throws TelegramApiException {
+	private static boolean isAnimatedStickerCompliant(File file, String mimeType) throws FileOperationException {
 		if ("application/gzip".equals(mimeType)) {
 			var uncompressedContent = "";
 
@@ -167,13 +169,13 @@ public final class MediaHelper {
 	 * @param file the file to check
 	 * @param threshold max allowed file size
 	 * @return {@code true} if file's size is compliant
-	 * @throws TelegramApiException if an error occurred retrieving the size of the file
+	 * @throws FileOperationException if an error occurred retrieving the size of the file
 	 */
-	private static boolean isFileSizeLowerThan(File file, long threshold) throws TelegramApiException {
+	private static boolean isFileSizeLowerThan(File file, long threshold) throws FileOperationException {
 		try {
 			return Files.size(file.toPath()) <= threshold;
 		} catch (IOException e) {
-			throw new TelegramApiException(e);
+			throw new FileOperationException(e);
 		}
 	}
 
@@ -183,15 +185,15 @@ public final class MediaHelper {
 	 *
 	 * @param file the file to read
 	 * @return the image, if supported by {@link ImageIO}
-	 * @throws TelegramApiException if an error occurred processing passed-in file
+	 * @throws FileOperationException if an error occurred processing passed-in file
 	 */
-	private static BufferedImage toImage(File file) throws TelegramApiException {
+	private static BufferedImage toImage(File file) throws FileOperationException {
 		LOGGER.atTrace().log("Loading image information");
 
 		try {
 			return ImageIO.read(file);
 		} catch (IOException e) {
-			throw new TelegramApiException("Unable to retrieve the image from passed-in file", e);
+			throw new FileOperationException("Unable to retrieve the image from passed-in file", e);
 		}
 	}
 
@@ -212,9 +214,9 @@ public final class MediaHelper {
 	 * @param mimeType the MIME type of the file
 	 * @param isFileSizeCompliant {@code true} if the file does not exceed Telegram's limit
 	 * @return converted image, {@code null} if no conversion was required
-	 * @throws TelegramApiException if an error occurred processing passed-in image
+	 * @throws MediaException if an error occurred processing passed-in image
 	 */
-	private static File convertToPng(BufferedImage image, String mimeType, boolean isFileSizeCompliant) throws TelegramApiException {
+	private static File convertToPng(BufferedImage image, String mimeType, boolean isFileSizeCompliant) throws MediaException {
 		try {
 			if (isImageCompliant(image, mimeType) && isFileSizeCompliant) {
 				LOGGER.atInfo().log("The image doesn't need conversion");
@@ -270,10 +272,10 @@ public final class MediaHelper {
 	 *
 	 * @param image the image to convert to png
 	 * @return png image
-	 * @throws TelegramApiException if an error occurs creating the temp file
-	 * @throws MediaOptimizationException if the image size could not be reduced enough to meet Telegram's requirements
+	 * @throws MediaException if an error occurs creating the temp file or
+	 * if the image size could not be reduced enough to meet Telegram's requirements
 	 */
-	private static File createPngFile(BufferedImage image) throws TelegramApiException {
+	private static File createPngFile(BufferedImage image) throws MediaException {
 		var pngImage = createTempFile("png");
 
 		LOGGER.atTrace().log("Writing output image file");
@@ -285,7 +287,7 @@ public final class MediaHelper {
 				optimizeImage(pngImage);
 			}
 		} catch (IOException e) {
-			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
+			throw new FileOperationException("An unexpected error occurred trying to create resulting image", e);
 		} finally {
 			image.flush();
 		}
@@ -300,9 +302,9 @@ public final class MediaHelper {
 	 *
 	 * @param pngImage the file to optimize
 	 * @throws IOException if the optimization process fails
-	 * @throws TelegramApiException if the image size could not be reduced enough to meet Telegram's requirements
+	 * @throws MediaException if the image size could not be reduced enough to meet Telegram's requirements
 	 */
-	private static void optimizeImage(File pngImage) throws IOException, TelegramApiException {
+	private static void optimizeImage(File pngImage) throws IOException, MediaException {
 		LOGGER.atTrace().log("Optimizing image size");
 
 		var imagePath = pngImage.getPath();
@@ -318,13 +320,13 @@ public final class MediaHelper {
 	 *
 	 * @param fileType the extension of the new file
 	 * @return a new temp file
-	 * @throws TelegramApiException if an error occurs creating the temp file
+	 * @throws FileOperationException if an error occurs creating the temp file
 	 */
-	private static File createTempFile(String fileType) throws TelegramApiException {
+	private static File createTempFile(String fileType) throws FileOperationException {
 		try {
 			return File.createTempFile("Stickerify-", "." + fileType);
 		} catch (IOException e) {
-			throw new TelegramApiException("An error occurred creating a new temp file", e);
+			throw new FileOperationException("An error occurred creating a new temp file", e);
 		}
 	}
 
@@ -334,9 +336,9 @@ public final class MediaHelper {
 	 *
 	 * @param file the file to convert
 	 * @return converted video, {@code null} if no conversion was required
-	 * @throws TelegramApiException if file conversion is not successful
+	 * @throws MediaException if file conversion is not successful
 	 */
-	private static File convertToWebm(File file) throws TelegramApiException {
+	private static File convertToWebm(File file) throws MediaException {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
 		if (isVideoCompliant(file, mediaInfo)) {
@@ -353,13 +355,13 @@ public final class MediaHelper {
 	 *
 	 * @param file the video to check
 	 * @return passed-in video's multimedia information
-	 * @throws TelegramApiException if an error occurred encoding the video
+	 * @throws MediaException if an error occurred encoding the video
 	 */
-	private static MultimediaInfo retrieveMultimediaInfo(File file) throws TelegramApiException {
+	private static MultimediaInfo retrieveMultimediaInfo(File file) throws MediaException {
 		try {
 			return new MultimediaObject(file, FFMPEG_LOCATOR).getInfo();
 		} catch (EncoderException e) {
-			throw new TelegramApiException("The video could not be processed successfully", e);
+			throw new MediaException("The video could not be processed successfully", e);
 		}
 	}
 
@@ -370,9 +372,9 @@ public final class MediaHelper {
 	 * @param file the file to check
 	 * @param mediaInfo video's multimedia information
 	 * @return {@code true} if the file is compliant
-	 * @throws TelegramApiException if an error occurred retrieving the size of the file
+	 * @throws FileOperationException if an error occurred retrieving the size of the file
 	 */
-	private static boolean isVideoCompliant(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
+	private static boolean isVideoCompliant(File file, MultimediaInfo mediaInfo) throws FileOperationException {
 		var videoInfo = mediaInfo.getVideo();
 		var videoSize = videoInfo.getSize();
 
@@ -392,9 +394,9 @@ public final class MediaHelper {
 	 * @param file the file to convert
 	 * @param mediaInfo video's multimedia information
 	 * @return converted video
-	 * @throws TelegramApiException if file conversion is not successful
+	 * @throws MediaException if file conversion is not successful
 	 */
-	private static File convertWithFfmpeg(File file, MultimediaInfo mediaInfo) throws TelegramApiException {
+	private static File convertWithFfmpeg(File file, MultimediaInfo mediaInfo) throws MediaException {
 		var webmVideo = createTempFile("webm");
 		var videoDetails = getResultingVideoDetails(mediaInfo);
 
@@ -412,7 +414,11 @@ public final class MediaHelper {
 				"-y", webmVideo.getAbsolutePath()
 		};
 
-		ProcessHelper.executeCommand(ffmpegCommand);
+		try {
+			ProcessHelper.executeCommand(ffmpegCommand);
+		} catch (ProcessException e) {
+			throw new MediaException("The video could not be converted successfully", e);
+		}
 
 		return webmVideo;
 	}
