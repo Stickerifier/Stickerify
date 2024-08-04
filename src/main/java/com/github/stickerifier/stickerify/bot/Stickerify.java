@@ -20,6 +20,7 @@ import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.LinkPreviewOptions;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.GetFile;
@@ -190,10 +191,12 @@ public class Stickerify {
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {
+		var previewOptions = new LinkPreviewOptions().isDisabled(answer.isDisableLinkPreview());
+
 		var answerWithText = new SendMessage(request.getChatId(), answer.getText())
 				.replyToMessageId(request.getMessageId())
 				.parseMode(MarkdownV2)
-				.disableWebPagePreview(answer.isDisableWebPreview());
+				.linkPreviewOptions(previewOptions);
 
 		try {
 			execute(answerWithText);
