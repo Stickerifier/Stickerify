@@ -27,7 +27,7 @@ jobs:
         uses: FedericoCarboni/setup-ffmpeg@v3
 
       - name: Setup project and upload dependency graph
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           dependency-graph: generate-and-submit
           build-scan-publish: true
