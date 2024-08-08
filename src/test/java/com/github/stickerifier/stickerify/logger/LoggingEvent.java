@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.LoggingEventVO;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.spi.ThrowableProxyVO;
-import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
+import com.github.stickerifier.stickerify.exception.TelegramApiException;
 
 /**
  * Test double that serves as an implementation of {@link ILoggingEvent}.
