@@ -20,7 +20,7 @@ logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback"
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.14"
 okio = "com.squareup.okio:okio:3.9.0"
 pngtastic = "com.github.depsypher:pngtastic:1.8"
-slf4j-api = "org.slf4j:slf4j-api:2.0.14"
+slf4j-api = "org.slf4j:slf4j-api:2.0.15"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:7.8.0"
 tika = "org.apache.tika:tika-core:2.9.2"
 
