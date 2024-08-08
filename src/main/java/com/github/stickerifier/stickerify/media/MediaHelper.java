@@ -418,7 +418,7 @@ public final class MediaHelper {
 		try {
 			ProcessHelper.executeCommand(ffmpegCommand);
 		} catch (ProcessException e) {
-			throw new MediaException("The video could not be converted successfully", e);
+			throw new MediaException(e.getMessage());
 		}
 
 		return webmVideo;

@@ -40,7 +40,7 @@ public final class ProcessHelper {
 			if (!processExited || process.exitValue() != 0) {
 				var reason = processExited ? "successfully" : "in time";
 				var output = readStream(process.getErrorStream());
-				throw new ProcessException("The command {} couldn't complete {}: {}", command[0], reason, output);
+				throw new ProcessException("The command {} couldn't complete {}\n{}", command[0], reason, output);
 			}
 
 			return readProcessOutput(process);
