@@ -78,7 +78,7 @@ public final class MediaHelper {
 			if (image != null) {
 				boolean isFileSizeCompliant = isFileSizeLowerThan(inputFile, MAX_IMAGE_FILE_SIZE);
 
-				return convertToPng(image, mimeType, isFileSizeCompliant);
+				return convertToWebp(image, mimeType, isFileSizeCompliant);
 			}
 		} catch (TelegramApiException e) {
 			LOGGER.atWarn().setCause(e).log("The file with {} MIME type could not be converted", mimeType);
@@ -203,15 +203,15 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
+	 * Given an image file, it converts it to a webp file of the proper dimension (max 512 x 512).
 	 *
-	 * @param image the image to convert to png
+	 * @param image the image to convert to webp
 	 * @param mimeType the MIME type of the file
 	 * @param isFileSizeCompliant {@code true} if the file does not exceed Telegram's limit
 	 * @return converted image, {@code null} if no conversion was required
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
-	private static File convertToPng(ImmutableImage image, String mimeType, boolean isFileSizeCompliant) throws TelegramApiException {
+	private static File convertToWebp(ImmutableImage image, String mimeType, boolean isFileSizeCompliant) throws TelegramApiException {
 		if (isImageCompliant(image, mimeType) && isFileSizeCompliant) {
 			LOGGER.atInfo().log("The image doesn't need conversion");
 
