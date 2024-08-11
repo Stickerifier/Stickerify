@@ -49,7 +49,7 @@ class MediaHelperTest {
 		var actualExtension = getExtension(result);
 
 		assertAll("Image validation failed",
-				() -> assertThat("image's extension must be png", actualExtension, is(equalTo(".png"))),
+				() -> assertThat("image's extension must be png", actualExtension, is(equalTo(".webp"))),
 				() -> assertThat("image's width is not correct", image.getWidth(), is(equalTo(expectedWidth))),
 				() -> assertThat("image's height is not correct", image.getHeight(), is(equalTo(expectedHeight))),
 				() -> assertThat("image size should not exceed 512 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_IMAGE_FILE_SIZE)))
@@ -105,7 +105,7 @@ class MediaHelperTest {
 		var tiffImage = loadResource("valid.tiff");
 		var result = MediaHelper.convert(tiffImage);
 
-		assertImageConsistency(result, 512, 342);
+		assertImageConsistency(result, 512, 341);
 	}
 
 	@Test
@@ -113,7 +113,7 @@ class MediaHelperTest {
 		var psdImage = loadResource("valid.psd");
 		var result = MediaHelper.convert(psdImage);
 
-		assertImageConsistency(result, 512, 384);
+		assertImageConsistency(result, 512, 383);
 	}
 
 	@Test

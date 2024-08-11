@@ -19,11 +19,9 @@ import com.github.stickerifier.stickerify.telegram.exception.TelegramApiExceptio
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
-import com.googlecode.pngtastic.core.PngImage;
-import com.googlecode.pngtastic.core.PngOptimizer;
+import com.sksamuel.scrimage.ImmutableImage;
+import com.sksamuel.scrimage.webp.WebpWriter;
 import org.apache.tika.Tika;
-import org.imgscalr.Scalr;
-import org.imgscalr.Scalr.Mode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.schild.jave.EncoderException;
@@ -32,7 +30,6 @@ import ws.schild.jave.info.MultimediaInfo;
 import ws.schild.jave.process.ProcessLocator;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -182,16 +179,16 @@ public final class MediaHelper {
 	 * If the file isn't a supported image, {@code null} is returned.
 	 *
 	 * @param file the file to read
-	 * @return the image, if supported by {@link ImageIO}
+	 * @return the image, if supported by Scrimage
 	 * @throws TelegramApiException if an error occurred processing passed-in file
 	 */
-	private static BufferedImage toImage(File file) throws TelegramApiException {
+	private static ImmutableImage toImage(File file) throws TelegramApiException {
 		LOGGER.atTrace().log("Loading image information");
 
 		try {
-			return ImageIO.read(file);
+			return ImmutableImage.loader().fromFile(file);
 		} catch (IOException e) {
-			throw new TelegramApiException("Unable to retrieve the image from passed-in file", e);
+			return null;
 		}
 	}
 
@@ -214,18 +211,14 @@ public final class MediaHelper {
 	 * @return converted image, {@code null} if no conversion was required
 	 * @throws TelegramApiException if an error occurred processing passed-in image
 	 */
-	private static File convertToPng(BufferedImage image, String mimeType, boolean isFileSizeCompliant) throws TelegramApiException {
-		try {
-			if (isImageCompliant(image, mimeType) && isFileSizeCompliant) {
-				LOGGER.atInfo().log("The image doesn't need conversion");
+	private static File convertToPng(ImmutableImage image, String mimeType, boolean isFileSizeCompliant) throws TelegramApiException {
+		if (isImageCompliant(image, mimeType) && isFileSizeCompliant) {
+			LOGGER.atInfo().log("The image doesn't need conversion");
 
-				return null;
-			}
-
-			return createPngFile(resizeImage(image));
-		} finally {
-			image.flush();
+			return null;
 		}
+
+		return createWebpFile(resizeImage(image));
 	}
 
 	/**
@@ -236,8 +229,8 @@ public final class MediaHelper {
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
 	 */
-	private static boolean isImageCompliant(BufferedImage image, String mimeType) {
-		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType)) && isSizeCompliant(image.getWidth(), image.getHeight());
+	private static boolean isImageCompliant(ImmutableImage image, String mimeType) {
+		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType)) && isSizeCompliant(image.width, image.height);
 	}
 
 	/**
@@ -258,59 +251,38 @@ public final class MediaHelper {
 	 * @param image the image to be resized
 	 * @return resized image
 	 */
-	private static BufferedImage resizeImage(BufferedImage image) {
+	private static ImmutableImage resizeImage(ImmutableImage image) {
 		LOGGER.atTrace().log("Resizing image");
 
-		return Scalr.resize(image, Mode.AUTOMATIC, MAX_SIZE);
+		return image.max(MAX_SIZE, MAX_SIZE);
 	}
 
 	/**
-	 * Creates a new <i>.png</i> file from passed-in {@code image}.
-	 * If the resulting image exceeds Telegram's threshold, it will be optimized using {@link PngOptimizer}.
+	 * Creates a new <i>.webp</i> file from passed-in {@code image}.
 	 *
-	 * @param image the image to convert to png
-	 * @return png image
+	 * @param image the image to convert to webp
+	 * @return webp image
 	 * @throws TelegramApiException if an error occurs creating the temp file
 	 * @throws MediaOptimizationException if the image size could not be reduced enough to meet Telegram's requirements
 	 */
-	private static File createPngFile(BufferedImage image) throws TelegramApiException {
-		var pngImage = createTempFile("png");
+	private static File createWebpFile(ImmutableImage image) throws TelegramApiException {
+		var webpImage = createTempFile("webp");
 
 		LOGGER.atTrace().log("Writing output image file");
 
 		try {
-			ImageIO.write(image, "png", pngImage);
+			image.output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
 
-			if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
-				optimizeImage(pngImage);
+			if (!isFileSizeLowerThan(webpImage, MAX_IMAGE_FILE_SIZE)) {
+				throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
 			}
 		} catch (IOException e) {
 			throw new TelegramApiException("An unexpected error occurred trying to create resulting image", e);
-		} finally {
-			image.flush();
 		}
 
 		LOGGER.atTrace().log("Image conversion completed successfully");
 
-		return pngImage;
-	}
-
-	/**
-	 * Performs an optimization aimed to reduce the image's size using {@link PngOptimizer}.
-	 *
-	 * @param pngImage the file to optimize
-	 * @throws IOException if the optimization process fails
-	 * @throws TelegramApiException if the image size could not be reduced enough to meet Telegram's requirements
-	 */
-	private static void optimizeImage(File pngImage) throws IOException, TelegramApiException {
-		LOGGER.atTrace().log("Optimizing image size");
-
-		var imagePath = pngImage.getPath();
-		new PngOptimizer().optimize(new PngImage(imagePath, "INFO"), imagePath, false, null);
-
-		if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
-			throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
-		}
+		return webpImage;
 	}
 
 	/**
@@ -402,7 +374,7 @@ public final class MediaHelper {
 				"ffmpeg",
 				"-v", "error",
 				"-i", file.getAbsolutePath(),
-				"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
+				"-vf", "scale=" + videoDetails.width() + ":" + videoDetails.height() + ",fps=" + videoDetails.frameRate(),
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-b:v", "256k",
 				"-crf", "32",

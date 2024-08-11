@@ -12,6 +12,7 @@
 		<appender-ref ref="CONSOLE"/>
 	</root>
 
+	<logger name="com.sksamuel.scrimage" level="warn" />
 	<logger name="org.apache.tika" level="info" />
 	<logger name="ws.schild.jave" level="info" />
 </configuration>

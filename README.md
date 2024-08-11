@@ -119,7 +119,7 @@ therefore counting towards the 4 contributions goal.
 * The official documentation of the Telegram Bot API can be found [here](https://core.telegram.org/bots)
 * The library used by the bot to work with Telegram is [Java Telegram Bot API](https://github.com/pengrad/java-telegram-bot-api)
 * Video conversion uses [FFmpeg](https://ffmpeg.org/) and [JAVE2](https://github.com/a-schild/jave2)
-* Image conversion uses [ImageIO](https://docs.oracle.com/en/java/javase/20/docs/api/java.desktop/javax/imageio/ImageIO.html), [TwelveMonkeys](https://github.com/haraldk/TwelveMonkeys), [imgscalr](https://github.com/rkalla/imgscalr), and [Pngtastic](https://github.com/depsypher/pngtastic)
+* Image conversion uses [Scrimage](https://github.com/sksamuel/scrimage), [ImageIO](https://docs.oracle.com/en/java/javase/20/docs/api/java.desktop/javax/imageio/ImageIO.html), and [TwelveMonkeys](https://github.com/haraldk/TwelveMonkeys)
 * Animated sticker validation uses [Gson](https://github.com/google/gson)
 * MIME type analysis is performed using [Apache Tika](https://tika.apache.org/)
 
