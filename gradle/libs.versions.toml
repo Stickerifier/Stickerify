@@ -8,10 +8,7 @@ batik = "org.apache.xmlgraphics:batik-transcoder:1.17"
 gson = "com.google.code.gson:gson:2.11.0"
 hamcrest = "org.hamcrest:hamcrest-core:3.0"
 imageio-batik = { module = "com.twelvemonkeys.imageio:imageio-batik", version.ref = "twelvemonkeys" }
-imageio-bmp = { module = "com.twelvemonkeys.imageio:imageio-bmp", version.ref = "twelvemonkeys" }
-imageio-jpeg = { module = "com.twelvemonkeys.imageio:imageio-jpeg", version.ref = "twelvemonkeys" }
 imageio-psd = { module = "com.twelvemonkeys.imageio:imageio-psd", version.ref = "twelvemonkeys" }
-imageio-webp = { module = "com.twelvemonkeys.imageio:imageio-webp", version.ref = "twelvemonkeys" }
 jave = "ws.schild:jave-core:3.5.0"
 junit = "org.junit.jupiter:junit-jupiter:5.10.3"
 junit-platform = "org.junit.platform:junit-platform-launcher:1.10.3"
@@ -20,6 +17,7 @@ logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback"
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.14"
 okio = "com.squareup.okio:okio:3.9.0"
 scrimage-core = { module = "com.sksamuel.scrimage:scrimage-core", version.ref = "scrimage" }
+scrimage-formats-extra = { module = "com.sksamuel.scrimage:scrimage-formats-extra", version.ref = "scrimage" }
 scrimage-webp = { module = "com.sksamuel.scrimage:scrimage-webp", version.ref = "scrimage" }
 slf4j-api = "org.slf4j:slf4j-api:2.0.16"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:7.8.0"

@@ -13,14 +13,12 @@ dependencies {
     implementation libs.batik
     implementation libs.gson
     implementation libs.imageio.batik
-    implementation libs.imageio.bmp
-    implementation libs.imageio.jpeg
     implementation libs.imageio.psd
-    implementation libs.imageio.webp
     implementation libs.jave
     implementation libs.logback.classic
     implementation libs.logback.core
     implementation libs.scrimage.core
+    implementation libs.scrimage.formats.extra
     implementation libs.scrimage.webp
     implementation libs.slf4j.api
     implementation libs.telegram.bot.api
