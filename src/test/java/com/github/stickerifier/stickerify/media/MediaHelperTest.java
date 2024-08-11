@@ -49,7 +49,7 @@ class MediaHelperTest {
 		var actualExtension = getExtension(result);
 
 		assertAll("Image validation failed",
-				() -> assertThat("image's extension must be png", actualExtension, is(equalTo(".webp"))),
+				() -> assertThat("image's extension must be webp", actualExtension, is(equalTo(".webp"))),
 				() -> assertThat("image's width is not correct", image.width, is(equalTo(expectedWidth))),
 				() -> assertThat("image's height is not correct", image.height, is(equalTo(expectedHeight))),
 				() -> assertThat("image size should not exceed 512 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_IMAGE_FILE_SIZE)))
