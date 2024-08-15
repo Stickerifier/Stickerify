@@ -121,6 +121,7 @@ public class Stickerify {
 
 			LOGGER.atTrace().log("Converting file {}", fileId);
 			var outputFile = MediaHelper.convert(originalFile);
+			LOGGER.atTrace().log("File converted successfully");
 
 			if (outputFile == null) {
 				answerText(FILE_ALREADY_VALID, request);
@@ -206,6 +207,8 @@ public class Stickerify {
 	}
 
 	private <T extends BaseRequest<T, R>, R extends BaseResponse> R execute(BaseRequest<T, R> request) throws TelegramApiException {
+		LOGGER.atTrace().log("Sending {} request", request.getMethod());
+
 		var response = bot.execute(request);
 
 		if (response.isOk()) {
