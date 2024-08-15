@@ -405,7 +405,7 @@ public final class MediaHelper {
 				"ffmpeg",
 				"-v", "error",
 				"-i", file.getAbsolutePath(),
-				"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
+				"-vf", "scale=" + videoDetails.width() + ":" + videoDetails.height() + ",fps=" + videoDetails.frameRate(),
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-b:v", "256k",
 				"-crf", "32",
