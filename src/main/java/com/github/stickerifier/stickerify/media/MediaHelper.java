@@ -218,7 +218,7 @@ public final class MediaHelper {
 			return null;
 		}
 
-		return createWebpFile(resizeImage(image));
+		return createOutputImage(resizeImage(image));
 	}
 
 	/**
@@ -258,22 +258,23 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Creates a new <i>.webp</i> file from passed-in {@code image}.
+	 * Creates a new <i>.png</i> file containing the lossless webp image retrieved converting passed-in {@code image};
+	 * this is done on purpose to force Telegram to send the image with a caption, which is not currently possible for <i>.webp</i> files.
 	 *
-	 * @param image the image to convert to webp
-	 * @return webp image
+	 * @param image the image to convert
+	 * @return converted image
 	 * @throws TelegramApiException if an error occurs creating the temp file
 	 * @throws MediaOptimizationException if the image size could not be reduced enough to meet Telegram's requirements
 	 */
-	private static File createWebpFile(ImmutableImage image) throws TelegramApiException {
-		var webpImage = createTempFile("webp");
+	private static File createOutputImage(ImmutableImage image) throws TelegramApiException {
+		var outputImage = createTempFile("png");
 
 		LOGGER.atTrace().log("Writing output image file");
 
 		try {
-			image.output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
+			image.output(WebpWriter.MAX_LOSSLESS_COMPRESSION, outputImage);
 
-			if (!isFileSizeLowerThan(webpImage, MAX_IMAGE_FILE_SIZE)) {
+			if (!isFileSizeLowerThan(outputImage, MAX_IMAGE_FILE_SIZE)) {
 				throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
 			}
 		} catch (IOException e) {
@@ -282,7 +283,7 @@ public final class MediaHelper {
 
 		LOGGER.atTrace().log("Image conversion completed successfully");
 
-		return webpImage;
+		return outputImage;
 	}
 
 	/**
@@ -374,7 +375,7 @@ public final class MediaHelper {
 				"ffmpeg",
 				"-v", "error",
 				"-i", file.getAbsolutePath(),
-				"-vf", "scale=" + videoDetails.width() + ":" + videoDetails.height() + ",fps=" + videoDetails.frameRate(),
+				"-vf", "scale = " + videoDetails.width() + ":" + videoDetails.height() + ", fps = " + videoDetails.frameRate(),
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-b:v", "256k",
 				"-crf", "32",
