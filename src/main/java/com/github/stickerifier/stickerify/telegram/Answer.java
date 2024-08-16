@@ -47,22 +47,22 @@ public enum Answer {
 			""");
 
 	private final String text;
-	private final boolean disableWebPreview;
+	private final boolean disableLinkPreview;
 
 	Answer(String text) {
 		this(text, false);
 	}
 
-	Answer(String text, boolean disableWebPreview) {
+	Answer(String text, boolean disableLinkPreview) {
 		this.text = text;
-		this.disableWebPreview = disableWebPreview;
+		this.disableLinkPreview = disableLinkPreview;
 	}
 
 	public String getText() {
 		return text;
 	}
 
-	public boolean isDisableWebPreview() {
-		return disableWebPreview;
+	public boolean isDisableLinkPreview() {
+		return disableLinkPreview;
 	}
 }
