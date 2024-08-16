@@ -9,14 +9,19 @@ import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import com.github.stickerifier.stickerify.exception.BaseException;
+import com.github.stickerifier.stickerify.exception.CorruptedVideoException;
+import com.github.stickerifier.stickerify.exception.FileOperationException;
+import com.github.stickerifier.stickerify.exception.MediaException;
+import com.github.stickerifier.stickerify.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
-import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.telegram.model.TelegramFile;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.LinkPreviewOptions;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.GetFile;
@@ -117,6 +122,7 @@ public class Stickerify {
 
 			LOGGER.atTrace().log("Converting file {}", fileId);
 			var outputFile = MediaHelper.convert(originalFile);
+			LOGGER.atTrace().log("File converted successfully");
 
 			if (outputFile == null) {
 				answerText(FILE_ALREADY_VALID, request);
@@ -130,14 +136,14 @@ public class Stickerify {
 
 				execute(answerWithFile);
 			}
-		} catch (TelegramApiException e) {
+		} catch (TelegramApiException | MediaException e) {
 			processFailure(request, e);
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
 	}
 
-	private File retrieveFile(String fileId) throws TelegramApiException {
+	private File retrieveFile(String fileId) throws TelegramApiException, FileOperationException {
 		var file = execute(new GetFile(fileId)).file();
 
 		try {
@@ -147,19 +153,33 @@ public class Stickerify {
 
 			return downloadedFile;
 		} catch (IOException e) {
-			throw new TelegramApiException(e);
+			throw new FileOperationException(e);
 		}
 	}
 
-	private void processFailure(TelegramRequest request, TelegramApiException e) {
-		if (e.getMessage().endsWith("Bad Request: message to be replied not found")) {
-			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", request.getDescription());
-		} else if ("The video could not be processed successfully".equals(e.getMessage())) {
+	private void processFailure(TelegramRequest request, BaseException e) {
+		if (e instanceof TelegramApiException telegramException) {
+			processTelegramFailure(request.getDescription(), telegramException, false);
+		}
+
+		if (e instanceof CorruptedVideoException) {
 			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
 			answerText(CORRUPTED, request);
 		} else {
 			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
 			answerText(ERROR, request);
+		}
+	}
+
+	private void processTelegramFailure(String requestDescription, TelegramApiException e, boolean logUnmatchedFailure) {
+		var exceptionMessage = e.getMessage();
+
+		if (exceptionMessage.endsWith("Bad Request: message to be replied not found")) {
+			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", requestDescription);
+		} else if (exceptionMessage.endsWith("Forbidden: bot was blocked by the user")) {
+			LOGGER.atInfo().log("Unable to reply to the {}: the user blocked the bot", requestDescription);
+		} else if (logUnmatchedFailure) {
+			LOGGER.atError().setCause(e).log("Unable to reply to the {}", requestDescription);
 		}
 	}
 
@@ -173,19 +193,23 @@ public class Stickerify {
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {
+		var previewOptions = new LinkPreviewOptions().isDisabled(answer.isDisableLinkPreview());
+
 		var answerWithText = new SendMessage(request.getChatId(), answer.getText())
 				.replyToMessageId(request.getMessageId())
 				.parseMode(MarkdownV2)
-				.disableWebPagePreview(answer.isDisableWebPreview());
+				.linkPreviewOptions(previewOptions);
 
 		try {
 			execute(answerWithText);
 		} catch (TelegramApiException e) {
-			LOGGER.atError().setCause(e).log("Unable to reply to the {}", request);
+			processTelegramFailure(request.getDescription(), e, true);
 		}
 	}
 
 	private <T extends BaseRequest<T, R>, R extends BaseResponse> R execute(BaseRequest<T, R> request) throws TelegramApiException {
+		LOGGER.atTrace().log("Sending {} request", request.getMethod());
+
 		var response = bot.execute(request);
 
 		if (response.isOk()) {

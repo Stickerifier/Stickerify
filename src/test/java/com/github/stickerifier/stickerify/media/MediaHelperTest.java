@@ -16,8 +16,8 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
-import com.github.stickerifier.stickerify.telegram.exception.TelegramApiException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -236,14 +236,14 @@ class MediaHelperTest {
 	void unsupportedGzipArchive() {
 		var archive = loadResource("unsupported_archive.gz");
 
-		assertThrows(TelegramApiException.class, () -> MediaHelper.convert(archive));
+		assertThrows(MediaException.class, () -> MediaHelper.convert(archive));
 	}
 
 	@Test
 	void unsupportedFile() {
 		var document = loadResource("document.txt");
 
-		assertThrows(TelegramApiException.class, () -> MediaHelper.convert(document));
+		assertThrows(MediaException.class, () -> MediaHelper.convert(document));
 	}
 
 	@Nested

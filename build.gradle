@@ -48,6 +48,7 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
             fileTree(dir: it, exclude: ['**/MediaConstraints.class',
+                                        '**/stickerify/exception/**',
                                         '**/stickerify/process/**',
                                         '**/stickerify/runner**',
                                         '**/stickerify/telegram/**'])
