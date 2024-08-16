@@ -12,6 +12,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDE
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.github.stickerifier.stickerify.exception.CorruptedVideoException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.MediaOptimizationException;
@@ -356,13 +357,13 @@ public final class MediaHelper {
 	 *
 	 * @param file the video to check
 	 * @return passed-in video's multimedia information
-	 * @throws MediaException if an error occurred encoding the video
+	 * @throws CorruptedVideoException if an error occurred retrieving video information
 	 */
-	private static MultimediaInfo retrieveMultimediaInfo(File file) throws MediaException {
+	private static MultimediaInfo retrieveMultimediaInfo(File file) throws CorruptedVideoException {
 		try {
 			return new MultimediaObject(file, FFMPEG_LOCATOR).getInfo();
 		} catch (EncoderException e) {
-			throw new MediaException("The video could not be processed successfully", e);
+			throw new CorruptedVideoException("The video could not be processed successfully", e);
 		}
 	}
 

@@ -10,6 +10,7 @@ import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
 import com.github.stickerifier.stickerify.exception.BaseException;
+import com.github.stickerifier.stickerify.exception.CorruptedVideoException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.TelegramApiException;
@@ -161,7 +162,7 @@ public class Stickerify {
 			processTelegramFailure(request.getDescription(), telegramException, false);
 		}
 
-		if ("The video could not be processed successfully".equals(e.getMessage())) {
+		if (e instanceof CorruptedVideoException) {
 			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
 			answerText(CORRUPTED, request);
 		} else {
