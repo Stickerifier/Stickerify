@@ -3,9 +3,9 @@ package com.github.stickerifier.stickerify.media;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAMERATE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAME_RATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIDE_LENGTH;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
@@ -22,11 +22,9 @@ import com.github.stickerifier.stickerify.process.ProcessHelper;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
-import com.googlecode.pngtastic.core.PngImage;
-import com.googlecode.pngtastic.core.PngOptimizer;
+import com.sksamuel.scrimage.ImmutableImage;
+import com.sksamuel.scrimage.webp.WebpWriter;
 import org.apache.tika.Tika;
-import org.imgscalr.Scalr;
-import org.imgscalr.Scalr.Mode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.schild.jave.EncoderException;
@@ -35,7 +33,6 @@ import ws.schild.jave.info.MultimediaInfo;
 import ws.schild.jave.process.ProcessLocator;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -84,7 +81,7 @@ public final class MediaHelper {
 			if (image != null) {
 				boolean isFileSizeCompliant = isFileSizeLowerThan(inputFile, MAX_IMAGE_FILE_SIZE);
 
-				return convertToPng(image, mimeType, isFileSizeCompliant);
+				return convertToWebp(image, mimeType, isFileSizeCompliant);
 			}
 		} catch (MediaException e) {
 			LOGGER.atWarn().setCause(e).log("The file with {} MIME type could not be converted", mimeType);
@@ -160,9 +157,10 @@ public final class MediaHelper {
 	 */
 	private static boolean isAnimationCompliant(AnimationDetails animation) {
 		return animation != null
-				&& animation.frameRate() <= MAX_ANIMATION_FRAMERATE
+				&& animation.frameRate() <= MAX_ANIMATION_FRAME_RATE
 				&& animation.duration() <= MAX_ANIMATION_DURATION_SECONDS
-				&& animation.width() == MAX_SIZE && animation.height() == MAX_SIZE;
+				&& animation.width() == MAX_SIDE_LENGTH
+				&& animation.height() == MAX_SIDE_LENGTH;
 	}
 
 	/**
@@ -189,13 +187,13 @@ public final class MediaHelper {
 	 * @return the image, if supported by {@link ImageIO}
 	 * @throws FileOperationException if an error occurred processing passed-in file
 	 */
-	private static BufferedImage toImage(File file) throws FileOperationException {
+	private static ImmutableImage toImage(File file) throws FileOperationException {
 		LOGGER.atTrace().log("Loading image information");
 
 		try {
-			return ImageIO.read(file);
+			return ImmutableImage.loader().fromFile(file);
 		} catch (IOException e) {
-			throw new FileOperationException("Unable to retrieve the image from passed-in file", e);
+			return null;
 		}
 	}
 
@@ -210,26 +208,22 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Given an image file, it converts it to a png file of the proper dimension (max 512 x 512).
+	 * Given an image file, it converts it to a WebP file of the proper dimension (max 512 x 512).
 	 *
-	 * @param image the image to convert to png
+	 * @param image the image to convert to WebP
 	 * @param mimeType the MIME type of the file
 	 * @param isFileSizeCompliant {@code true} if the file does not exceed Telegram's limit
-	 * @return converted image, {@code null} if no conversion was required
+	 * @return converted image, {@code null} if no conversion was needed
 	 * @throws MediaException if an error occurred processing passed-in image
 	 */
-	private static File convertToPng(BufferedImage image, String mimeType, boolean isFileSizeCompliant) throws MediaException {
-		try {
-			if (isImageCompliant(image, mimeType) && isFileSizeCompliant) {
-				LOGGER.atInfo().log("The image doesn't need conversion");
+	private static File convertToWebp(ImmutableImage image, String mimeType, boolean isFileSizeCompliant) throws MediaException {
+		if (isImageCompliant(image, mimeType) && isFileSizeCompliant) {
+			LOGGER.atInfo().log("The image doesn't need conversion");
 
-				return null;
-			}
-
-			return createPngFile(resizeImage(image));
-		} finally {
-			image.flush();
+			return null;
 		}
+
+		return createWebpFile(image);
 	}
 
 	/**
@@ -240,8 +234,8 @@ public final class MediaHelper {
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
 	 */
-	private static boolean isImageCompliant(BufferedImage image, String mimeType) {
-		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType)) && isSizeCompliant(image.getWidth(), image.getHeight());
+	private static boolean isImageCompliant(ImmutableImage image, String mimeType) {
+		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType)) && isSizeCompliant(image.width, image.height);
 	}
 
 	/**
@@ -253,91 +247,79 @@ public final class MediaHelper {
 	 * @return {@code true} if the video has valid dimensions
 	 */
 	private static boolean isSizeCompliant(int width, int height) {
-		return (width == MAX_SIZE && height <= MAX_SIZE) || (height == MAX_SIZE && width <= MAX_SIZE);
+		return (width == MAX_SIDE_LENGTH && height <= MAX_SIDE_LENGTH) || (height == MAX_SIDE_LENGTH && width <= MAX_SIDE_LENGTH);
 	}
 
 	/**
-	 * Given an image, it returns its resized version with sides of max 512 pixels each.
+	 * Creates a new <i>.webp</i> file from passed-in {@code image}, resizing it with sides of max 512 pixels each.
 	 *
-	 * @param image the image to be resized
-	 * @return resized image
-	 */
-	private static BufferedImage resizeImage(BufferedImage image) {
-		LOGGER.atTrace().log("Resizing image");
-
-		return Scalr.resize(image, Mode.AUTOMATIC, MAX_SIZE);
-	}
-
-	/**
-	 * Creates a new <i>.png</i> file from passed-in {@code image}.
-	 * If the resulting image exceeds Telegram's threshold, it will be optimized using {@link PngOptimizer}.
-	 *
-	 * @param image the image to convert to png
-	 * @return png image
+	 * @param image the image to convert to WebP
+	 * @return converted image
 	 * @throws MediaException if an error occurs creating the temp file or
 	 * if the image size could not be reduced enough to meet Telegram's requirements
 	 */
-	private static File createPngFile(BufferedImage image) throws MediaException {
-		var pngImage = createTempFile("png");
+	private static File createWebpFile(ImmutableImage image) throws MediaException {
+		var webpImage = createTempFile("webp");
+		var deleteTempFile = false;
 
 		LOGGER.atTrace().log("Writing output image file");
 
 		try {
-			ImageIO.write(image, "png", pngImage);
+			image.max(MAX_SIDE_LENGTH, MAX_SIDE_LENGTH).output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
 
-			if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
-				optimizeImage(pngImage);
+			if (!isFileSizeLowerThan(webpImage, MAX_IMAGE_FILE_SIZE)) {
+				deleteTempFile = true;
+				throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
 			}
 		} catch (IOException e) {
+			deleteTempFile = true;
 			throw new FileOperationException("An unexpected error occurred trying to create resulting image", e);
 		} finally {
-			image.flush();
+			if (deleteTempFile) {
+				deleteFile(webpImage);
+			}
 		}
 
 		LOGGER.atTrace().log("Image conversion completed successfully");
 
-		return pngImage;
+		return webpImage;
 	}
 
 	/**
-	 * Performs an optimization aimed to reduce the image's size using {@link PngOptimizer}.
+	 * Creates a new temp file with desired extension.
 	 *
-	 * @param pngImage the file to optimize
-	 * @throws IOException if the optimization process fails
-	 * @throws MediaException if the image size could not be reduced enough to meet Telegram's requirements
-	 */
-	private static void optimizeImage(File pngImage) throws IOException, MediaException {
-		LOGGER.atTrace().log("Optimizing image size");
-
-		var imagePath = pngImage.getPath();
-		new PngOptimizer().optimize(new PngImage(imagePath, "INFO"), imagePath, false, null);
-
-		if (!isFileSizeLowerThan(pngImage, MAX_IMAGE_FILE_SIZE)) {
-			throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
-		}
-	}
-
-	/**
-	 * Creates a new temp file of the desired type.
-	 *
-	 * @param fileType the extension of the new file
+	 * @param fileExtension the extension of the new file
 	 * @return a new temp file
 	 * @throws FileOperationException if an error occurs creating the temp file
 	 */
-	private static File createTempFile(String fileType) throws FileOperationException {
+	private static File createTempFile(String fileExtension) throws FileOperationException {
 		try {
-			return File.createTempFile("Stickerify-", "." + fileType);
+			return File.createTempFile("Stickerify-", "." + fileExtension);
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred creating a new temp file", e);
 		}
 	}
 
 	/**
-	 * Given a video file, it converts it to a webm file of the proper dimension (max 512 x 512),
+	 * Deletes passed-in {@code file}.
+	 *
+	 * @param file the file to be removed
+	 * @throws FileOperationException if an error occurs deleting the file
+	 */
+	private static void deleteFile(File file) throws FileOperationException {
+		try {
+			Files.deleteIfExists(file.toPath());
+		} catch (IOException e) {
+			throw new FileOperationException("An error occurred deleting the file", e);
+		}
+	}
+
+	/**
+	 * Given a video file, it converts it to a WebM file of the proper dimension (max 512 x 512),
 	 * based on the requirements specified by <a href="https://core.telegram.org/stickers/webm-vp9-encoding">Telegram documentation</a>.
 	 *
 	 * @param file the file to convert
-	 * @return converted video, {@code null} if no conversion was required
+	 * @return converted video, {@code null} if no conversion was needed
 	 * @throws MediaException if file conversion is not successful
 	 */
 	private static File convertToWebm(File file) throws MediaException {
@@ -419,6 +401,7 @@ public final class MediaHelper {
 		try {
 			ProcessHelper.executeCommand(ffmpegCommand);
 		} catch (ProcessException e) {
+			deleteFile(webmVideo);
 			throw new MediaException(e.getMessage());
 		}
 
@@ -438,8 +421,8 @@ public final class MediaHelper {
 		long duration = Math.min(mediaInfo.getDuration(), MAX_VIDEO_DURATION_MILLIS) / 1_000L;
 
 		boolean isWidthBigger = videoInfo.getSize().getWidth() >= videoInfo.getSize().getHeight();
-		int width = isWidthBigger ? MAX_SIZE : PRESERVE_ASPECT_RATIO;
-		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIZE;
+		int width = isWidthBigger ? MAX_SIDE_LENGTH : PRESERVE_ASPECT_RATIO;
+		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIDE_LENGTH;
 
 		return new ResultingVideoDetails(width, height, frameRate, String.valueOf(duration));
 	}

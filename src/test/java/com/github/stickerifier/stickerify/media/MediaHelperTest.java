@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
+import com.sksamuel.scrimage.ImmutableImage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
 
-import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -45,13 +45,13 @@ class MediaHelperTest {
 	}
 
 	private static void assertImageConsistency(File result, int expectedWidth, int expectedHeight) throws IOException {
-		var image = ImageIO.read(result);
+		var image = ImmutableImage.loader().fromFile(result);
 		var actualExtension = getExtension(result);
 
 		assertAll("Image validation failed",
-				() -> assertThat("image's extension must be png", actualExtension, is(equalTo(".png"))),
-				() -> assertThat("image's width is not correct", image.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat("image's height is not correct", image.getHeight(), is(equalTo(expectedHeight))),
+				() -> assertThat("image's extension must be webp", actualExtension, is(equalTo(".webp"))),
+				() -> assertThat("image's width is not correct", image.width, is(equalTo(expectedWidth))),
+				() -> assertThat("image's height is not correct", image.height, is(equalTo(expectedHeight))),
 				() -> assertThat("image size should not exceed 512 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_IMAGE_FILE_SIZE)))
 		);
 	}
@@ -105,7 +105,7 @@ class MediaHelperTest {
 		var tiffImage = loadResource("valid.tiff");
 		var result = MediaHelper.convert(tiffImage);
 
-		assertImageConsistency(result, 512, 342);
+		assertImageConsistency(result, 512, 341);
 	}
 
 	@Test
@@ -113,7 +113,7 @@ class MediaHelperTest {
 		var psdImage = loadResource("valid.psd");
 		var result = MediaHelper.convert(psdImage);
 
-		assertImageConsistency(result, 512, 384);
+		assertImageConsistency(result, 512, 383);
 	}
 
 	@Test
