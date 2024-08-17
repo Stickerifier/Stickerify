@@ -5,7 +5,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIM
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAMERATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIZE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIDE_PIXELS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
@@ -159,7 +159,8 @@ public final class MediaHelper {
 		return animation != null
 				&& animation.frameRate() <= MAX_ANIMATION_FRAMERATE
 				&& animation.duration() <= MAX_ANIMATION_DURATION_SECONDS
-				&& animation.width() == MAX_SIZE && animation.height() == MAX_SIZE;
+				&& animation.width() == MAX_SIDE_PIXELS
+				&& animation.height() == MAX_SIDE_PIXELS;
 	}
 
 	/**
@@ -207,12 +208,12 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Given an image file, it converts it to a webp file of the proper dimension (max 512 x 512).
+	 * Given an image file, it converts it to a WebP file of the proper dimension (max 512 x 512).
 	 *
 	 * @param image the image to convert to webp
 	 * @param mimeType the MIME type of the file
 	 * @param isFileSizeCompliant {@code true} if the file does not exceed Telegram's limit
-	 * @return converted image, {@code null} if no conversion was required
+	 * @return converted image, {@code null} if no conversion was needed
 	 * @throws MediaException if an error occurred processing passed-in image
 	 */
 	private static File convertToWebp(ImmutableImage image, String mimeType, boolean isFileSizeCompliant) throws MediaException {
@@ -246,7 +247,7 @@ public final class MediaHelper {
 	 * @return {@code true} if the video has valid dimensions
 	 */
 	private static boolean isSizeCompliant(int width, int height) {
-		return (width == MAX_SIZE && height <= MAX_SIZE) || (height == MAX_SIZE && width <= MAX_SIZE);
+		return (width == MAX_SIDE_PIXELS && height <= MAX_SIDE_PIXELS) || (height == MAX_SIDE_PIXELS && width <= MAX_SIDE_PIXELS);
 	}
 
 	/**
@@ -258,13 +259,13 @@ public final class MediaHelper {
 	private static ImmutableImage resizeImage(ImmutableImage image) {
 		LOGGER.atTrace().log("Resizing image");
 
-		return image.max(MAX_SIZE, MAX_SIZE);
+		return image.max(MAX_SIDE_PIXELS, MAX_SIDE_PIXELS);
 	}
 
 	/**
 	 * Creates a new <i>.webp</i> file from passed-in {@code image}.
 	 *
-	 * @param image the image to convert to webp
+	 * @param image the image to convert to WebP
 	 * @return converted image
 	 * @throws MediaException if an error occurs creating the temp file or
 	 * if the image size could not be reduced enough to meet Telegram's requirements
@@ -290,26 +291,26 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Creates a new temp file of the desired type.
+	 * Creates a new temp file with desired extension.
 	 *
-	 * @param fileType the extension of the new file
+	 * @param fileExtension the extension of the new file
 	 * @return a new temp file
 	 * @throws FileOperationException if an error occurs creating the temp file
 	 */
-	private static File createTempFile(String fileType) throws FileOperationException {
+	private static File createTempFile(String fileExtension) throws FileOperationException {
 		try {
-			return File.createTempFile("Stickerify-", "." + fileType);
+			return File.createTempFile("Stickerify-", "." + fileExtension);
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred creating a new temp file", e);
 		}
 	}
 
 	/**
-	 * Given a video file, it converts it to a webm file of the proper dimension (max 512 x 512),
+	 * Given a video file, it converts it to a WebM file of the proper dimension (max 512 x 512),
 	 * based on the requirements specified by <a href="https://core.telegram.org/stickers/webm-vp9-encoding">Telegram documentation</a>.
 	 *
 	 * @param file the file to convert
-	 * @return converted video, {@code null} if no conversion was required
+	 * @return converted video, {@code null} if no conversion was needed
 	 * @throws MediaException if file conversion is not successful
 	 */
 	private static File convertToWebm(File file) throws MediaException {
@@ -410,8 +411,8 @@ public final class MediaHelper {
 		long duration = Math.min(mediaInfo.getDuration(), MAX_VIDEO_DURATION_MILLIS) / 1_000L;
 
 		boolean isWidthBigger = videoInfo.getSize().getWidth() >= videoInfo.getSize().getHeight();
-		int width = isWidthBigger ? MAX_SIZE : PRESERVE_ASPECT_RATIO;
-		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIZE;
+		int width = isWidthBigger ? MAX_SIDE_PIXELS : PRESERVE_ASPECT_RATIO;
+		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIDE_PIXELS;
 
 		return new ResultingVideoDetails(width, height, frameRate, String.valueOf(duration));
 	}

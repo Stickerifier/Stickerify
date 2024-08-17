@@ -9,7 +9,7 @@ package com.github.stickerifier.stickerify.media;
  */
 public final class MediaConstraints {
 
-	static final int MAX_SIZE = 512;
+	static final int MAX_SIDE_PIXELS = 512;
 	static final float MAX_VIDEO_FRAMES = 30F;
 	static final long MAX_VIDEO_DURATION_MILLIS = 3_000L;
 	static final String VP9_CODEC = "vp9";
