@@ -131,6 +131,7 @@ public class Stickerify {
 
 				var answerWithFile = new SendDocument(request.getChatId(), outputFile)
 						.replyToMessageId(request.getMessageId())
+						.disableContentTypeDetection(true)
 						.caption(FILE_READY.getText())
 						.parseMode(MarkdownV2);
 

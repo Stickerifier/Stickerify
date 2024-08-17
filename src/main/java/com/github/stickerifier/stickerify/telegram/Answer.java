@@ -13,6 +13,8 @@ public enum Answer {
 			\\- no file, if you sent a media already suiting Telegram's requirements
 			\\- an error message, if you sent either an unsupported or a corrupted file
 			\\- an informative message for any message without a file
+
+			Once the file is ready, head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
 			"""),
 	FILE_READY("""
 			Your sticker file is ready\\!

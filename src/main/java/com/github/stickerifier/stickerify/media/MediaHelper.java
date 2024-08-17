@@ -222,7 +222,7 @@ public final class MediaHelper {
 			return null;
 		}
 
-		return createOutputImage(resizeImage(image));
+		return createWebpFile(resizeImage(image));
 	}
 
 	/**
@@ -262,23 +262,22 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Creates a new <i>.png</i> file containing the lossless webp image retrieved converting passed-in {@code image};
-	 * this is done on purpose to force Telegram to send the image with a caption, which is not currently possible for <i>.webp</i> files.
+	 * Creates a new <i>.webp</i> file from passed-in {@code image}.
 	 *
-	 * @param image the image to convert
+	 * @param image the image to convert to webp
 	 * @return converted image
 	 * @throws MediaException if an error occurs creating the temp file or
 	 * if the image size could not be reduced enough to meet Telegram's requirements
 	 */
-	private static File createOutputImage(ImmutableImage image) throws MediaException {
-		var outputImage = createTempFile("png");
+	private static File createWebpFile(ImmutableImage image) throws MediaException {
+		var webpImage = createTempFile("webp");
 
 		LOGGER.atTrace().log("Writing output image file");
 
 		try {
-			image.output(WebpWriter.MAX_LOSSLESS_COMPRESSION, outputImage);
+			image.output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
 
-			if (!isFileSizeLowerThan(outputImage, MAX_IMAGE_FILE_SIZE)) {
+			if (!isFileSizeLowerThan(webpImage, MAX_IMAGE_FILE_SIZE)) {
 				throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
 			}
 		} catch (IOException e) {
@@ -287,7 +286,7 @@ public final class MediaHelper {
 
 		LOGGER.atTrace().log("Image conversion completed successfully");
 
-		return outputImage;
+		return webpImage;
 	}
 
 	/**
