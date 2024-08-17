@@ -260,6 +260,7 @@ public final class MediaHelper {
 	 */
 	private static File createWebpFile(ImmutableImage image) throws MediaException {
 		var webpImage = createTempFile("webp");
+		var deleteTempFile = false;
 
 		LOGGER.atTrace().log("Writing output image file");
 
@@ -267,10 +268,16 @@ public final class MediaHelper {
 			image.max(MAX_SIDE_LENGTH, MAX_SIDE_LENGTH).output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
 
 			if (!isFileSizeLowerThan(webpImage, MAX_IMAGE_FILE_SIZE)) {
+				deleteTempFile = true;
 				throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
 			}
 		} catch (IOException e) {
+			deleteTempFile = true;
 			throw new FileOperationException("An unexpected error occurred trying to create resulting image", e);
+		} finally {
+			if (deleteTempFile) {
+				deleteFile(webpImage);
+			}
 		}
 
 		LOGGER.atTrace().log("Image conversion completed successfully");
@@ -290,6 +297,20 @@ public final class MediaHelper {
 			return File.createTempFile("Stickerify-", "." + fileExtension);
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred creating a new temp file", e);
+		}
+	}
+
+	/**
+	 * Deletes passed-in {@code file}.
+	 *
+	 * @param file the file to be removed
+	 * @throws FileOperationException if an error occurs deleting the file
+	 */
+	private static void deleteFile(File file) throws FileOperationException {
+		try {
+			Files.deleteIfExists(file.toPath());
+		} catch (IOException e) {
+			throw new FileOperationException("An error occurred deleting the file", e);
 		}
 	}
 
@@ -380,6 +401,7 @@ public final class MediaHelper {
 		try {
 			ProcessHelper.executeCommand(ffmpegCommand);
 		} catch (ProcessException e) {
+			deleteFile(webmVideo);
 			throw new MediaException(e.getMessage());
 		}
 
