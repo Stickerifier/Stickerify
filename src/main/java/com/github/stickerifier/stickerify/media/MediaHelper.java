@@ -3,9 +3,9 @@ package com.github.stickerifier.stickerify.media;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAMERATE;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAME_RATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIDE_PIXELS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIDE_LENGTH;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
@@ -157,10 +157,10 @@ public final class MediaHelper {
 	 */
 	private static boolean isAnimationCompliant(AnimationDetails animation) {
 		return animation != null
-				&& animation.frameRate() <= MAX_ANIMATION_FRAMERATE
+				&& animation.frameRate() <= MAX_ANIMATION_FRAME_RATE
 				&& animation.duration() <= MAX_ANIMATION_DURATION_SECONDS
-				&& animation.width() == MAX_SIDE_PIXELS
-				&& animation.height() == MAX_SIDE_PIXELS;
+				&& animation.width() == MAX_SIDE_LENGTH
+				&& animation.height() == MAX_SIDE_LENGTH;
 	}
 
 	/**
@@ -247,7 +247,7 @@ public final class MediaHelper {
 	 * @return {@code true} if the video has valid dimensions
 	 */
 	private static boolean isSizeCompliant(int width, int height) {
-		return (width == MAX_SIDE_PIXELS && height <= MAX_SIDE_PIXELS) || (height == MAX_SIDE_PIXELS && width <= MAX_SIDE_PIXELS);
+		return (width == MAX_SIDE_LENGTH && height <= MAX_SIDE_LENGTH) || (height == MAX_SIDE_LENGTH && width <= MAX_SIDE_LENGTH);
 	}
 
 	/**
@@ -264,7 +264,7 @@ public final class MediaHelper {
 		LOGGER.atTrace().log("Writing output image file");
 
 		try {
-			image.max(MAX_SIDE_PIXELS, MAX_SIDE_PIXELS).output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
+			image.max(MAX_SIDE_LENGTH, MAX_SIDE_LENGTH).output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
 
 			if (!isFileSizeLowerThan(webpImage, MAX_IMAGE_FILE_SIZE)) {
 				throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
@@ -399,8 +399,8 @@ public final class MediaHelper {
 		long duration = Math.min(mediaInfo.getDuration(), MAX_VIDEO_DURATION_MILLIS) / 1_000L;
 
 		boolean isWidthBigger = videoInfo.getSize().getWidth() >= videoInfo.getSize().getHeight();
-		int width = isWidthBigger ? MAX_SIDE_PIXELS : PRESERVE_ASPECT_RATIO;
-		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIDE_PIXELS;
+		int width = isWidthBigger ? MAX_SIDE_LENGTH : PRESERVE_ASPECT_RATIO;
+		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIDE_LENGTH;
 
 		return new ResultingVideoDetails(width, height, frameRate, String.valueOf(duration));
 	}
