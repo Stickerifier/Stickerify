@@ -210,7 +210,7 @@ public final class MediaHelper {
 	/**
 	 * Given an image file, it converts it to a WebP file of the proper dimension (max 512 x 512).
 	 *
-	 * @param image the image to convert to webp
+	 * @param image the image to convert to WebP
 	 * @param mimeType the MIME type of the file
 	 * @param isFileSizeCompliant {@code true} if the file does not exceed Telegram's limit
 	 * @return converted image, {@code null} if no conversion was needed
@@ -223,7 +223,7 @@ public final class MediaHelper {
 			return null;
 		}
 
-		return createWebpFile(resizeImage(image));
+		return createWebpFile(image);
 	}
 
 	/**
@@ -251,19 +251,7 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Given an image, it returns its resized version with sides of max 512 pixels each.
-	 *
-	 * @param image the image to be resized
-	 * @return resized image
-	 */
-	private static ImmutableImage resizeImage(ImmutableImage image) {
-		LOGGER.atTrace().log("Resizing image");
-
-		return image.max(MAX_SIDE_PIXELS, MAX_SIDE_PIXELS);
-	}
-
-	/**
-	 * Creates a new <i>.webp</i> file from passed-in {@code image}.
+	 * Creates a new <i>.webp</i> file from passed-in {@code image}, resizing it with sides of max 512 pixels each.
 	 *
 	 * @param image the image to convert to WebP
 	 * @return converted image
@@ -276,7 +264,7 @@ public final class MediaHelper {
 		LOGGER.atTrace().log("Writing output image file");
 
 		try {
-			image.output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
+			image.max(MAX_SIDE_PIXELS, MAX_SIDE_PIXELS).output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
 
 			if (!isFileSizeLowerThan(webpImage, MAX_IMAGE_FILE_SIZE)) {
 				throw new MediaOptimizationException("The image size could not be reduced enough to meet Telegram's requirements");
