@@ -1,4 +1,9 @@
+ARG LIBWEBP=libwebp-1.4.0-linux-x86-64
+
 FROM eclipse-temurin AS builder
+ARG LIBWEBP
+RUN curl -LO https://storage.googleapis.com/downloads.webmproject.org/releases/webp/$LIBWEBP.tar.gz && \
+    tar -xvzf $LIBWEBP.tar.gz -C /tmp
 WORKDIR /app
 COPY settings.gradle build.gradle gradlew ./
 COPY gradle ./gradle
@@ -8,8 +13,10 @@ COPY . .
 RUN ./gradlew runtime --no-daemon
 
 FROM debian:trixie-slim AS bot
-RUN apt-get update && apt-get install -y webp ffmpeg
+ARG LIBWEBP
 COPY --from=builder /app/build/jre ./jre
 COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
-ENV FFMPEG_PATH=/usr/bin/ffmpeg
+COPY --from=builder /tmp/$LIBWEBP/bin/cwebp /usr/local/bin/
+COPY --from=builder /tmp/$LIBWEBP/bin/dwebp /usr/local/bin/
+COPY --from=mwader/static-ffmpeg /ffmpeg /usr/local/bin/
 CMD ["jre/bin/java", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify-shadow.jar"]

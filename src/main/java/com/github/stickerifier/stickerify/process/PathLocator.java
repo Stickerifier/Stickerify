@@ -19,13 +19,11 @@ public class PathLocator implements ProcessLocator {
 
 	private static final String[] FIND_FFMPEG = { IS_WINDOWS ? "where" : "which", "ffmpeg" };
 
-	private String ffmpegLocation = System.getenv("FFMPEG_PATH");
+	private String ffmpegLocation;
 
 	public PathLocator() {
 		try {
-			if (ffmpegLocation == null || ffmpegLocation.isBlank()) {
-				ffmpegLocation = ProcessHelper.executeCommand(FIND_FFMPEG).split(lineSeparator())[0];
-			}
+			ffmpegLocation = ProcessHelper.executeCommand(FIND_FFMPEG).split(lineSeparator())[0];
 
 			LOGGER.atInfo().log("FFmpeg is installed at {}", ffmpegLocation);
 		} catch (ProcessException e) {
