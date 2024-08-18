@@ -44,6 +44,7 @@ public final class MediaHelper {
 
 	static {
 		System.setProperty("java.awt.headless", "true");
+		System.setProperty("com.sksamuel.scrimage.webp.binary.dir", "/usr/local/bin/");
 		ImageIO.setUseCache(false);
 	}
 
