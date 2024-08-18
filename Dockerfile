@@ -12,11 +12,12 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
 COPY . .
 RUN ./gradlew runtime --no-daemon
 
-FROM debian:trixie-slim AS bot
+FROM gcr.io/distroless/base-nossl:nonroot AS bot
 ARG LIBWEBP
 COPY --from=builder /app/build/jre ./jre
 COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=builder /tmp/$LIBWEBP/bin/cwebp /usr/local/bin/
 COPY --from=builder /tmp/$LIBWEBP/bin/dwebp /usr/local/bin/
 COPY --from=mwader/static-ffmpeg /ffmpeg /usr/local/bin/
+ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 CMD ["jre/bin/java", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify-shadow.jar"]
