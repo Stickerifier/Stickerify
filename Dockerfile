@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
 COPY . .
 RUN ./gradlew runtime --no-daemon
 
-FROM debian:unstable-slim AS bot
+FROM debian:trixie-slim AS bot
 COPY --from=builder /app/build/jre ./jre
 COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=builder /usr/bin/cwebp /usr/local/bin/
