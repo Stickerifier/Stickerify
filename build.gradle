@@ -87,4 +87,8 @@ shadowJar {
     archiveClassifier = 'shadow'
     archiveVersion = ''
     mergeServiceFiles()
+
+    dependencies {
+        exclude('dist_webp_binaries/')
+    }
 }
