@@ -126,7 +126,7 @@ public final class MediaHelper {
 
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
 				uncompressedContent = new String(gzipInputStream.readAllBytes(), UTF_8);
-			} catch (IOException e) {
+			} catch (IOException _) {
 				LOGGER.atError().log("Unable to retrieve gzip content from file {}", file.getName());
 			}
 
@@ -192,7 +192,7 @@ public final class MediaHelper {
 
 		try {
 			return ImmutableImage.loader().fromFile(file);
-		} catch (IOException e) {
+		} catch (IOException _) {
 			return null;
 		}
 	}
