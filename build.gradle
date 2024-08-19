@@ -78,7 +78,7 @@ application {
 }
 
 runtime {
-    options = ['--strip-debug', '--no-header-files', '--no-man-pages', '--compress=2']
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
     modules = ['java.desktop', 'java.naming', 'java.sql', 'jdk.crypto.ec']
 }
 
