@@ -93,6 +93,13 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void resizeAnimatedWebpImage() {
+		var webpImage = loadResource("animated.webp");
+
+		assertThrows(MediaException.class, () -> MediaHelper.convert(webpImage));
+	}
+
+	@Test
 	void resizeFaviconImage() throws Exception {
 		var faviconImage = loadResource("favicon.ico");
 		var result = MediaHelper.convert(faviconImage);
