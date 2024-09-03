@@ -1,21 +1,40 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "packageRules": [
-    {
-      "matchPackagePatterns": [
-        "*"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "automerge": true,
-      "labels": [
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "labels": [
         "dependencies"
-      ]
-    }
-  ],
-  "extends": [
-    "config:base"
-  ]
+    ],
+    "assignees": [
+        "rob93c"
+    ],
+    "packageRules": [
+        {
+            "matchPackagePatterns": [
+                "*"
+            ],
+            "enabledManagers": [
+                "gradle",
+                "dockerfile",
+                "github-actions"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ],
+            "automerge": true,
+            "assignAutomerge": true,
+            "minimumReleaseAge": "1 week"
+        },
+        {
+            "matchManagers": [
+                "gradle-wrapper"
+            ],
+            "schedule": [
+                "at any time"
+            ],
+            "automerge": false
+        }
+    ],
+    "extends": [
+        "config:base"
+    ]
 }
