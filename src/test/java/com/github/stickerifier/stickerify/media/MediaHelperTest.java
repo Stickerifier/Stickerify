@@ -85,11 +85,18 @@ class MediaHelperTest {
 	}
 
 	@Test
-	void resizeWebpImage() throws Exception {
-		var webpImage = loadResource("valid.webp");
+	void resizeStaticWebpImage() throws Exception {
+		var webpImage = loadResource("static.webp");
 		var result = MediaHelper.convert(webpImage);
 
 		assertImageConsistency(result, 256, 512);
+	}
+
+	@Test
+	void resizeAnimatedWebpImage() {
+		var webpImage = loadResource("animated.webp");
+
+		assertThrows(MediaException.class, () -> MediaHelper.convert(webpImage));
 	}
 
 	@Test
@@ -316,7 +323,7 @@ class MediaHelperTest {
 		@Test
 		@DisplayName("webp images")
 		void concurrentWebpImageConversions() {
-			var webpImage = loadResource("valid.webp");
+			var webpImage = loadResource("static.webp");
 
 			executeConcurrentConversionsOf(webpImage);
 		}
