@@ -188,8 +188,6 @@ public final class MediaHelper {
 	 * @throws FileOperationException if an error occurred processing passed-in file
 	 */
 	private static ImmutableImage toImage(File file) throws FileOperationException {
-		LOGGER.atTrace().log("Loading image information");
-
 		try {
 			return ImmutableImage.loader().fromFile(file);
 		} catch (IOException _) {
@@ -262,8 +260,6 @@ public final class MediaHelper {
 		var webpImage = createTempFile("webp");
 		var deleteTempFile = false;
 
-		LOGGER.atTrace().log("Writing output image file");
-
 		try {
 			image.max(MAX_SIDE_LENGTH, MAX_SIDE_LENGTH).output(WebpWriter.MAX_LOSSLESS_COMPRESSION, webpImage);
 
@@ -279,8 +275,6 @@ public final class MediaHelper {
 				deleteFile(webpImage);
 			}
 		}
-
-		LOGGER.atTrace().log("Image conversion completed successfully");
 
 		return webpImage;
 	}
