@@ -25,4 +25,4 @@ tika = "org.apache.tika:tika-core:2.9.2"
 
 [plugins]
 runtime = "org.beryx.runtime:1.13.1"
-shadow = "com.gradleup.shadow:8.3.0"
+shadow = "com.gradleup.shadow:8.3.2"
