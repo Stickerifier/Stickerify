@@ -1,0 +1,18 @@
+name: Automatic version updates
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code changes
+        uses: actions/checkout@v4
+
+      - name: Update dependencies
+        uses: wader/bump/action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUMP_TOKEN }}

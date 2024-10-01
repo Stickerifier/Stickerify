@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+
+# from https://github.com/wader/static-ffmpeg/blob/787709ac341e7ef16f8a1768ed1e5a30b492a0b7/hashupdate
+# Usage: hashupdate <FILE> <NAME> <VERSION>
+URL_TEMPLATE=$(grep "$2_URL=" "$1" | sed -E 's/.*="(.*)"/\1/' | tr -d '\r')
+URL=$(echo "$URL_TEMPLATE" | sed "s/\$$2_VERSION/$3/g")
+SHA256=$(curl -sL "$URL" | sha256sum | sed -e 's/  -//g')
+sed -i -E "s/$2_SHA256=.*/$2_SHA256=$SHA256/" "$1"
