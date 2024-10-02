@@ -25,14 +25,16 @@ jobs:
 
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: '7.0.2'
 
       - name: Setup project and upload dependency graph
         uses: gradle/actions/setup-gradle@v4
         with:
           dependency-graph: generate-and-submit
           build-scan-publish: true
-          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
-          build-scan-terms-of-use-agree: "yes"
+          build-scan-terms-of-use-url: 'https://gradle.com/help/legal-terms-of-use'
+          build-scan-terms-of-use-agree: 'yes'
 
       - name: Execute tests
         run: ./gradlew test
@@ -68,7 +70,7 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: "--baseline,qodana.baseline.json"
+          args: '--baseline,qodana.baseline.json'
           use-caches: false
           post-pr-comment: false
           pr-mode: false
