@@ -15,6 +15,6 @@ COPY --from=builder /app/build/jre ./jre
 COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=builder /tmp/libwebp/bin/cwebp /usr/local/bin/
 COPY --from=builder /tmp/libwebp/bin/dwebp /usr/local/bin/
-COPY --from=mwader/static-ffmpeg /ffmpeg /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:7.0.2 /ffmpeg /usr/local/bin/
 ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 CMD ["jre/bin/java", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify-shadow.jar"]
