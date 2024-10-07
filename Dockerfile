@@ -7,9 +7,9 @@ ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releas
 ARG LIBWEBP_SHA256=94ac053be5f8cb47a493d7a56b2b1b7328bab9cff24ecb89fa642284330d8dff
 
 WORKDIR /app
-RUN curl "$LIBWEBP_URL" -o libwebp.tar.gz
-RUN echo "$LIBWEBP_SHA256  libwebp.tar.gz" | sha256sum -c -
-RUN tar -xzf libwebp.tar.gz --one-top-level=libwebp --strip-components=1
+RUN curl "$LIBWEBP_URL" -o libwebp.tar.gz && \
+    echo "$LIBWEBP_SHA256  libwebp.tar.gz" | sha256sum -c - && \
+    tar -xzf libwebp.tar.gz --one-top-level=libwebp --strip-components=1
 COPY settings.gradle build.gradle gradlew ./
 COPY gradle ./gradle
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
