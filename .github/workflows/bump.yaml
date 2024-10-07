@@ -1,12 +1,13 @@
-name: Automatic version updates
+name: Bump CI
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 9 * * *'
-  workflow_dispatch:
 
 jobs:
   bump:
+    name: Search for dependency updates
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code changes

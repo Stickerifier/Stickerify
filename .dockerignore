@@ -14,3 +14,5 @@ LICENSE
 Dockerfile
 *.dockerfile
 qodana.baseline.json
+Bumpfile
+hashupdate

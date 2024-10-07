@@ -26,7 +26,7 @@ jobs:
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
         with:
-          # bump: ffmpeg /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg|^7.0
+          # bump: ffmpeg-ci /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg|~7.0
           ffmpeg-version: '7.0.2'
 
       - name: Setup project and upload dependency graph
