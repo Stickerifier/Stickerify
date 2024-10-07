@@ -1,0 +1,19 @@
+name: Bump CI
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * *'
+
+jobs:
+  bump:
+    name: Search for dependency updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code changes
+        uses: actions/checkout@v4
+
+      - name: Update dependencies
+        uses: wader/bump/action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUMP_TOKEN }}
