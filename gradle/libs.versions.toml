@@ -1,5 +1,5 @@
 [versions]
-logback = "1.5.11"
+logback = "1.5.12"
 scrimage = "4.2.0"
 twelvemonkeys = "3.12.0"
 
