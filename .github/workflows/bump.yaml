@@ -3,7 +3,7 @@ name: Bump CI
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 10 * * *'
+    - cron: '0 8 * * *'
 
 jobs:
   bump:
