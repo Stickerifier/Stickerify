@@ -8,9 +8,6 @@
     ],
     "packageRules": [
         {
-            "matchPackagePatterns": [
-                "*"
-            ],
             "enabledManagers": [
                 "gradle",
                 "dockerfile",
@@ -22,7 +19,10 @@
             ],
             "automerge": true,
             "assignAutomerge": true,
-            "minimumReleaseAge": "1 week"
+            "minimumReleaseAge": "1 week",
+            "matchPackageNames": [
+                "*"
+            ]
         },
         {
             "matchManagers": [
@@ -35,6 +35,6 @@
         }
     ],
     "extends": [
-        "config:base"
+        "config:recommended"
     ]
 }
