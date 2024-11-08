@@ -3,5 +3,5 @@ profile:
   name: qodana.recommended
 include:
   - name: VulnerableLibrariesGlobal
-linter: jetbrains/qodana-jvm:latest
-projectJDK: temurin-22
+linter: jetbrains/qodana-jvm:2024.2
+projectJDK: temurin-23

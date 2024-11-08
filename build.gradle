@@ -60,7 +60,7 @@ description = 'Telegram bot to convert medias in the format required to be used 
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(22)
+        languageVersion = JavaLanguageVersion.of(23)
     }
 }
 
