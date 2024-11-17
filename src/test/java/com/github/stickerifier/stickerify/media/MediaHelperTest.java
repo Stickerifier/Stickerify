@@ -240,6 +240,13 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void nonCompliantAnimatedSticker() {
+		var archive = loadResource("non_compliant_animated_sticker.gz");
+
+		assertThrows(MediaException.class, () -> MediaHelper.convert(archive));
+	}
+
+	@Test
 	void unsupportedGzipArchive() {
 		var archive = loadResource("unsupported_archive.gz");
 

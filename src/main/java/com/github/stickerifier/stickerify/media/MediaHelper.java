@@ -146,6 +146,16 @@ public final class MediaHelper {
 		private float duration() {
 			return (end - start) / frameRate;
 		}
+
+		@Override
+		public String toString() {
+			return "animated sticker [" +
+					"width=" + width +
+					", height=" + height +
+					", frameRate=" + frameRate +
+					", duration=" + duration() +
+					']';
+		}
 	}
 
 	/**
@@ -156,11 +166,17 @@ public final class MediaHelper {
 	 * @return {@code true} if the animation is compliant
 	 */
 	private static boolean isAnimationCompliant(AnimationDetails animation) {
-		return animation != null
+		boolean isCompliant = animation != null
 				&& animation.frameRate() <= MAX_ANIMATION_FRAME_RATE
 				&& animation.duration() <= MAX_ANIMATION_DURATION_SECONDS
 				&& animation.width() == MAX_SIDE_LENGTH
 				&& animation.height() == MAX_SIDE_LENGTH;
+
+		if (!isCompliant) {
+			LOGGER.atWarn().log("The {} doesn't meet Telegram's requirements", animation);
+		}
+
+		return isCompliant;
 	}
 
 	/**
