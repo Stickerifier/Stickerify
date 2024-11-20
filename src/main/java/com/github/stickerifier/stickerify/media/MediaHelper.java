@@ -133,7 +133,12 @@ public final class MediaHelper {
 			try {
 				var sticker = GSON.fromJson(uncompressedContent, AnimationDetails.class);
 
-				return isAnimationCompliant(sticker) && isFileSizeLowerThan(file, MAX_ANIMATION_FILE_SIZE);
+				boolean isAnimationCompliant = isAnimationCompliant(sticker);
+				if (isAnimationCompliant) {
+					return isFileSizeLowerThan(file, MAX_ANIMATION_FILE_SIZE);
+				}
+
+				LOGGER.atWarn().log("The {} doesn't meet Telegram's requirements", sticker);
 			} catch (JsonSyntaxException _) {
 				LOGGER.atInfo().log("The archive isn't an animated sticker");
 			}
@@ -166,17 +171,11 @@ public final class MediaHelper {
 	 * @return {@code true} if the animation is compliant
 	 */
 	private static boolean isAnimationCompliant(AnimationDetails animation) {
-		boolean isCompliant = animation != null
+		return animation != null
 				&& animation.frameRate() <= MAX_ANIMATION_FRAME_RATE
 				&& animation.duration() <= MAX_ANIMATION_DURATION_SECONDS
 				&& animation.width() == MAX_SIDE_LENGTH
 				&& animation.height() == MAX_SIDE_LENGTH;
-
-		if (!isCompliant) {
-			LOGGER.atWarn().log("The {} doesn't meet Telegram's requirements", animation);
-		}
-
-		return isCompliant;
 	}
 
 	/**
