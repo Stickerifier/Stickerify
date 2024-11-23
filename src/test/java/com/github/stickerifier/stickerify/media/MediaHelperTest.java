@@ -241,9 +241,9 @@ class MediaHelperTest {
 
 	@Test
 	void nonCompliantAnimatedSticker() {
-		var archive = loadResource("non_compliant_animated_sticker.tgs");
+		var animatedSticker = loadResource("non_compliant_animated_sticker.tgs");
 
-		assertThrows(MediaException.class, () -> MediaHelper.convert(archive));
+		assertThrows(MediaException.class, () -> MediaHelper.convert(animatedSticker));
 	}
 
 	@Test
