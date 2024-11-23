@@ -133,7 +133,12 @@ public final class MediaHelper {
 			try {
 				var sticker = GSON.fromJson(uncompressedContent, AnimationDetails.class);
 
-				return isAnimationCompliant(sticker) && isFileSizeLowerThan(file, MAX_ANIMATION_FILE_SIZE);
+				boolean isAnimationCompliant = isAnimationCompliant(sticker);
+				if (isAnimationCompliant) {
+					return isFileSizeLowerThan(file, MAX_ANIMATION_FILE_SIZE);
+				}
+
+				LOGGER.atWarn().log("The {} doesn't meet Telegram's requirements", sticker);
 			} catch (JsonSyntaxException _) {
 				LOGGER.atInfo().log("The archive isn't an animated sticker");
 			}
@@ -145,6 +150,16 @@ public final class MediaHelper {
 	private record AnimationDetails(@SerializedName("w") int width, @SerializedName("h") int height, @SerializedName("fr") int frameRate, @SerializedName("ip") float start, @SerializedName("op") float end) {
 		private float duration() {
 			return (end - start) / frameRate;
+		}
+
+		@Override
+		public String toString() {
+			return "animated sticker [" +
+					"width=" + width +
+					", height=" + height +
+					", frameRate=" + frameRate +
+					", duration=" + duration() +
+					']';
 		}
 	}
 
