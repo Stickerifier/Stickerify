@@ -216,6 +216,14 @@ class MediaHelperTest {
 	}
 
 	@Test
+	void convertMsVideo() throws Exception {
+		var msVideo = loadResource("msvideo.avi");
+		var result = MediaHelper.convert(msVideo);
+
+		assertVideoConsistency(result, 512, 512, 30F, 2_970L);
+	}
+
+	@Test
 	void noVideoConversionNeeded() throws Exception {
 		var webmVideo = loadResource("no_conversion_needed.webm");
 		var result = MediaHelper.convert(webmVideo);
