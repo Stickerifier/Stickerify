@@ -216,9 +216,9 @@ class MediaHelperTest {
 	}
 
 	@Test
-	void convertMsVideo() throws Exception {
-		var msVideo = loadResource("msvideo.avi");
-		var result = MediaHelper.convert(msVideo);
+	void convertAviVideo() throws Exception {
+		var aviVideo = loadResource("valid.avi");
+		var result = MediaHelper.convert(aviVideo);
 
 		assertVideoConsistency(result, 512, 512, 30F, 2_970L);
 	}
@@ -325,6 +325,14 @@ class MediaHelperTest {
 			var webmVideo = loadResource("small_video_sticker.webm");
 
 			executeConcurrentConversionsOf(webmVideo);
+		}
+
+		@Test
+		@DisplayName("avi videos")
+		void concurrentAviVideoConversions() {
+			var aviVideo = loadResource("valid.avi");
+
+			executeConcurrentConversionsOf(aviVideo);
 		}
 
 		@Test
