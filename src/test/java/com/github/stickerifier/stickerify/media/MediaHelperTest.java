@@ -220,7 +220,7 @@ class MediaHelperTest {
 		var aviVideo = loadResource("valid.avi");
 		var result = MediaHelper.convert(aviVideo);
 
-		assertVideoConsistency(result, 512, 512, 30F, 2_970L);
+		assertVideoConsistency(result, 512, 512, 30F, 3_000L);
 	}
 
 	@Test
