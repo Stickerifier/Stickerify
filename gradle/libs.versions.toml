@@ -1,6 +1,6 @@
 [versions]
 logback = "1.5.12"
-scrimage = "4.2.0"
+scrimage = "4.3.0"
 twelvemonkeys = "3.12.0"
 
 [libraries]
