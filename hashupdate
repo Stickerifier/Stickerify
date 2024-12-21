@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu pipefail
+set -euo
 
 # Usage: hashupdate <FILE> <NAME> <VERSION>
 URL_TEMPLATE=$(grep "$2_URL=" "$1" | sed -E 's/.*="(.*)"/\1/')
