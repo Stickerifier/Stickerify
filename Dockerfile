@@ -4,7 +4,7 @@ FROM eclipse-temurin AS builder
 # bump: libwebp after ./hashupdate Dockerfile LIBWEBP $LATEST
 ARG LIBWEBP_VERSION=1.5.0
 ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
-ARG LIBWEBP_SHA256=d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed
+ARG LIBWEBP_SHA256=f4bf49f85991f50e86a5404d16f15b72a053bb66768ed5cc0f6d042277cc2bb8
 
 WORKDIR /app
 RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -o libwebp.tar.gz && \
