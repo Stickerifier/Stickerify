@@ -2,9 +2,9 @@ FROM eclipse-temurin AS builder
 
 # bump: libwebp /LIBWEBP_VERSION=([\d.]+)/ git:https://chromium.googlesource.com/webm/libwebp.git|^1
 # bump: libwebp after ./hashupdate Dockerfile LIBWEBP $LATEST
-ARG LIBWEBP_VERSION=1.4.0
+ARG LIBWEBP_VERSION=1.5.0
 ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
-ARG LIBWEBP_SHA256=94ac053be5f8cb47a493d7a56b2b1b7328bab9cff24ecb89fa642284330d8dff
+ARG LIBWEBP_SHA256=d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed
 
 WORKDIR /app
 RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -o libwebp.tar.gz && \
