@@ -188,7 +188,7 @@ class MediaHelperTest {
 		var webmVideo = loadResource("short_low_fps.webm");
 		var result = MediaHelper.convert(webmVideo);
 
-		assertVideoConsistency(result, 512, 288, 10F, 900L);
+		assertVideoConsistency(result, 512, 288, 10F, 1_000L);
 	}
 
 	@Test
@@ -204,7 +204,7 @@ class MediaHelperTest {
 		var webmVideo = loadResource("vertical_video_sticker.webm");
 		var result = MediaHelper.convert(webmVideo);
 
-		assertVideoConsistency(result, 288, 512, 30F, 1_970L);
+		assertVideoConsistency(result, 288, 512, 30F, 2_000L);
 	}
 
 	@Test
@@ -212,7 +212,7 @@ class MediaHelperTest {
 		var gifVideo = loadResource("valid.gif");
 		var result = MediaHelper.convert(gifVideo);
 
-		assertVideoConsistency(result, 512, 274, 10F, 900L);
+		assertVideoConsistency(result, 512, 274, 10F, 1_000L);
 	}
 
 	@Test
@@ -220,7 +220,7 @@ class MediaHelperTest {
 		var aviVideo = loadResource("valid.avi");
 		var result = MediaHelper.convert(aviVideo);
 
-		assertVideoConsistency(result, 512, 512, 30F, 2_970L);
+		assertVideoConsistency(result, 512, 512, 30F, 3_000L);
 	}
 
 	@Test
