@@ -28,4 +28,4 @@ COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=builder /app/libwebp/bin/cwebp /usr/local/bin/
 COPY --from=builder /app/libwebp/bin/dwebp /usr/local/bin/
 
-CMD ["jre/bin/java", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify-shadow.jar"]
+CMD ["jre/bin/java", "-XX:+UseZGC", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify-shadow.jar"]
