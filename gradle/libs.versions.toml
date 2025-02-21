@@ -20,7 +20,7 @@ scrimage-core = { module = "com.sksamuel.scrimage:scrimage-core", version.ref = 
 scrimage-formats-extra = { module = "com.sksamuel.scrimage:scrimage-formats-extra", version.ref = "scrimage" }
 scrimage-webp = { module = "com.sksamuel.scrimage:scrimage-webp", version.ref = "scrimage" }
 slf4j-api = "org.slf4j:slf4j-api:2.0.16"
-telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:8.1.0"
+telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:8.3.0"
 tika = "org.apache.tika:tika-core:3.1.0"
 
 [plugins]
