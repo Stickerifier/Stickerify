@@ -79,7 +79,7 @@ application {
 
 runtime {
     options = ['--strip-debug', '--no-header-files', '--no-man-pages']
-    modules = ['java.desktop', 'java.naming', 'java.sql', 'jdk.crypto.ec']
+    modules = ['java.desktop', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
 }
 
 shadowJar {
