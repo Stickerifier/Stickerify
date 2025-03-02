@@ -23,6 +23,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.LinkPreviewOptions;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.ReplyParameters;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.GetUpdates;
@@ -128,7 +129,7 @@ public class Stickerify {
 				pathsToDelete.add(outputFile.toPath());
 
 				var answerWithFile = new SendDocument(request.getChatId(), outputFile)
-						.replyToMessageId(request.getMessageId())
+						.replyParameters(new ReplyParameters(request.getMessageId()))
 						.disableContentTypeDetection(true)
 						.caption(FILE_READY.getText())
 						.parseMode(MarkdownV2);
@@ -195,7 +196,7 @@ public class Stickerify {
 		var previewOptions = new LinkPreviewOptions().isDisabled(answer.isDisableLinkPreview());
 
 		var answerWithText = new SendMessage(request.getChatId(), answer.getText())
-				.replyToMessageId(request.getMessageId())
+				.replyParameters(new ReplyParameters(request.getMessageId()))
 				.parseMode(MarkdownV2)
 				.linkPreviewOptions(previewOptions);
 
