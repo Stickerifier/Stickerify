@@ -19,7 +19,7 @@ RUN ./gradlew runtime --no-daemon
 FROM gcr.io/distroless/base-nossl:nonroot AS bot
 
 # bump: ffmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.0
-COPY --from=mwader/static-ffmpeg:7.0.2 /ffmpeg /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:7.1.1 /ffmpeg /usr/local/bin/
 ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 
 COPY --from=builder /app/libwebp/bin/cwebp /usr/local/bin/
