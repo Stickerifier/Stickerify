@@ -69,8 +69,15 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 test {
+    dependsOn 'runtime'
     useJUnitPlatform()
     finalizedBy(jacocoTestReport)
+
+    doFirst {
+        def javaExecutable = System.getProperty("os.name").toLowerCase().contains("windows") ? "java.exe" : "java"
+
+        executable = layout.buildDirectory.file("jre/bin/$javaExecutable").get().asFile.absolutePath
+    }
 }
 
 application {
