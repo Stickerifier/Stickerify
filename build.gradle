@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 plugins {
     alias(libs.plugins.runtime)
     alias(libs.plugins.shadow)
@@ -69,15 +71,12 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 test {
-    dependsOn 'runtime'
+    dependsOn('runtime')
     useJUnitPlatform()
     finalizedBy(jacocoTestReport)
 
-    doFirst {
-        def javaExecutable = System.getProperty("os.name").toLowerCase().contains("windows") ? "java.exe" : "java"
-
-        executable = layout.buildDirectory.file("jre/bin/$javaExecutable").get().asFile.absolutePath
-    }
+    def file = DefaultNativePlatform.currentOperatingSystem.isWindows() ? 'java.exe' : 'java'
+    executable = layout.buildDirectory.file('jre/bin/' + file).get()
 }
 
 application {
@@ -86,7 +85,7 @@ application {
 
 runtime {
     options = ['--strip-debug', '--no-header-files', '--no-man-pages']
-    modules = ['java.desktop', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
+    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
 }
 
 shadowJar {
