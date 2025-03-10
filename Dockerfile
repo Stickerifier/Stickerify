@@ -23,9 +23,11 @@ FROM gcr.io/distroless/base-nossl:nonroot AS bot
 COPY --from=mwader/static-ffmpeg:7.0.2 /ffmpeg /usr/local/bin/
 ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 
-COPY --from=builder /app/build/jre ./jre
-COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=builder /app/libwebp/bin/cwebp /usr/local/bin/
 COPY --from=builder /app/libwebp/bin/dwebp /usr/local/bin/
+COPY --from=builder /app/libwebp/bin/gif2webp /usr/local/bin/
 
-CMD ["jre/bin/java", "-XX:+UseZGC", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify-shadow.jar"]
+COPY --from=builder /app/build/jre jre
+COPY --from=builder /app/build/libs/Stickerify-*-all.jar Stickerify.jar
+
+CMD ["jre/bin/java", "-XX:+UseZGC", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify.jar"]

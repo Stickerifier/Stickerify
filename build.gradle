@@ -38,6 +38,31 @@ dependencies {
     }
 }
 
+group = 'com.github.stickerifier'
+version = '1.0'
+description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    dependsOn jre
+    inputs.files jre.outputs.files
+
+    def file = DefaultNativePlatform.currentOperatingSystem.isWindows() ? 'java.exe' : 'java'
+    executable = layout.buildDirectory.file('jre/bin/' + file).get()
+
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
 jacocoTestReport {
     reports {
         html.required = false
@@ -56,45 +81,21 @@ jacocoTestReport {
     }
 }
 
-group = 'com.github.stickerifier'
-version = '1.0'
-description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(23)
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-test {
-    dependsOn('runtime')
-    useJUnitPlatform()
-    finalizedBy(jacocoTestReport)
-
-    def file = DefaultNativePlatform.currentOperatingSystem.isWindows() ? 'java.exe' : 'java'
-    executable = layout.buildDirectory.file('jre/bin/' + file).get()
-}
-
 application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
 }
 
-runtime {
-    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
-    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
-}
-
 shadowJar {
-    archiveBaseName = 'Stickerify'
-    archiveClassifier = 'shadow'
-    archiveVersion = ''
     mergeServiceFiles()
 
     dependencies {
         exclude('dist_webp_binaries/')
     }
 }
+
+runtime {
+    options = ['--compress', 'zip-9', '--no-header-files', '--no-man-pages', '--strip-debug']
+    modules = [ 'java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
+}
+
+suggestModules.dependsOn shadowJar

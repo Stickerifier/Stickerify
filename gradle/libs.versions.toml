@@ -24,5 +24,5 @@ telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:8.3.0"
 tika = "org.apache.tika:tika-core:3.1.0"
 
 [plugins]
-runtime = "org.beryx.runtime:1.13.1"
+runtime = "com.dua3.gradle.runtime:1.13.1-patch-1"
 shadow = "com.gradleup.shadow:8.3.6"
