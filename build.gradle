@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 plugins {
     alias(libs.plugins.runtime)
     alias(libs.plugins.shadow)
@@ -36,6 +38,31 @@ dependencies {
     }
 }
 
+group = 'com.github.stickerifier'
+version = '1.0'
+description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    dependsOn jre
+    inputs.dir tasks.jre.jreDir
+
+    def file = DefaultNativePlatform.currentOperatingSystem.isWindows() ? 'java.exe' : 'java'
+    executable = tasks.jre.jreDir.file('bin/' + file)
+
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
 jacocoTestReport {
     reports {
         html.required = false
@@ -54,41 +81,21 @@ jacocoTestReport {
     }
 }
 
-group = 'com.github.stickerifier'
-version = '1.0'
-description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(23)
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-test {
-    useJUnitPlatform()
-    finalizedBy(jacocoTestReport)
-}
-
 application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
 }
 
-runtime {
-    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
-    modules = ['java.desktop', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
-}
-
 shadowJar {
-    archiveBaseName = 'Stickerify'
-    archiveClassifier = 'shadow'
-    archiveVersion = ''
     mergeServiceFiles()
 
     dependencies {
         exclude('dist_webp_binaries/')
     }
 }
+
+runtime {
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
+}
+
+suggestModules.dependsOn shadowJar

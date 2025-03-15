@@ -12,8 +12,7 @@ RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -o libwebp.tar.gz &&
     tar -xzf libwebp.tar.gz --one-top-level=libwebp --strip-components=1
 COPY settings.gradle build.gradle gradlew ./
 COPY gradle ./gradle
-RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
-    ./gradlew dependencies --no-daemon
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches ./gradlew dependencies --no-daemon
 COPY . .
 RUN ./gradlew runtime --no-daemon
 
@@ -23,9 +22,10 @@ FROM gcr.io/distroless/base-nossl:nonroot AS bot
 COPY --from=mwader/static-ffmpeg:7.0.2 /ffmpeg /usr/local/bin/
 ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 
-COPY --from=builder /app/build/jre ./jre
-COPY --from=builder /app/build/libs/Stickerify-shadow.jar .
 COPY --from=builder /app/libwebp/bin/cwebp /usr/local/bin/
 COPY --from=builder /app/libwebp/bin/dwebp /usr/local/bin/
 
-CMD ["jre/bin/java", "-XX:+UseZGC", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify-shadow.jar"]
+COPY --from=builder /app/build/jre jre
+COPY --from=builder /app/build/libs/Stickerify-1.0-all.jar Stickerify.jar
+
+CMD ["jre/bin/java", "-XX:+UseZGC", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify.jar"]
