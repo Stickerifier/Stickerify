@@ -93,7 +93,7 @@ shadowJar {
 }
 
 runtime {
-    options = ['--compress', 'zip-9', '--strip-debug', '--no-header-files', '--no-man-pages']
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
     modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec']
 }
 
