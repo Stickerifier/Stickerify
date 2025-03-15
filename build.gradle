@@ -54,9 +54,10 @@ tasks.withType(JavaCompile).configureEach {
 
 test {
     dependsOn jre
+    inputs.dir tasks.jre.jreDir
 
     def file = DefaultNativePlatform.currentOperatingSystem.isWindows() ? 'java.exe' : 'java'
-    executable = layout.buildDirectory.file('jre/bin/' + file).get()
+    executable = tasks.jre.jreDir.file('bin/' + file)
 
     useJUnitPlatform()
     finalizedBy jacocoTestReport
