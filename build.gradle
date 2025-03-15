@@ -93,8 +93,8 @@ shadowJar {
 }
 
 runtime {
-    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
-    modules = [ 'java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
+    options = ['--compress', 'zip-9', '--strip-debug', '--no-header-files', '--no-man-pages']
+    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec']
 }
 
 suggestModules.dependsOn shadowJar
