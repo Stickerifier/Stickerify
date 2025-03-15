@@ -54,7 +54,6 @@ tasks.withType(JavaCompile).configureEach {
 
 test {
     dependsOn jre
-    inputs.files jre.outputs.files
 
     def file = DefaultNativePlatform.currentOperatingSystem.isWindows() ? 'java.exe' : 'java'
     executable = layout.buildDirectory.file('jre/bin/' + file).get()
@@ -94,7 +93,7 @@ shadowJar {
 }
 
 runtime {
-    options = ['--compress', 'zip-9', '--no-header-files', '--no-man-pages', '--strip-debug']
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
     modules = [ 'java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
 }
 
