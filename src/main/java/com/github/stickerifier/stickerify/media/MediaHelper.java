@@ -92,7 +92,7 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Analyses the file in order to detect its media type.
+	 * Analyzes the file to detect its media type.
 	 *
 	 * @param file the file sent to the bot
 	 * @return the MIME type of the passed-in file
@@ -113,7 +113,7 @@ public final class MediaHelper {
 
 	/**
 	 * Checks if the file is a {@code gzip} archive, then it reads its content and verifies if it's a valid JSON.
-	 * Once JSON information are retrieved, they are validated against Telegram's requirements.
+	 * Once JSON information is retrieved, they are validated against Telegram's requirements.
 	 *
 	 * @param file the file to check
 	 * @param mimeType the MIME type of the file
@@ -179,7 +179,7 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Checks that passed-in file's size does not exceed specified threshold.
+	 * Checks that passed-in file's size does not exceed the specified threshold.
 	 *
 	 * @param file the file to check
 	 * @param threshold max allowed file size
@@ -268,7 +268,7 @@ public final class MediaHelper {
 	 *
 	 * @param image the image to convert to WebP
 	 * @return converted image
-	 * @throws MediaException if an error occurs creating the temp file or
+	 * @throws MediaException if an error occurred creating the temp file, or
 	 * if the image size could not be reduced enough to meet Telegram's requirements
 	 */
 	private static File createWebpFile(ImmutableImage image) throws MediaException {
@@ -295,7 +295,7 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Creates a new temp file with desired extension.
+	 * Creates a new temp file with the desired extension.
 	 *
 	 * @param fileExtension the extension of the new file
 	 * @return a new temp file

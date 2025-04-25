@@ -22,7 +22,7 @@ to convert.
 
 Based on what you send, [Stickerify](https://t.me/StickerifyImageBot) will answer the following:
 
-* the converted media, if you sent a supported file (images, gifs, videos, and existing Telegram stickers are supported)
+* the converted media, if you sent a supported file (images, GIFs, videos, and existing Telegram stickers are supported)
   that needed conversion
 * no file, if you sent a media already suiting Telegram's requirements
 * an error message, if you sent either an unsupported or a corrupted file
@@ -88,7 +88,7 @@ After you successfully set up the project, you will have to go through the follo
        docker pull rob93c/stickerify
        ```
 
-3. Now you just need to run the Docker image passing the token (`{{TOKEN}}`) retrieved
+3. Now you need to run the Docker image passing the token (`{{TOKEN}}`) retrieved
    from [BotFather](https://t.me/BotFather):
 
    ```shell
@@ -111,7 +111,7 @@ If you would like to improve [Stickerify](https://t.me/StickerifyImageBot) as pa
 the [contributing guidelines](CONTRIBUTING.md) and then consider opening a new issue _and/or_ pull request.
 
 If your pull request represents a valid contribution to the project, it will be marked as `hacktoberfest-accepted`,
-therefore counting towards the 4 contributions goal.
+therefore counting towards the four-contribution goal.
 
 ## Useful information
 
