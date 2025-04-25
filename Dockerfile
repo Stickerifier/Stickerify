@@ -1,4 +1,4 @@
-FROM eclipse-temurin AS builder
+FROM eclipse-temurin:24-alpine AS builder
 
 # bump: libwebp /LIBWEBP_VERSION=([\d.]+)/ git:https://chromium.googlesource.com/webm/libwebp.git|^1
 # bump: libwebp after ./hashupdate Dockerfile LIBWEBP $LATEST
@@ -7,7 +7,8 @@ ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releas
 ARG LIBWEBP_SHA256=f4bf49f85991f50e86a5404d16f15b72a053bb66768ed5cc0f6d042277cc2bb8
 
 WORKDIR /app
-RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -o libwebp.tar.gz && \
+RUN apk --no-cache add curl tar && \
+    curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -o libwebp.tar.gz && \
     echo "$LIBWEBP_SHA256 libwebp.tar.gz" | sha256sum -c - && \
     tar -xzf libwebp.tar.gz --one-top-level=libwebp --strip-components=1
 COPY settings.gradle build.gradle gradlew ./
