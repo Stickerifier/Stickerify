@@ -95,7 +95,7 @@ shadowJar {
 }
 
 runtime {
-    options = ['--strip-debug', '--no-header-files', '--no-man-pages', '--compress', 'zip-9']
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages'] // don't compress jre because final docker image will be larger
     modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
 }
 
