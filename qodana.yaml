@@ -5,4 +5,4 @@ include:
   - name: VulnerableLibrariesGlobal
 # bump: qodana /qodana-jvm:([\d.]+)/ docker:jetbrains/qodana-jvm|/^[\d]{4}\.\d+$/|sort
 linter: jetbrains/qodana-jvm:2025.1
-projectJDK: temurin-23
+projectJDK: zulu-24

@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-13 ]
+        os: [ ubuntu-latest, windows-latest, macos-13 ] # pin macos to latest x64 image
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v4
@@ -32,8 +32,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 23
+          distribution: zulu
+          java-version: 24
 
       - name: Setup project and upload dependency graph
         uses: gradle/actions/setup-gradle@v4

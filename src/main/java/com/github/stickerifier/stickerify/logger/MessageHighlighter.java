@@ -15,7 +15,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.pattern.Converter;
 
 /**
- * Custom converter class to be used by Logback in order to highlight important substrings.
+ * Custom converter class to be used by Logback to highlight important substrings.
  *
  * @see Converter
  */

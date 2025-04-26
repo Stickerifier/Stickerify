@@ -66,7 +66,7 @@ public final class ProcessHelper {
 	}
 
 	/**
-	 * Reads the content of the input stream of the process.
+	 * Reads the content of the input stream.
 	 * If the input stream is empty, the content of the error stream is returned.
 	 *
 	 * @param process the process
