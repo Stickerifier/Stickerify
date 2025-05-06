@@ -4,7 +4,7 @@ scrimage = "4.3.1"
 twelvemonkeys = "3.12.0"
 
 [libraries]
-batik = "org.apache.xmlgraphics:batik-transcoder:1.18"
+batik = "org.apache.xmlgraphics:batik-transcoder:1.19"
 gson = "com.google.code.gson:gson:2.13.1"
 hamcrest = "org.hamcrest:hamcrest-core:3.0"
 imageio-batik = { module = "com.twelvemonkeys.imageio:imageio-batik", version.ref = "twelvemonkeys" }
