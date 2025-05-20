@@ -44,7 +44,8 @@ description = 'Telegram bot to convert medias in the format required to be used 
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(23)
+        languageVersion = JavaLanguageVersion.of(24)
+        vendor = JvmVendorSpec.AZUL
     }
 }
 
@@ -67,7 +68,7 @@ jacocoTestReport {
     reports {
         html.required = false
         xml.required = true
-        xml.outputLocation = file(".qodana/code-coverage/report.xml")
+        xml.outputLocation = file('.qodana/code-coverage/report.xml')
     }
 
     afterEvaluate {
@@ -94,7 +95,7 @@ shadowJar {
 }
 
 runtime {
-    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages'] // don't compress jre because final docker image will be larger
     modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
 }
 
