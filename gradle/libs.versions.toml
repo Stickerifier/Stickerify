@@ -15,7 +15,7 @@ junit-platform = "org.junit.platform:junit-platform-launcher:1.12.2"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.14"
-okio = "com.squareup.okio:okio:3.11.0"
+okio = "com.squareup.okio:okio:3.12.0"
 scrimage-core = { module = "com.sksamuel.scrimage:scrimage-core", version.ref = "scrimage" }
 scrimage-formats-extra = { module = "com.sksamuel.scrimage:scrimage-formats-extra", version.ref = "scrimage" }
 scrimage-webp = { module = "com.sksamuel.scrimage:scrimage-webp", version.ref = "scrimage" }
