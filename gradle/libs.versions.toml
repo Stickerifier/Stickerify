@@ -25,4 +25,4 @@ tika = "org.apache.tika:tika-core:3.2.0"
 
 [plugins]
 runtime = "com.dua3.gradle.runtime:1.13.1-patch-1"
-shadow = "com.gradleup.shadow:8.3.6"
+shadow = "com.gradleup.shadow:8.3.7"
