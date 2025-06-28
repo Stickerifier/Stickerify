@@ -11,7 +11,7 @@ imageio-batik = { module = "com.twelvemonkeys.imageio:imageio-batik", version.re
 imageio-psd = { module = "com.twelvemonkeys.imageio:imageio-psd", version.ref = "twelvemonkeys" }
 jave = "ws.schild:jave-core:3.5.0"
 junit = "org.junit.jupiter:junit-jupiter:5.13.2"
-junit-platform = "org.junit.platform:junit-platform-launcher:1.13.0"
+junit-platform = "org.junit.platform:junit-platform-launcher:1.13.2"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.16"
