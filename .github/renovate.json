@@ -12,6 +12,12 @@
             "matchPackageNames": [
                 "*"
             ]
+        },
+        {
+            "matchPackageNames": [
+                "*ffmpeg**"
+            ],
+            "enabled": false
         }
     ],
     "extends": [
