@@ -27,8 +27,8 @@ jobs:
         shell: bash
         run: |
           docker create --name ffmpeg mwader/static-ffmpeg:7.0.2
-          docker cp ffmpeg:/usr/local/bin/ffmpeg ffmpeg
-          docker cp ffmpeg:/usr/local/bin/ffprobe ffprobe
+          docker cp ffmpeg:/ffmpeg ffmpeg
+          docker cp ffmpeg:/ffprobe ffprobe
           docker rm -f ffmpeg
           echo "$PWD" >> "$GITHUB_PATH"
 
