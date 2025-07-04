@@ -26,7 +26,7 @@ jobs:
       - name: Setup FFmpeg
         shell: bash
         run: |
-          docker run --rm -v "$PWD:/out" -it $(docker build .github/workflows/ -q -f FFmpeg.dockerfile)
+          docker run --rm -v "$PWD:/out" -it $(docker build .github/workflows -q -f FFmpeg.dockerfile)
           echo "$PWD" >> "$GITHUB_PATH"
 
       - name: Setup Java
