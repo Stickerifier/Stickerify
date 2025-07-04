@@ -25,7 +25,11 @@ jobs:
 
       # bump: ffmpeg-ci /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.0
       - name: Setup FFmpeg
+        shell: bash
         run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            brew install docker
+          fi
           docker run --rm -v "$PWD:/out" $(echo -e 'FROM alpine\nCOPY --from=mwader/static-ffmpeg:7.0.2 /ff* /\nENTRYPOINT cp /ff* /out' | docker build -q -)
           echo "$PWD" >> "$GITHUB_PATH"
 
