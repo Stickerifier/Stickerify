@@ -27,7 +27,7 @@ jobs:
       - name: Setup FFmpeg
         shell: bash
         run: |
-          docker run --rm -v "$PWD:/out" $(echo -e 'FROM alpine\nCOPY --from=mwader/static-ffmpeg:7.0.2 /ff* /\nENTRYPOINT cp /ff* /out' | docker build --platform=linux -q -)
+          docker run --rm -v "$PWD:/out" $(echo -e 'FROM alpine\nCOPY --from=mwader/static-ffmpeg:7.0.2 /ff* /\nENTRYPOINT cp /ff* /out' | docker build --experimental -q -)
           echo "$PWD" >> "$GITHUB_PATH"
 
       - name: Setup Java
