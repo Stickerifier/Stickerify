@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-13 ] # pin macos to latest x64 image
+        os: [ ubuntu-latest, windows-latest ]
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v4
@@ -27,10 +27,7 @@ jobs:
       - name: Setup FFmpeg
         shell: bash
         run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            brew install docker
-          fi
-          docker run --rm -v "$PWD:/out" $(echo -e 'FROM alpine\nCOPY --from=mwader/static-ffmpeg:7.0.2 /ff* /\nENTRYPOINT cp /ff* /out' | docker build -q -)
+          docker run --rm -v "$PWD:/out" $(echo -e 'FROM alpine\nCOPY --from=mwader/static-ffmpeg:7.0.2 /ff* /\nENTRYPOINT cp /ff* /out' | docker build --platform=linux -q -)
           echo "$PWD" >> "$GITHUB_PATH"
 
       - name: Setup Java
