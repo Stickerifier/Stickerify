@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest, windows-2025 ]
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
       - name: Setup FFmpeg
         shell: bash
         run: |
-          docker create --name ffmpeg --platform linux mwader/static-ffmpeg:7.0.2
+          docker create --name ffmpeg mwader/static-ffmpeg:7.0.2
           docker cp ffmpeg:/ffmpeg ffmpeg
           docker cp ffmpeg:/ffprobe ffprobe
           docker rm -f ffmpeg
