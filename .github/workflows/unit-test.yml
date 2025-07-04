@@ -26,7 +26,10 @@ jobs:
       - name: Setup FFmpeg
         shell: bash
         run: |
-          docker run --rm -v "$PWD:/out" --experimental $(docker build -q -f .github/workflows/FFmpeg.dockerfile .)
+          docker create --name ffmpeg mwader/static-ffmpeg:7.0.2
+          docker cp ffmpeg:/usr/local/bin/ffmpeg ffmpeg
+          docker cp ffmpeg:/usr/local/bin/ffprobe ffprobe
+          docker rm -f ffmpeg
           echo "$PWD" >> "$GITHUB_PATH"
 
       - name: Setup Java

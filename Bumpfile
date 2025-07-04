@@ -1,6 +1,6 @@
 ffmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.0
 qodana /qodana-jvm:([\d.]+)/ docker:jetbrains/qodana-jvm|/^[\d]{4}\.\d+$/|sort
 
-.github/workflows/FFmpeg.dockerfile
+.github/workflows/unit-test.yml
 Dockerfile
 qodana.yaml
