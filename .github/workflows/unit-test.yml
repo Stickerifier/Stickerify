@@ -23,11 +23,11 @@ jobs:
       - name: Checkout code changes
         uses: actions/checkout@v4
 
+      # bump: ffmpeg-ci /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.0
       - name: Setup FFmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          # bump: ffmpeg-ci /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg|~7.0
-          ffmpeg-version: '7.0.2'
+        run: |
+          docker run --rm -v "$PWD:/out" $(echo -e 'FROM alpine\nCOPY --from=mwader/static-ffmpeg:7.0.2 /ff* /\nENTRYPOINT cp /ff* /out' | docker build -q -)
+          echo "$PWD" >> "$GITHUB_PATH"
 
       - name: Setup Java
         uses: actions/setup-java@v4
