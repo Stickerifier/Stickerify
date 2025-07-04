@@ -26,7 +26,7 @@ jobs:
       - name: Setup FFmpeg
         shell: bash
         run: |
-          docker create --name ffmpeg mwader/static-ffmpeg:7.0.2
+          docker create --name ffmpeg --platform linux/amd64 mwader/static-ffmpeg:7.0.2
           docker cp ffmpeg:/ffmpeg ffmpeg
           docker cp ffmpeg:/ffprobe ffprobe
           docker rm -f ffmpeg
