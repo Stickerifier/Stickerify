@@ -5,29 +5,23 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
-import mockwebserver3.junit5.internal.MockWebServerExtension;
-import org.junit.jupiter.api.BeforeEach;
+import mockwebserver3.junit5.StartStop;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.net.URLEncoder;
 
 @ClearTempFiles
-@ExtendWith(MockWebServerExtension.class)
 class StickerifyTest {
 
-	private MockWebServer server;
-
-	@BeforeEach
-	void setup() {
-		server = new MockWebServer();
-	}
+	@StartStop
+	private final MockWebServer server = new MockWebServer();
 
 	@Test
 	void startMessage() throws Exception {
@@ -36,10 +30,10 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
 		assertResponseContainsMessage(sendMessage, Answer.HELP);
 	}
 
@@ -55,7 +49,8 @@ class StickerifyTest {
 
 	private static void assertResponseContainsMessage(RecordedRequest request, Answer answer) {
 		var message = URLEncoder.encode(answer.getText(), UTF_8);
-		assertThat(request.getBody().readUtf8(), containsString(message));
+		assertNotNull(request.getBody());
+		assertThat(request.getBody().utf8(), containsString(message));
 	}
 
 	@Test
@@ -65,10 +60,10 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
 		assertResponseContainsMessage(sendMessage, Answer.HELP);
 	}
 
@@ -79,10 +74,10 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
 		assertResponseContainsMessage(sendMessage, Answer.PRIVACY_POLICY);
 	}
 
@@ -93,10 +88,10 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
 		assertResponseContainsMessage(sendMessage, Answer.ERROR);
 	}
 
@@ -107,10 +102,10 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
 		assertResponseContainsMessage(sendMessage, Answer.FILE_TOO_LARGE);
 	}
 
@@ -123,17 +118,18 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=animated_sticker.tgs", getFile.getBody().readUtf8());
+		assertEquals("/api/token/getFile", getFile.getTarget());
+		assertNotNull(getFile.getBody());
+		assertEquals("file_id=animated_sticker.tgs", getFile.getBody().utf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/animated_sticker.tgs", download.getPath());
+		assertEquals("/files/token/animated_sticker.tgs", download.getTarget());
 
 		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
 		assertResponseContainsMessage(sendMessage, Answer.FILE_ALREADY_VALID);
 	}
 
@@ -146,18 +142,20 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=big.png", getFile.getBody().readUtf8());
+		assertEquals("/api/token/getFile", getFile.getTarget());
+		assertNotNull(getFile.getBody());
+		assertEquals("file_id=big.png", getFile.getBody().utf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/big.png", download.getPath());
+		assertEquals("/files/token/big.png", download.getTarget());
 
 		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getPath());
-		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+		assertNotNull(sendDocument.getBody());
+		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 	}
 
 	@Test
@@ -169,18 +167,20 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=static.webp", getFile.getBody().readUtf8());
+		assertEquals("/api/token/getFile", getFile.getTarget());
+		assertNotNull(getFile.getBody());
+		assertEquals("file_id=static.webp", getFile.getBody().utf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/static.webp", download.getPath());
+		assertEquals("/files/token/static.webp", download.getTarget());
 
 		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getPath());
-		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+		assertNotNull(sendDocument.getBody());
+		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 	}
 
 	@Test
@@ -192,18 +192,20 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=long.mov", getFile.getBody().readUtf8());
+		assertEquals("/api/token/getFile", getFile.getTarget());
+		assertNotNull(getFile.getBody());
+		assertEquals("file_id=long.mov", getFile.getBody().utf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/long.mov", download.getPath());
+		assertEquals("/files/token/long.mov", download.getTarget());
 
 		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getPath());
-		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+		assertNotNull(sendDocument.getBody());
+		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 	}
 
 	@Test
@@ -215,18 +217,20 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=short_low_fps.webm", getFile.getBody().readUtf8());
+		assertEquals("/api/token/getFile", getFile.getTarget());
+		assertNotNull(getFile.getBody());
+		assertEquals("file_id=short_low_fps.webm", getFile.getBody().utf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/short_low_fps.webm", download.getPath());
+		assertEquals("/files/token/short_low_fps.webm", download.getTarget());
 
 		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getPath());
-		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+		assertNotNull(sendDocument.getBody());
+		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 	}
 
 	@Test
@@ -238,18 +242,20 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=valid.gif", getFile.getBody().readUtf8());
+		assertEquals("/api/token/getFile", getFile.getTarget());
+		assertNotNull(getFile.getBody());
+		assertEquals("file_id=valid.gif", getFile.getBody().utf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/valid.gif", download.getPath());
+		assertEquals("/files/token/valid.gif", download.getTarget());
 
 		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getPath());
-		assertThat(sendDocument.getBody().readUtf8(), containsString(Answer.FILE_READY.getText()));
+		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+		assertNotNull(sendDocument.getBody());
+		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 	}
 
 	@Test
@@ -261,17 +267,18 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=document.txt", getFile.getBody().readUtf8());
+		assertEquals("/api/token/getFile", getFile.getTarget());
+		assertNotNull(getFile.getBody());
+		assertEquals("file_id=document.txt", getFile.getBody().utf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/document.txt", download.getPath());
+		assertEquals("/files/token/document.txt", download.getTarget());
 
 		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
 		assertResponseContainsMessage(sendMessage, Answer.ERROR);
 	}
 
@@ -284,17 +291,18 @@ class StickerifyTest {
 		startBot();
 
 		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getPath());
+		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
 		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getPath());
-		assertEquals("file_id=corrupted.mp4", getFile.getBody().readUtf8());
+		assertEquals("/api/token/getFile", getFile.getTarget());
+		assertNotNull(getFile.getBody());
+		assertEquals("file_id=corrupted.mp4", getFile.getBody().utf8());
 
 		var download = server.takeRequest();
-		assertEquals("/files/token/corrupted.mp4", download.getPath());
+		assertEquals("/files/token/corrupted.mp4", download.getTarget());
 
 		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getPath());
+		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
 		assertResponseContainsMessage(sendMessage, Answer.CORRUPTED);
 	}
 }
