@@ -14,11 +14,7 @@ permissions:
 jobs:
   tests:
     name: Execute unit tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ] # pin macos to latest x64 image
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v4
@@ -26,5 +22,4 @@ jobs:
       - name: Setup FFmpeg
         uses: Stickerifier/setup-ffmpeg@improve-ffmpeg-downloads
         with:
-          # bump: ffmpeg-ci /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg|~7.0
           ffmpeg-version: '7.0.2'
