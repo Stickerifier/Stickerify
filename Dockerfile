@@ -2,8 +2,8 @@ FROM azul/zulu-openjdk-alpine:24 AS builder
 
 # bump: libwebp /LIBWEBP_VERSION=([\d.]+)/ git:https://chromium.googlesource.com/webm/libwebp.git|^1
 # bump: libwebp after ./hashupdate Dockerfile LIBWEBP $LATEST
-ARG LIBWEBP_VERSION=1.5.0
-ARG LIBWEBP_SHA256=f4bf49f85991f50e86a5404d16f15b72a053bb66768ed5cc0f6d042277cc2bb8
+ARG LIBWEBP_VERSION=1.6.0
+ARG LIBWEBP_SHA256=1c5ffab71efecefa0e3c23516c3a3a1dccb45cc310ae1095c6f14ae268e38067
 ARG LIBWEBP_FILE="libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
 ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/$LIBWEBP_FILE"
 
