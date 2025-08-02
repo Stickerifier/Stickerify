@@ -54,25 +54,32 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 def jreOutputDir = layout.buildDirectory.dir('jre')
-tasks.register("jre") {
+tasks.register('jre') {
+    inputs.property('options', ['--strip-debug', '--no-header-files', '--no-man-pages'])
+    inputs.property('modules', ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported'])
+
     outputs.dir(jreOutputDir)
 
-    def toolchain = javaToolchains.launcherFor(java.toolchain)
+    doFirst {
+        delete(jreOutputDir)
+    }
+
+    def javaLauncher = javaToolchains.launcherFor(java.toolchain)
 
     doLast {
-        def installationPath = toolchain.get().metadata.installationPath
-        def jlink = installationPath.file('bin/jlink')
-        def jmods = installationPath.dir('jmods')
+        def installationPath = javaLauncher.get().metadata.installationPath
 
-        delete(jreOutputDir)
+        def exe = Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\jlink.exe' : 'bin/jlink'
+        def jlink = installationPath.file(exe)
+        def jmods = installationPath.dir('jmods')
 
         def output = providers.exec {
             ignoreExitValue = true
             commandLine = [
                     jlink.toString(), '-v',
-                    '--strip-debug', '--no-header-files', '--no-man-pages',
+                    *(inputs.properties['options'] as List),
                     '--module-path', jmods.toString(),
-                    '--add-modules', ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported'].join(','),
+                    '--add-modules', (inputs.properties['modules'] as List).join(','),
                     '--output', jreOutputDir.get().toString()
             ]
         }
