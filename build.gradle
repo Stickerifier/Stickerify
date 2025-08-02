@@ -1,8 +1,8 @@
-import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
-    alias(libs.plugins.runtime)
     alias(libs.plugins.shadow)
+    id 'application'
     id 'java'
     id 'jacoco'
 }
@@ -53,12 +53,48 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-test {
-    dependsOn jre
-    inputs.dir tasks.jre.jreDir
+def jreOutputDir = layout.buildDirectory.dir('jre')
+tasks.register("jre") {
+    outputs.dir(jreOutputDir)
 
-    def file = DefaultNativePlatform.currentOperatingSystem.isWindows() ? 'java.exe' : 'java'
-    executable = tasks.jre.jreDir.file('bin/' + file)
+    def toolchain = javaToolchains.launcherFor(java.toolchain)
+
+    doLast {
+        def installationPath = toolchain.get().metadata.installationPath
+        def jlink = installationPath.file('bin/jlink')
+        def jmods = installationPath.dir('jmods')
+
+        delete(jreOutputDir)
+
+        def output = providers.exec {
+            ignoreExitValue = true
+            commandLine = [
+                    jlink.toString(), '-v',
+                    '--strip-debug', '--no-header-files', '--no-man-pages',
+                    '--module-path', jmods.toString(),
+                    '--add-modules', ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported'].join(','),
+                    '--output', jreOutputDir.get().toString()
+            ]
+        }
+
+        def result = output.result.get()
+        if (result.exitValue != 0) {
+            logger.log(LogLevel.ERROR, output.standardError.asText.get())
+        } else {
+            logger.info(output.standardOutput.asText.get())
+        }
+
+        result.assertNormalExitValue()
+        result.rethrowFailure()
+    }
+}
+
+test {
+    dependsOn tasks.named('jre')
+    inputs.dir(jreOutputDir)
+
+    def exe = Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java'
+    executable = jreOutputDir.get().file(exe)
 
     useJUnitPlatform()
     finalizedBy jacocoTestReport
@@ -93,10 +129,3 @@ shadowJar {
         exclude('dist_webp_binaries/')
     }
 }
-
-runtime {
-    options = ['--strip-debug', '--no-header-files', '--no-man-pages'] // don't compress jre because final docker image will be larger
-    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
-}
-
-suggestModules.dependsOn shadowJar
