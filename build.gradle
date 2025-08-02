@@ -69,8 +69,7 @@ tasks.register('jre') {
     doLast {
         def installationPath = javaLauncher.get().metadata.installationPath
 
-        def exe = Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\jlink.exe' : 'bin/jlink'
-        def jlink = installationPath.file(exe)
+        def jlink = installationPath.file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\jlink.exe' : 'bin/jlink')
         def jmods = installationPath.dir('jmods')
 
         def output = providers.exec {
@@ -85,10 +84,10 @@ tasks.register('jre') {
         }
 
         def result = output.result.get()
-        if (result.exitValue != 0) {
-            logger.log(LogLevel.ERROR, output.standardError.asText.get())
-        } else {
+        if (result.exitValue == 0) {
             logger.info(output.standardOutput.asText.get())
+        } else {
+            logger.log(LogLevel.ERROR, output.standardError.asText.get())
         }
 
         result.assertNormalExitValue()
@@ -100,8 +99,7 @@ test {
     dependsOn tasks.named('jre')
     inputs.dir(jreOutputDir)
 
-    def exe = Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java'
-    executable = jreOutputDir.get().file(exe)
+    executable = jreOutputDir.get().file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java')
 
     useJUnitPlatform()
     finalizedBy jacocoTestReport
