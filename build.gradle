@@ -1,4 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
 import com.github.stickerifier.stickerify.JlinkTask
 
 plugins {
@@ -59,12 +58,8 @@ def jlink = tasks.register('jlink', JlinkTask) {
 }
 
 test {
-    dependsOn jlink
-
-    def jre = jlink.map { it.jreDir }
-    inputs.dir jre
-
-    executable = jre.get().file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java').get()
+    inputs.dir jlink.get().outputDirectory
+    javaLauncher = JlinkTask.getJavaLauncher(jlink)
 
     useJUnitPlatform()
     finalizedBy jacocoTestReport
