@@ -7,17 +7,13 @@ import org.gradle.api.logging.LogLevel;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.toolchain.JavaCompiler;
-import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.process.ExecOperations;
-import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -101,13 +97,6 @@ public abstract class JlinkTask extends DefaultTask {
 		}
 
 		result.assertNormalExitValue();
-	}
-
-	public static Provider<JavaLauncher> getJavaLauncher(TaskProvider<@NotNull JlinkTask> taskProvider) {
-		return taskProvider.map(jlinkTask -> new JlinkJavaLauncher(
-				jlinkTask.getJavaCompiler().map(JavaCompiler::getMetadata),
-				jlinkTask.getOutputDirectory().file("jre/bin/java")
-		));
 	}
 
 }

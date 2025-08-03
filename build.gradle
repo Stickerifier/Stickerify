@@ -1,3 +1,4 @@
+import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
 
 plugins {
@@ -59,7 +60,7 @@ def jlink = tasks.register('jlink', JlinkTask) {
 
 test {
     inputs.dir jlink.get().outputDirectory
-    javaLauncher = JlinkTask.getJavaLauncher(jlink)
+    javaLauncher = new JlinkJavaLauncher(jlink.get())
 
     useJUnitPlatform()
     finalizedBy jacocoTestReport
