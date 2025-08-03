@@ -15,11 +15,8 @@ RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -O && \
     rm "$LIBWEBP_FILE"
 
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
-COPY settings.gradle build.gradle gradlew ./
-COPY gradle gradle
-RUN --mount=type=cache,target=/root/.gradle ./gradlew dependencies
 COPY . .
-RUN --mount=type=cache,target=/root/.gradle ./gradlew jre shadowJar
+RUN --mount=type=cache,target=/root/.gradle ./gradlew jlink shadowJar
 
 FROM alpine AS bot
 

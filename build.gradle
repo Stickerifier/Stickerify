@@ -1,4 +1,5 @@
 import org.apache.tools.ant.taskdefs.condition.Os
+import com.github.stickerifier.stickerify.JlinkTask
 
 plugins {
     alias(libs.plugins.shadow)
@@ -49,57 +50,20 @@ java {
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
+def jlink = tasks.register('jlink', JlinkTask) {
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
 
-def jreOutputDir = layout.buildDirectory.dir('jre')
-tasks.register('jre') {
-    inputs.property('options', ['--strip-debug', '--no-header-files', '--no-man-pages'])
-    inputs.property('modules', ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported'])
-
-    outputs.dir(jreOutputDir)
-
-    doFirst {
-        delete(jreOutputDir)
-    }
-
-    def javaLauncher = javaToolchains.launcherFor(java.toolchain)
-
-    doLast {
-        def installationPath = javaLauncher.get().metadata.installationPath
-
-        def jlink = installationPath.file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\jlink.exe' : 'bin/jlink')
-        def jmods = installationPath.dir('jmods')
-
-        def output = providers.exec {
-            ignoreExitValue = true
-            commandLine = [
-                    jlink.toString(), '-v',
-                    *(inputs.properties['options'] as List),
-                    '--module-path', jmods.toString(),
-                    '--add-modules', (inputs.properties['modules'] as List).join(','),
-                    '--output', jreOutputDir.get().toString()
-            ]
-        }
-
-        def result = output.result.get()
-        if (result.exitValue == 0) {
-            logger.info(output.standardOutput.asText.get())
-        } else {
-            logger.log(LogLevel.ERROR, output.standardError.asText.get())
-        }
-
-        result.assertNormalExitValue()
-        result.rethrowFailure()
-    }
+    group = 'build'
+    description = 'Generates a minimal JRE for the project.'
 }
 
 test {
-    dependsOn tasks.named('jre')
-    inputs.dir(jreOutputDir)
+    dependsOn jlink
 
-    executable = jreOutputDir.get().file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java')
+    def jre = jlink.get().jreDir
+    inputs.dir jre
+    executable = jre.get().file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java')
 
     useJUnitPlatform()
     finalizedBy jacocoTestReport
