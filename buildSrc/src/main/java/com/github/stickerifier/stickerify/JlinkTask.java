@@ -1,6 +1,5 @@
 package com.github.stickerifier.stickerify;
 
-import org.apache.tools.ant.taskdefs.condition.Os;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileSystemOperations;
@@ -8,13 +7,17 @@ import org.gradle.api.logging.LogLevel;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.TaskProvider;
+import org.gradle.jvm.toolchain.JavaCompiler;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.process.ExecOperations;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -30,10 +33,10 @@ public abstract class JlinkTask extends DefaultTask {
 	public abstract ListProperty<String> getModules();
 
 	@OutputDirectory
-	public abstract DirectoryProperty getJreDir();
+	public abstract DirectoryProperty getOutputDirectory();
 
 	@Nested
-	protected abstract Property<JavaLauncher> getJavaLauncher();
+	protected abstract Property<JavaCompiler> getJavaCompiler();
 
 	@Inject
 	protected abstract JavaToolchainService getJavaToolchainService();
@@ -47,20 +50,21 @@ public abstract class JlinkTask extends DefaultTask {
 	public JlinkTask() {
 		getOptions().convention(List.of());
 		getModules().convention(List.of("ALL-MODULE-PATH"));
-		getJreDir().convention(getProject().getLayout().getBuildDirectory().dir("jre"));
+		getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir("jlink"));
 
 		var toolchain = getProject().getExtensions().getByType(JavaPluginExtension.class).getToolchain();
-		getJavaLauncher().convention(getJavaToolchainService().launcherFor(toolchain));
+		getJavaCompiler().convention(getJavaToolchainService().compilerFor(toolchain));
 	}
 
 	@TaskAction
 	public void performAction() {
-		var installationPath = getJavaLauncher().get().getMetadata().getInstallationPath();
+		var installationPath = getJavaCompiler().get().getMetadata().getInstallationPath();
 
-		var jlink = installationPath.file(Os.isFamily(Os.FAMILY_WINDOWS) ? "bin\\jlink.exe" : "bin/jlink");
+		var jlink = installationPath.file("bin/jlink");
 		var jmods = installationPath.dir("jmods");
 
-		getFs().delete(deleteSpec -> deleteSpec.delete(getJreDir()));
+		var jlinkOutput = getOutputDirectory().dir("jre").get().getAsFile();
+		getFs().delete(deleteSpec -> deleteSpec.delete(jlinkOutput));
 
 		var stdout = new ByteArrayOutputStream();
 		var stderr = new ByteArrayOutputStream();
@@ -77,7 +81,7 @@ public abstract class JlinkTask extends DefaultTask {
 			commandLine.add("--add-modules");
 			commandLine.add(String.join(",", getModules().get()));
 			commandLine.add("--output");
-			commandLine.add(getJreDir().get().toString());
+			commandLine.add(jlinkOutput.toString());
 
 			execSpec.setCommandLine(commandLine);
 
@@ -97,6 +101,13 @@ public abstract class JlinkTask extends DefaultTask {
 		}
 
 		result.assertNormalExitValue();
+	}
+
+	public static Provider<JavaLauncher> getJavaLauncher(TaskProvider<@NotNull JlinkTask> taskProvider) {
+		return taskProvider.map(jlinkTask -> new JlinkJavaLauncher(
+				jlinkTask.getJavaCompiler().map(JavaCompiler::getMetadata),
+				jlinkTask.getOutputDirectory().file("jre/bin/java")
+		));
 	}
 
 }
