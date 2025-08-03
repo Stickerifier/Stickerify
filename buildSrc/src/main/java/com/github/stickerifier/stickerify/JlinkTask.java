@@ -53,7 +53,7 @@ public abstract class JlinkTask extends DefaultTask {
 	}
 
 	@TaskAction
-	public void performAction() {
+	public void createJre() {
 		var installationPath = getJavaCompiler().get().getMetadata().getInstallationPath();
 
 		var jlink = installationPath.file("bin/jlink");
@@ -92,8 +92,12 @@ public abstract class JlinkTask extends DefaultTask {
 			getLogger().info(stdoutStr);
 		}
 
-		if (result.getExitValue() != 0 && !stderrStr.isEmpty()) {
-			getLogger().log(LogLevel.ERROR, stderrStr);
+		if (result.getExitValue() != 0) {
+			if (!stderrStr.isEmpty()) {
+				getLogger().log(LogLevel.ERROR, stderrStr);
+			} else {
+				getLogger().log(LogLevel.ERROR, "jlink failed with exit code: {}", result.getExitValue());
+			}
 		}
 
 		result.assertNormalExitValue();

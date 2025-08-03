@@ -26,7 +26,7 @@ ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 COPY --from=builder /app/libwebp/bin/cwebp /usr/local/bin/
 COPY --from=builder /app/libwebp/bin/dwebp /usr/local/bin/
 
-COPY --from=builder /app/build/jre jre
+COPY --from=builder /app/build/jlink/jre jre
 COPY --from=builder /app/build/libs/Stickerify-1.0-all.jar Stickerify.jar
 
 CMD ["jre/bin/java", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify.jar"]
