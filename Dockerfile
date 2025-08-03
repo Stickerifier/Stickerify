@@ -14,7 +14,6 @@ RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -O && \
     tar -xzf "$LIBWEBP_FILE" --one-top-level=libwebp --strip-components=1 && \
     rm "$LIBWEBP_FILE"
 
-ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 COPY . .
 RUN --mount=type=cache,target=/root/.gradle ./gradlew jlink shadowJar
 

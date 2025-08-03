@@ -85,14 +85,18 @@ public abstract class JlinkTask extends DefaultTask {
 			execSpec.setErrorOutput(stderr);
 		});
 
-		if (result.getExitValue() == 0) {
-			getLogger().info(stdout.toString());
-		} else {
-			getLogger().log(LogLevel.ERROR, stderr.toString());
+		var stdoutStr = stdout.toString();
+		var stderrStr = stderr.toString();
+
+		if (!stdoutStr.isEmpty()) {
+			getLogger().info(stdoutStr);
+		}
+
+		if (result.getExitValue() != 0 && !stderrStr.isEmpty()) {
+			getLogger().log(LogLevel.ERROR, stderrStr);
 		}
 
 		result.assertNormalExitValue();
-		result.rethrowFailure();
 	}
 
 }

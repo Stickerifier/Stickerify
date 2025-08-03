@@ -61,9 +61,10 @@ def jlink = tasks.register('jlink', JlinkTask) {
 test {
     dependsOn jlink
 
-    def jre = jlink.get().jreDir
+    def jre = jlink.map { it.jreDir }
     inputs.dir jre
-    executable = jre.get().file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java')
+
+    executable = jre.get().file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java').get()
 
     useJUnitPlatform()
     finalizedBy jacocoTestReport
