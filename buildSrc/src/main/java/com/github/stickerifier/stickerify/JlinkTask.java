@@ -70,7 +70,6 @@ public abstract class JlinkTask extends DefaultTask {
 
 			var commandLine = new ArrayList<String>();
 			commandLine.add(jlink.toString());
-			commandLine.add("-v");
 			commandLine.addAll(getOptions().get());
 			commandLine.add("--module-path");
 			commandLine.add(jmods.toString());
