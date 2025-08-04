@@ -7,15 +7,9 @@ import org.gradle.jvm.toolchain.JavaInstallationMetadata;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.jetbrains.annotations.NotNull;
 
-public record JlinkJavaLauncher(
-		Provider<JavaInstallationMetadata> metadata,
-		Provider<RegularFile> executablePath
-) implements JavaLauncher {
+public record JlinkJavaLauncher(Provider<JavaInstallationMetadata> metadata, Provider<RegularFile> executablePath) implements JavaLauncher {
 	public JlinkJavaLauncher(JlinkTask task) {
-		this(
-				task.getJavaCompiler().map(JavaCompiler::getMetadata),
-				task.getOutputDirectory().file("jre/bin/java")
-		);
+		this(task.getJavaCompiler().map(JavaCompiler::getMetadata), task.getOutputDirectory().file("jre/bin/java"));
 	}
 
 	@Override

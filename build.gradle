@@ -1,11 +1,13 @@
 import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
+import org.gradle.api.plugins.jvm.JvmTestSuite
+import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 
 plugins {
-    alias(libs.plugins.shadow)
     id 'application'
     id 'java'
     id 'jacoco'
+    alias(libs.plugins.shadow)
 }
 
 repositories {
@@ -27,11 +29,6 @@ dependencies {
     implementation libs.telegram.bot.api
     implementation libs.tika
 
-    testRuntimeOnly libs.junit.platform
-    testImplementation libs.hamcrest
-    testImplementation libs.junit
-    testImplementation libs.mockwebserver
-
     constraints {
         implementation(libs.okio) {
             because 'CVE-2023-3635: Okio Signed to Unsigned Conversion Error vulnerability'
@@ -43,11 +40,14 @@ group = 'com.github.stickerifier'
 version = '1.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(24)
-        vendor = JvmVendorSpec.AZUL
-    }
+java.toolchain {
+    languageVersion = JavaLanguageVersion.of(24)
+    vendor = JvmVendorSpec.AZUL
+}
+
+tasks.named('updateDaemonJvm', UpdateDaemonJvm) {
+    languageVersion = JavaLanguageVersion.of(24)
+    vendor = JvmVendorSpec.AZUL
 }
 
 def jlink = tasks.register('jlink', JlinkTask) {
@@ -58,12 +58,28 @@ def jlink = tasks.register('jlink', JlinkTask) {
     description = 'Generates a minimal JRE for the project.'
 }
 
-test {
-    inputs.dir jlink.get().outputDirectory
-    javaLauncher = new JlinkJavaLauncher(jlink.get())
+testing {
+    suites {
+        named('test', JvmTestSuite) {
+            useJUnitJupiter(libs.versions.junit)
 
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
+            dependencies {
+                implementation libs.hamcrest
+                implementation libs.mockwebserver
+            }
+
+            targets {
+                configureEach {
+                    testTask.configure { Test test ->
+                        test.inputs.dir jlink.get().outputDirectory
+                        test.javaLauncher = new JlinkJavaLauncher(jlink.get())
+
+                        test.finalizedBy jacocoTestReport
+                    }
+                }
+            }
+        }
+    }
 }
 
 jacocoTestReport {

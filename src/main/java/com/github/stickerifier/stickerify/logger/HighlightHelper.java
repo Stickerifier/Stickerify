@@ -37,4 +37,8 @@ public final class HighlightHelper {
 	static String replaceFirst(String message, String textToReplace, String replacement) {
 		return message.replaceFirst(Pattern.quote(textToReplace), replacement);
 	}
+
+	private HighlightHelper() {
+		throw new UnsupportedOperationException();
+	}
 }
