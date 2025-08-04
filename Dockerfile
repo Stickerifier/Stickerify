@@ -9,8 +9,11 @@ ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releas
 
 WORKDIR /app
 ADD --checksum=sha256:$LIBWEBP_SHA256 $LIBWEBP_URL $LIBWEBP_FILE
-RUN apk --no-cache --update add binutils tar
-RUN tar -xzf $LIBWEBP_FILE --one-top-level=libwebp --strip-components=1 && rm $LIBWEBP_FILE
+RUN apk --no-cache add binutils curl tar
+RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -O && \
+    echo "$LIBWEBP_SHA256 $LIBWEBP_FILE" | sha256sum -c - && \
+    tar -xzf "$LIBWEBP_FILE" --one-top-level=libwebp --strip-components=1 && \
+    rm "$LIBWEBP_FILE"
 
 COPY . .
 RUN --mount=type=cache,target=/root/.gradle ./gradlew jlink shadowJar
