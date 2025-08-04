@@ -8,16 +8,16 @@ ARG LIBWEBP_FILE="libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
 ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/$LIBWEBP_FILE"
 
 WORKDIR /app
-RUN apk --no-cache add binutils curl tar
-RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -O && \
-    echo "$LIBWEBP_SHA256 $LIBWEBP_FILE" | sha256sum -c - && \
-    tar -xzf "$LIBWEBP_FILE" --one-top-level=libwebp --strip-components=1 && \
-    rm "$LIBWEBP_FILE"
+ADD --checksum=sha256:$LIBWEBP_SHA256 $LIBWEBP_URL $LIBWEBP_FILE
+RUN apk --no-cache --update add binutils tar
+RUN tar -xzf $LIBWEBP_FILE --one-top-level=libwebp --strip-components=1 && rm $LIBWEBP_FILE
 
 COPY . .
 RUN --mount=type=cache,target=/root/.gradle ./gradlew jlink shadowJar
 
-FROM alpine AS bot
+# bump: alpine /FROM alpine:([\d.]+)/ docker:alpine|^3
+# bump: alpine link "Release notes" https://alpinelinux.org/posts/Alpine-$LATEST-released.html
+FROM alpine:3.22.1 AS bot
 
 # bump: ffmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.0
 COPY --from=mwader/static-ffmpeg:7.0.2 /ffmpeg /usr/local/bin/
