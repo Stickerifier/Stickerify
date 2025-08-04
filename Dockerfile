@@ -8,7 +8,6 @@ ARG LIBWEBP_FILE="libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
 ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/$LIBWEBP_FILE"
 
 WORKDIR /app
-ADD --checksum=sha256:$LIBWEBP_SHA256 $LIBWEBP_URL $LIBWEBP_FILE
 RUN apk --no-cache add binutils curl tar
 RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -O && \
     echo "$LIBWEBP_SHA256 $LIBWEBP_FILE" | sha256sum -c - && \
