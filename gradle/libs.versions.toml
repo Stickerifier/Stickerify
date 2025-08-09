@@ -21,7 +21,7 @@ scrimage-formats-extra = { module = "com.sksamuel.scrimage:scrimage-formats-extr
 scrimage-webp = { module = "com.sksamuel.scrimage:scrimage-webp", version.ref = "scrimage" }
 slf4j-api = "org.slf4j:slf4j-api:2.0.17"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:8.3.0"
-tika = "org.apache.tika:tika-core:3.2.1"
+tika = "org.apache.tika:tika-core:3.2.2"
 
 [plugins]
 shadow = "com.gradleup.shadow:8.3.8"
