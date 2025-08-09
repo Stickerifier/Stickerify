@@ -1,10 +1,13 @@
-import org.apache.tools.ant.taskdefs.condition.Os
+import com.github.stickerifier.stickerify.JlinkJavaLauncher
+import com.github.stickerifier.stickerify.JlinkTask
+import org.gradle.api.plugins.jvm.JvmTestSuite
+import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 
 plugins {
-    alias(libs.plugins.shadow)
     id 'application'
     id 'java'
     id 'jacoco'
+    alias(libs.plugins.shadow)
 }
 
 repositories {
@@ -26,11 +29,6 @@ dependencies {
     implementation libs.telegram.bot.api
     implementation libs.tika
 
-    testRuntimeOnly libs.junit.platform
-    testImplementation libs.hamcrest
-    testImplementation libs.junit
-    testImplementation libs.mockwebserver
-
     constraints {
         implementation(libs.okio) {
             because 'CVE-2023-3635: Okio Signed to Unsigned Conversion Error vulnerability'
@@ -42,67 +40,46 @@ group = 'com.github.stickerifier'
 version = '1.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(24)
-        vendor = JvmVendorSpec.AZUL
-    }
+java.toolchain {
+    languageVersion = JavaLanguageVersion.of(24)
+    vendor = JvmVendorSpec.AZUL
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+tasks.named('updateDaemonJvm', UpdateDaemonJvm) {
+    languageVersion = JavaLanguageVersion.of(24)
+    vendor = JvmVendorSpec.AZUL
 }
 
-def jreOutputDir = layout.buildDirectory.dir('jre')
-tasks.register('jre') {
-    inputs.property('options', ['--strip-debug', '--no-header-files', '--no-man-pages'])
-    inputs.property('modules', ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported'])
+def jlink = tasks.register('jlink', JlinkTask) {
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
 
-    outputs.dir(jreOutputDir)
+    group = 'build'
+    description = 'Generates a minimal JRE for the project.'
+}
 
-    doFirst {
-        delete(jreOutputDir)
-    }
+testing {
+    suites {
+        named('test', JvmTestSuite) {
+            useJUnitJupiter(libs.versions.junit)
 
-    def javaLauncher = javaToolchains.launcherFor(java.toolchain)
+            dependencies {
+                implementation libs.hamcrest
+                implementation libs.mockwebserver
+            }
 
-    doLast {
-        def installationPath = javaLauncher.get().metadata.installationPath
+            targets {
+                configureEach {
+                    testTask.configure { Test test ->
+                        test.inputs.dir jlink.get().outputDirectory
+                        test.javaLauncher = new JlinkJavaLauncher(jlink.get())
 
-        def jlink = installationPath.file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\jlink.exe' : 'bin/jlink')
-        def jmods = installationPath.dir('jmods')
-
-        def output = providers.exec {
-            ignoreExitValue = true
-            commandLine = [
-                    jlink.toString(), '-v',
-                    *(inputs.properties['options'] as List),
-                    '--module-path', jmods.toString(),
-                    '--add-modules', (inputs.properties['modules'] as List).join(','),
-                    '--output', jreOutputDir.get().toString()
-            ]
+                        test.finalizedBy jacocoTestReport
+                    }
+                }
+            }
         }
-
-        def result = output.result.get()
-        if (result.exitValue == 0) {
-            logger.info(output.standardOutput.asText.get())
-        } else {
-            logger.log(LogLevel.ERROR, output.standardError.asText.get())
-        }
-
-        result.assertNormalExitValue()
-        result.rethrowFailure()
     }
-}
-
-test {
-    dependsOn tasks.named('jre')
-    inputs.dir(jreOutputDir)
-
-    executable = jreOutputDir.get().file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java')
-
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {

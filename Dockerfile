@@ -14,14 +14,12 @@ RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -O && \
     tar -xzf "$LIBWEBP_FILE" --one-top-level=libwebp --strip-components=1 && \
     rm "$LIBWEBP_FILE"
 
-ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
-COPY settings.gradle build.gradle gradlew ./
-COPY gradle gradle
-RUN --mount=type=cache,target=/root/.gradle ./gradlew dependencies
 COPY . .
-RUN --mount=type=cache,target=/root/.gradle ./gradlew jre shadowJar
+RUN --mount=type=cache,target=/root/.gradle ./gradlew jlink shadowJar
 
-FROM alpine AS bot
+# bump: alpine /FROM alpine:([\d.]+)/ docker:alpine|^3
+# bump: alpine link "Release notes" https://alpinelinux.org/posts/Alpine-$LATEST-released.html
+FROM alpine:3.22.1 AS bot
 
 # bump: ffmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.0
 COPY --from=mwader/static-ffmpeg:7.0.2 /ffmpeg /usr/local/bin/
@@ -30,7 +28,7 @@ ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 COPY --from=builder /app/libwebp/bin/cwebp /usr/local/bin/
 COPY --from=builder /app/libwebp/bin/dwebp /usr/local/bin/
 
-COPY --from=builder /app/build/jre jre
+COPY --from=builder /app/build/jlink/jre jre
 COPY --from=builder /app/build/libs/Stickerify-1.0-all.jar Stickerify.jar
 
 CMD ["jre/bin/java", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/local/bin/", "-jar", "Stickerify.jar"]
