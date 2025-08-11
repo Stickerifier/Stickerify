@@ -3,6 +3,7 @@ package com.github.stickerifier.stickerify;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileSystemOperations;
+import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.ListProperty;
@@ -14,6 +15,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaCompiler;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.process.ExecOperations;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -23,19 +25,16 @@ import java.util.List;
 public abstract class JlinkTask extends DefaultTask {
 
 	@Input
-	public abstract ListProperty<String> getOptions();
+	public abstract ListProperty<@NotNull String> getOptions();
 
 	@Input
-	public abstract ListProperty<String> getModules();
+	public abstract ListProperty<@NotNull String> getModules();
 
 	@OutputDirectory
 	public abstract DirectoryProperty getOutputDirectory();
 
 	@Nested
-	protected abstract Property<JavaCompiler> getJavaCompiler();
-
-	@Inject
-	protected abstract JavaToolchainService getJavaToolchainService();
+	protected abstract Property<@NotNull JavaCompiler> getJavaCompiler();
 
 	@Inject
 	protected abstract FileSystemOperations getFs();
@@ -43,13 +42,14 @@ public abstract class JlinkTask extends DefaultTask {
 	@Inject
 	protected abstract ExecOperations getExec();
 
-	public JlinkTask() {
+	@Inject
+	public JlinkTask(ProjectLayout layout, JavaToolchainService javaToolchain) {
 		getOptions().convention(List.of());
 		getModules().convention(List.of("ALL-MODULE-PATH"));
-		getOutputDirectory().convention(getProject().getLayout().getBuildDirectory().dir("jlink"));
+		getOutputDirectory().convention(layout.getBuildDirectory().dir("jlink"));
 
 		var toolchain = getProject().getExtensions().getByType(JavaPluginExtension.class).getToolchain();
-		getJavaCompiler().convention(getJavaToolchainService().compilerFor(toolchain));
+		getJavaCompiler().convention(javaToolchain.compilerFor(toolchain));
 	}
 
 	@TaskAction

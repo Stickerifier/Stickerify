@@ -18,7 +18,7 @@ ij_wrap_on_typing = false
 
 [*.java]
 indent_style = tab
-ij_java_imports_layout = $*,|,*,|,javax.**,java.**,|
+ij_java_imports_layout = $*, |, *, |, javax.**, java.**, |, @*
 ij_java_names_count_to_use_import_on_demand = 999
 ij_java_class_count_to_use_import_on_demand = 999
 ij_java_align_consecutive_assignments = false
