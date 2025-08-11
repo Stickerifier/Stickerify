@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.PreserveFirstFoundResourceTransformer
 import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
@@ -128,7 +129,22 @@ application {
 }
 
 shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     mergeServiceFiles()
+
+    transform(PreserveFirstFoundResourceTransformer) {
+        resources.add('META-INF/LICENSE')
+        resources.add('META-INF/LICENSE.txt')
+        resources.add('META-INF/NOTICE')
+        resources.add('META-INF/NOTICE.txt')
+        resources.add('license/LICENSE')
+        resources.add('license/LICENSE.dom-documentation.txt')
+        resources.add('license/LICENSE.dom-software.txt')
+        resources.add('license/NOTICE')
+        resources.add('license/README.dom.txt')
+    }
+
+    failOnDuplicateEntries = true
 
     dependencies {
         exclude('dist_webp_binaries/')
