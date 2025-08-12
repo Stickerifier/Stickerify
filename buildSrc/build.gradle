@@ -1,18 +1,12 @@
 plugins {
-    id 'java-library'
+    id('java-library')
 }
 
 repositories {
     gradlePluginPortal()
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(24)
-        vendor = JvmVendorSpec.AZUL
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+java.toolchain {
+    languageVersion = JavaLanguageVersion.of(24)
+    vendor = JvmVendorSpec.AZUL
 }

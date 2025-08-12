@@ -2,9 +2,9 @@ import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
 
 plugins {
-    id 'application'
-    id 'java'
-    id 'jacoco'
+    id('application')
+    id('java')
+    id('jacoco')
     alias(libs.plugins.shadow)
 }
 
@@ -13,26 +13,31 @@ repositories {
 }
 
 dependencies {
-    implementation libs.batik
-    implementation libs.gson
-    implementation libs.imageio.batik
-    implementation libs.imageio.psd
-    implementation libs.jave
-    implementation libs.logback.classic
-    implementation libs.logback.core
-    implementation libs.scrimage.core
-    implementation libs.scrimage.formats.extra
-    implementation libs.scrimage.webp
-    implementation libs.slf4j.api
-    implementation libs.telegram.bot.api
-    implementation libs.tika
+    implementation(libs.batik)
+    implementation(libs.gson)
+    implementation(libs.imageio.batik)
+    implementation(libs.imageio.psd)
+    implementation(libs.jave)
+    implementation(libs.logback.classic)
+    implementation(libs.logback.core)
+    implementation(libs.scrimage.core)
+    implementation(libs.scrimage.formats.extra)
+    implementation(libs.scrimage.webp)
+    implementation(libs.slf4j.api)
+    implementation(libs.telegram.bot.api)
+    implementation(libs.tika)
+
+    testRuntimeOnly(libs.junit.platform)
+    testImplementation(libs.hamcrest)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockwebserver)
 
     constraints {
         implementation('org.apache.commons:commons-lang3') {
             version {
                 strictly('[3.18.0, 4[')
             }
-            because 'CVE-2025-48924: Apache Commons Lang is vulnerable to Uncontrolled Recursion when processing long inputs'
+            because('CVE-2025-48924: Apache Commons Lang is vulnerable to Uncontrolled Recursion when processing long inputs')
         }
     }
 }
@@ -59,28 +64,12 @@ def jlink = tasks.register('jlink', JlinkTask) {
     description = 'Generates a minimal JRE for the project.'
 }
 
-testing {
-    suites {
-        test {
-            useJUnitJupiter(libs.versions.junit)
+test {
+    inputs.dir(jlink.map { it.outputDirectory.get().asFile })
+    javaLauncher = providers.provider { new JlinkJavaLauncher(jlink.get()) }
 
-            dependencies {
-                implementation libs.hamcrest
-                implementation libs.mockwebserver
-            }
-
-            targets {
-                all {
-                    testTask.configure { Test test ->
-                        test.inputs.dir jlink.get().outputDirectory
-                        test.javaLauncher = new JlinkJavaLauncher(jlink.get())
-
-                        test.finalizedBy jacocoTestReport
-                    }
-                }
-            }
-        }
-    }
+    useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
 }
 
 jacocoTestReport {
@@ -95,7 +84,7 @@ jacocoTestReport {
             fileTree(dir: it, exclude: ['**/MediaConstraints.class',
                                         '**/stickerify/exception/**',
                                         '**/stickerify/process/**',
-                                        '**/stickerify/runner**',
+                                        '**/stickerify/runner/**',
                                         '**/stickerify/telegram/**'])
         })
     }
