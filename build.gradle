@@ -1,7 +1,5 @@
 import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
-import org.gradle.api.plugins.jvm.JvmTestSuite
-import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 
 plugins {
     id 'application'
@@ -30,8 +28,11 @@ dependencies {
     implementation libs.tika
 
     constraints {
-        implementation(libs.okio) {
-            because 'CVE-2023-3635: Okio Signed to Unsigned Conversion Error vulnerability'
+        implementation('org.apache.commons:commons-lang3') {
+            version {
+                strictly('[3.18.0, 4[')
+            }
+            because 'CVE-2025-48924: Apache Commons Lang is vulnerable to Uncontrolled Recursion when processing long inputs'
         }
     }
 }
@@ -45,7 +46,7 @@ java.toolchain {
     vendor = JvmVendorSpec.AZUL
 }
 
-tasks.named('updateDaemonJvm', UpdateDaemonJvm) {
+updateDaemonJvm {
     languageVersion = JavaLanguageVersion.of(24)
     vendor = JvmVendorSpec.AZUL
 }
@@ -60,7 +61,7 @@ def jlink = tasks.register('jlink', JlinkTask) {
 
 testing {
     suites {
-        named('test', JvmTestSuite) {
+        test {
             useJUnitJupiter(libs.versions.junit)
 
             dependencies {
@@ -69,7 +70,7 @@ testing {
             }
 
             targets {
-                configureEach {
+                all {
                     testTask.configure { Test test ->
                         test.inputs.dir jlink.get().outputDirectory
                         test.javaLauncher = new JlinkJavaLauncher(jlink.get())
