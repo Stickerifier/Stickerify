@@ -35,7 +35,7 @@ dependencies {
     constraints {
         implementation('org.apache.commons:commons-lang3') {
             version {
-                strictly('[3.18.0, 4[')
+                strictly('[3.18.0, 4)')
             }
             because('CVE-2025-48924: Apache Commons Lang is vulnerable to Uncontrolled Recursion when processing long inputs')
         }
