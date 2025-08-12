@@ -92,10 +92,10 @@ public abstract class JlinkTask extends DefaultTask {
 		}
 
 		if (result.getExitValue() != 0) {
-			if (!stderrStr.isEmpty()) {
-				getLogger().log(LogLevel.ERROR, stderrStr);
-			} else {
+			if (stderrStr.isEmpty()) {
 				getLogger().log(LogLevel.ERROR, "jlink failed with exit code: {}", result.getExitValue());
+			} else {
+				getLogger().log(LogLevel.ERROR, stderrStr);
 			}
 		}
 
