@@ -128,9 +128,18 @@ application {
 }
 
 shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     mergeServiceFiles()
+    failOnDuplicateEntries = true
 
-    dependencies {
-        exclude('dist_webp_binaries/')
-    }
+    exclude('dist_webp_binaries/',
+            'META-INF/LICENSE',
+            'META-INF/LICENSE.txt',
+            'META-INF/NOTICE',
+            'META-INF/NOTICE.txt',
+            'license/LICENSE',
+            'license/LICENSE.dom-documentation.txt',
+            'license/LICENSE.dom-software.txt',
+            'license/NOTICE',
+            'license/README.dom.txt')
 }
