@@ -1,10 +1,11 @@
-import org.apache.tools.ant.taskdefs.condition.Os
+import com.github.stickerifier.stickerify.JlinkJavaLauncher
+import com.github.stickerifier.stickerify.JlinkTask
 
 plugins {
+    id('application')
+    id('java')
+    id('jacoco')
     alias(libs.plugins.shadow)
-    id 'application'
-    id 'java'
-    id 'jacoco'
 }
 
 repositories {
@@ -12,28 +13,31 @@ repositories {
 }
 
 dependencies {
-    implementation libs.batik
-    implementation libs.gson
-    implementation libs.imageio.batik
-    implementation libs.imageio.psd
-    implementation libs.jave
-    implementation libs.logback.classic
-    implementation libs.logback.core
-    implementation libs.scrimage.core
-    implementation libs.scrimage.formats.extra
-    implementation libs.scrimage.webp
-    implementation libs.slf4j.api
-    implementation libs.telegram.bot.api
-    implementation libs.tika
+    implementation(libs.batik)
+    implementation(libs.gson)
+    implementation(libs.imageio.batik)
+    implementation(libs.imageio.psd)
+    implementation(libs.jave)
+    implementation(libs.logback.classic)
+    implementation(libs.logback.core)
+    implementation(libs.scrimage.core)
+    implementation(libs.scrimage.formats.extra)
+    implementation(libs.scrimage.webp)
+    implementation(libs.slf4j.api)
+    implementation(libs.telegram.bot.api)
+    implementation(libs.tika)
 
-    testRuntimeOnly libs.junit.platform
-    testImplementation libs.hamcrest
-    testImplementation libs.junit
-    testImplementation libs.mockwebserver
+    testImplementation(libs.hamcrest)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockwebserver)
+    testRuntimeOnly(libs.junit.platform)
 
     constraints {
-        implementation(libs.okio) {
-            because 'CVE-2023-3635: Okio Signed to Unsigned Conversion Error vulnerability'
+        implementation('org.apache.commons:commons-lang3') {
+            version {
+                strictly('[3.18.0, 4)')
+            }
+            because('CVE-2025-48924: Apache Commons Lang is vulnerable to Uncontrolled Recursion when processing long inputs')
         }
     }
 }
@@ -42,67 +46,34 @@ group = 'com.github.stickerifier'
 version = '1.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(24)
-        vendor = JvmVendorSpec.AZUL
-    }
+java.toolchain {
+    languageVersion = JavaLanguageVersion.of(24)
+    vendor = JvmVendorSpec.AZUL
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+updateDaemonJvm {
+    languageVersion = JavaLanguageVersion.of(24)
+    vendor = JvmVendorSpec.AZUL
 }
 
-def jreOutputDir = layout.buildDirectory.dir('jre')
-tasks.register('jre') {
-    inputs.property('options', ['--strip-debug', '--no-header-files', '--no-man-pages'])
-    inputs.property('modules', ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported'])
+def jlink = tasks.register('jlink', JlinkTask) {
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
 
-    outputs.dir(jreOutputDir)
-
-    doFirst {
-        delete(jreOutputDir)
-    }
-
-    def javaLauncher = javaToolchains.launcherFor(java.toolchain)
-
-    doLast {
-        def installationPath = javaLauncher.get().metadata.installationPath
-
-        def jlink = installationPath.file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\jlink.exe' : 'bin/jlink')
-        def jmods = installationPath.dir('jmods')
-
-        def output = providers.exec {
-            ignoreExitValue = true
-            commandLine = [
-                    jlink.toString(), '-v',
-                    *(inputs.properties['options'] as List),
-                    '--module-path', jmods.toString(),
-                    '--add-modules', (inputs.properties['modules'] as List).join(','),
-                    '--output', jreOutputDir.get().toString()
-            ]
-        }
-
-        def result = output.result.get()
-        if (result.exitValue == 0) {
-            logger.info(output.standardOutput.asText.get())
-        } else {
-            logger.log(LogLevel.ERROR, output.standardError.asText.get())
-        }
-
-        result.assertNormalExitValue()
-        result.rethrowFailure()
-    }
+    group = 'build'
+    description = 'Generates a minimal JRE for the project.'
 }
 
 test {
-    dependsOn tasks.named('jre')
-    inputs.dir(jreOutputDir)
-
-    executable = jreOutputDir.get().file(Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin\\java.exe' : 'bin/java')
+    inputs.dir(jlink.map { it.outputDirectory.get().asFile })
+    javaLauncher = providers.provider { new JlinkJavaLauncher(jlink.get()) }
 
     useJUnitPlatform()
-    finalizedBy jacocoTestReport
+    finalizedBy(jacocoTestReport)
+
+    testLogging {
+        events "passed"
+    }
 }
 
 jacocoTestReport {
@@ -117,7 +88,7 @@ jacocoTestReport {
             fileTree(dir: it, exclude: ['**/MediaConstraints.class',
                                         '**/stickerify/exception/**',
                                         '**/stickerify/process/**',
-                                        '**/stickerify/runner**',
+                                        '**/stickerify/runner/**',
                                         '**/stickerify/telegram/**'])
         })
     }

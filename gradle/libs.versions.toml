@@ -6,16 +6,15 @@ twelvemonkeys = "3.12.0"
 [libraries]
 batik = "org.apache.xmlgraphics:batik-transcoder:1.19"
 gson = "com.google.code.gson:gson:2.13.1"
-hamcrest = "org.hamcrest:hamcrest-core:3.0"
+hamcrest = "org.hamcrest:hamcrest:3.0"
 imageio-batik = { module = "com.twelvemonkeys.imageio:imageio-batik", version.ref = "twelvemonkeys" }
 imageio-psd = { module = "com.twelvemonkeys.imageio:imageio-psd", version.ref = "twelvemonkeys" }
 jave = "ws.schild:jave-core:3.5.0"
-junit = "org.junit.jupiter:junit-jupiter:5.13.4"
-junit-platform = "org.junit.platform:junit-platform-launcher:1.13.4"
+junit-jupiter = "org.junit.jupiter:junit-jupiter:5.13.4"
+junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.1.0"
-okio = "com.squareup.okio:okio:3.16.0"
 scrimage-core = { module = "com.sksamuel.scrimage:scrimage-core", version.ref = "scrimage" }
 scrimage-formats-extra = { module = "com.sksamuel.scrimage:scrimage-formats-extra", version.ref = "scrimage" }
 scrimage-webp = { module = "com.sksamuel.scrimage:scrimage-webp", version.ref = "scrimage" }
