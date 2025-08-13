@@ -1,0 +1,24 @@
+package com.github.stickerifier.stickerify;
+
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.provider.Provider;
+import org.gradle.jvm.toolchain.JavaCompiler;
+import org.gradle.jvm.toolchain.JavaInstallationMetadata;
+import org.gradle.jvm.toolchain.JavaLauncher;
+import org.jetbrains.annotations.NotNull;
+
+public record JlinkJavaLauncher(Provider<@NotNull JavaInstallationMetadata> metadata, Provider<@NotNull RegularFile> executablePath) implements JavaLauncher {
+	public JlinkJavaLauncher(JlinkTask task) {
+		this(task.getJavaCompiler().map(JavaCompiler::getMetadata), task.getOutputDirectory().file("jre/bin/java"));
+	}
+
+	@Override
+	public @NotNull JavaInstallationMetadata getMetadata() {
+		return metadata.get();
+	}
+
+	@Override
+	public @NotNull RegularFile getExecutablePath() {
+		return executablePath.get();
+	}
+}

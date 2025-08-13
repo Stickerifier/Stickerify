@@ -200,9 +200,8 @@ public final class MediaHelper {
 	 *
 	 * @param file the file to read
 	 * @return the image, if supported by {@link ImageIO}
-	 * @throws FileOperationException if an error occurred processing passed-in file
 	 */
-	private static ImmutableImage toImage(File file) throws FileOperationException {
+	private static ImmutableImage toImage(File file) {
 		try {
 			return ImmutableImage.loader().fromFile(file);
 		} catch (IOException _) {

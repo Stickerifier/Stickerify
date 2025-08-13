@@ -1,0 +1,12 @@
+plugins {
+    id('java-library')
+}
+
+repositories {
+    gradlePluginPortal()
+}
+
+java.toolchain {
+    languageVersion = JavaLanguageVersion.of(24)
+    vendor = JvmVendorSpec.AZUL
+}

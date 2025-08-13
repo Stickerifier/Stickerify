@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
 class MediaHelperTest {
 
 	@Test
-	void resizeImage() throws Exception {
+	void resizeRectangularImage() throws Exception {
 		var jpgImage = loadResource("big.jpg");
 		var result = MediaHelper.convert(jpgImage);
 
@@ -58,14 +58,6 @@ class MediaHelperTest {
 
 	private static String getExtension(File file) {
 		return file.getName().substring(file.getName().lastIndexOf('.'));
-	}
-
-	@Test
-	void resizeRectangularImage() throws Exception {
-		var jpgImage = loadResource("big.jpg");
-		var result = MediaHelper.convert(jpgImage);
-
-		assertImageConsistency(result, 512, 341);
 	}
 
 	@Test
