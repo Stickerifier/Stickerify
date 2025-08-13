@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk-alpine:24 AS builder
+FROM eclipse-temurin:24-alpine AS builder
 
 # bump: libwebp /LIBWEBP_VERSION=([\d.]+)/ git:https://chromium.googlesource.com/webm/libwebp.git|^1
 # bump: libwebp after ./hashupdate Dockerfile LIBWEBP $LATEST

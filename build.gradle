@@ -48,17 +48,18 @@ description = 'Telegram bot to convert medias in the format required to be used 
 
 java.toolchain {
     languageVersion = JavaLanguageVersion.of(24)
-    vendor = JvmVendorSpec.AZUL
+    vendor = JvmVendorSpec.ADOPTIUM
 }
 
 updateDaemonJvm {
     languageVersion = JavaLanguageVersion.of(24)
-    vendor = JvmVendorSpec.AZUL
+    vendor = JvmVendorSpec.ADOPTIUM
 }
 
 def jlink = tasks.register('jlink', JlinkTask) {
     options = ['--strip-debug', '--no-header-files', '--no-man-pages']
     modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
+    includeModulePath = false
 
     group = 'build'
     description = 'Generates a minimal JRE for the project.'
@@ -72,7 +73,7 @@ test {
     finalizedBy(jacocoTestReport)
 
     testLogging {
-        events "passed"
+        events 'passed'
     }
 }
 
