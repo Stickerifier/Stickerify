@@ -5,14 +5,13 @@ FROM eclipse-temurin:24-alpine AS builder
 ARG LIBWEBP_VERSION=1.6.0
 ARG LIBWEBP_SHA256=1c5ffab71efecefa0e3c23516c3a3a1dccb45cc310ae1095c6f14ae268e38067
 ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
-ARG LIBWEBP_FILE="libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
 
 WORKDIR /app
 RUN apk --no-cache add binutils curl tar
-RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -O && \
-    echo "$LIBWEBP_SHA256 $LIBWEBP_FILE" | sha256sum -c - && \
-    tar -xzf "$LIBWEBP_FILE" --one-top-level=libwebp --strip-components=1 && \
-    rm "$LIBWEBP_FILE"
+RUN curl -L --fail --retry 3 --retry-delay 5 "$LIBWEBP_URL" -o /tmp/libwebp.tar.gz && \
+    echo "$LIBWEBP_SHA256  /tmp/libwebp.tar.gz" | sha256sum -c - && \
+    tar -xzf /tmp/libwebp.tar.gz --one-top-level=libwebp --strip-components=1 && \
+    rm /tmp/libwebp.tar.gz
 
 COPY . .
 RUN --mount=type=cache,target=/root/.gradle ./gradlew jlink shadowJar
