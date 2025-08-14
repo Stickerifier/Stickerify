@@ -56,6 +56,8 @@ jobs:
           if-no-files-found: error
 
   qodana:
+    permissions:
+      checks: write
     name: Perform Qodana analysis
     needs: tests
     runs-on: ubuntu-latest
