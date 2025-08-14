@@ -73,7 +73,7 @@ test {
     finalizedBy(jacocoTestReport)
 
     testLogging {
-        events 'passed'
+        events 'passed', 'failed', 'skipped'
     }
 }
 

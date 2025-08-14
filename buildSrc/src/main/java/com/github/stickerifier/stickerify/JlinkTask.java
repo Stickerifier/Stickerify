@@ -30,6 +30,9 @@ public abstract class JlinkTask extends DefaultTask {
 	@Input
 	public abstract ListProperty<@NotNull String> getModules();
 
+	/**
+	 * If the selected JVM is <a href="https://openjdk.org/jeps/493">JEP 493</a> compatible, then this should be set to false.
+	 */
 	@Input
 	public abstract Property<@NotNull Boolean> getIncludeModulePath();
 

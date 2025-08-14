@@ -4,8 +4,8 @@ FROM eclipse-temurin:24-alpine AS builder
 # bump: libwebp after ./hashupdate Dockerfile LIBWEBP $LATEST
 ARG LIBWEBP_VERSION=1.6.0
 ARG LIBWEBP_SHA256=1c5ffab71efecefa0e3c23516c3a3a1dccb45cc310ae1095c6f14ae268e38067
+ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
 ARG LIBWEBP_FILE="libwebp-$LIBWEBP_VERSION-linux-x86-64.tar.gz"
-ARG LIBWEBP_URL="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/$LIBWEBP_FILE"
 
 WORKDIR /app
 RUN apk --no-cache add binutils curl tar
