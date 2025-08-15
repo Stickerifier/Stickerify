@@ -8,5 +8,5 @@ repositories {
 
 java.toolchain {
     languageVersion = JavaLanguageVersion.of(24)
-    vendor = JvmVendorSpec.AZUL
+    vendor = JvmVendorSpec.ADOPTIUM
 }
