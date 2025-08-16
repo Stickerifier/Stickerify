@@ -21,8 +21,8 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew jlink shadowJar
 # bump: alpine link "Release notes" https://alpinelinux.org/posts/Alpine-$LATEST-released.html
 FROM alpine:3.22.1 AS bot
 
-# bump: ffmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.0
-COPY --from=mwader/static-ffmpeg:7.0.2 /ffmpeg /usr/local/bin/
+# bump: ffmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.*
+COPY --from=mwader/static-ffmpeg:7.1.1 /ffmpeg /usr/local/bin/
 ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
 
 COPY --from=builder /app/libwebp/bin/cwebp /usr/local/bin/
