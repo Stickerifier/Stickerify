@@ -15,6 +15,6 @@ COPY --from=mwader/static-ffmpeg:7.0.2 /ffmpeg /usr/bin/
 ENV FFMPEG_PATH=/usr/bin/ffmpeg
 
 COPY --from=builder /app/build/jlink/jre jre
-COPY --from=builder /app/build/libs/Stickerify-1.0-all.jar Stickerify.jar
+COPY --from=builder /app/build/libs/*-all.jar Stickerify.jar
 
-CMD ["jre/bin/java", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/bin/", "-jar", "Stickerify.jar"]
+CMD ["jre/bin/java", "-Dcom.sksamuel.scrimage.webp.binary.dir=/usr/bin", "-jar", "Stickerify.jar"]
