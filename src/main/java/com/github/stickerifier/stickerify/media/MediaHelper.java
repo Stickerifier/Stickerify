@@ -25,6 +25,7 @@ import com.google.gson.annotations.SerializedName;
 import com.sksamuel.scrimage.ImmutableImage;
 import com.sksamuel.scrimage.webp.WebpWriter;
 import org.apache.tika.Tika;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.schild.jave.EncoderException;
@@ -152,6 +153,7 @@ public final class MediaHelper {
 			return (end - start) / frameRate;
 		}
 
+		@NotNull
 		@Override
 		public String toString() {
 			return "animated sticker [" +
