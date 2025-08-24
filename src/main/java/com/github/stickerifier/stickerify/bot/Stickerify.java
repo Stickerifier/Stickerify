@@ -47,14 +47,11 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author Roberto Cella
  */
-public class Stickerify {
+public record Stickerify(TelegramBot bot, Executor executor) {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
-
-	private final TelegramBot bot;
-	private final Executor executor;
 
 	/**
 	 * Instantiate the bot processing requests with virtual threads.
@@ -70,7 +67,7 @@ public class Stickerify {
 	 *
 	 * @see Stickerify
 	 */
-	Stickerify(TelegramBot bot, Executor executor) {
+	public Stickerify(TelegramBot bot, Executor executor) {
 		this.bot = bot;
 		this.executor = executor;
 
