@@ -318,7 +318,9 @@ public final class MediaHelper {
 	 */
 	private static void deleteFile(File file) throws FileOperationException {
 		try {
-			Files.deleteIfExists(file.toPath());
+			if (!Files.deleteIfExists(file.toPath())) {
+				throw new FileOperationException("An error occurred deleting the file");
+			}
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred deleting the file", e);
 		}

@@ -8,4 +8,8 @@ public class FileOperationException extends MediaException {
 	public FileOperationException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
+	public FileOperationException(String message) {
+		super(message);
+	}
 }

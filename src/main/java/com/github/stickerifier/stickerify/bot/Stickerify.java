@@ -220,7 +220,9 @@ public class Stickerify {
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
 		for (var path : pathsToDelete) {
 			try {
-				Files.deleteIfExists(path);
+				if (!Files.deleteIfExists(path)) {
+					LOGGER.atWarn().log("Unable to delete temp file {}", path);
+				}
 			} catch (IOException e) {
 				LOGGER.atError().setCause(e).log("An error occurred trying to delete temp file {}", path);
 			}
