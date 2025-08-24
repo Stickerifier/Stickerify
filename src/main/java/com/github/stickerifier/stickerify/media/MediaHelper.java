@@ -320,7 +320,7 @@ public final class MediaHelper {
 	private static void deleteFile(File file) throws FileOperationException {
 		try {
 			if (!Files.deleteIfExists(file.toPath())) {
-				throw new FileOperationException("An error occurred deleting the file");
+				LOGGER.atInfo().log("Unable to delete file {}", file.toPath());
 			}
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred deleting the file", e);
