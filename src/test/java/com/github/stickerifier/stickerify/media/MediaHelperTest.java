@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-@Tag("unit")
+@Tag("media")
 @ClearTempFiles
 class MediaHelperTest {
 

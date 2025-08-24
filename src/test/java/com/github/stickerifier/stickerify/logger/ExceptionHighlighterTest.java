@@ -14,7 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-@Tag("unit")
+@Tag("log")
 class ExceptionHighlighterTest {
 
 	private static final String LOG_MESSAGE = "Received request";
