@@ -34,11 +34,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+@Tag("unit")
 @ClearTempFiles
 class MediaHelperTest {
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void resizeRectangularImage() throws Exception {
 		var jpgImage = loadResource("big.jpg");
 		var result = MediaHelper.convert(jpgImage);
@@ -63,7 +64,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void resizeSmallImage() throws Exception {
 		var pngImage = loadResource("small_image.png");
 		var result = MediaHelper.convert(pngImage);
@@ -72,7 +73,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void noImageConversionNeeded() throws Exception {
 		var pngImage = loadResource("valid.png");
 		var result = MediaHelper.convert(pngImage);
@@ -81,7 +82,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void resizeStaticWebpImage() throws Exception {
 		var webpImage = loadResource("static.webp");
 		var result = MediaHelper.convert(webpImage);
@@ -90,7 +91,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void resizeFaviconImage() throws Exception {
 		var faviconImage = loadResource("favicon.ico");
 		var result = MediaHelper.convert(faviconImage);
@@ -99,7 +100,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void resizeTiffImage() throws Exception {
 		var tiffImage = loadResource("valid.tiff");
 		var result = MediaHelper.convert(tiffImage);
@@ -108,7 +109,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void resizePsdImage() throws Exception {
 		var psdImage = loadResource("valid.psd");
 		var result = MediaHelper.convert(psdImage);
@@ -117,7 +118,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void resizeDetailedImage() throws Exception {
 		var detailedImage = loadResource("detailed.jpg");
 		var result = MediaHelper.convert(detailedImage);
@@ -126,7 +127,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Image")
+	@Tag("image")
 	void resizeSvgImage() throws Exception {
 		var svgImage = loadResource("valid.svg");
 		var result = MediaHelper.convert(svgImage);
@@ -135,7 +136,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void convertLongMovVideo() throws Exception {
 		var movVideo = loadResource("long.mov");
 		var result = MediaHelper.convert(movVideo);
@@ -164,7 +165,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void convertMp4WithAudio() throws Exception {
 		var mp4Video = loadResource("video_with_audio.mp4");
 		var result = MediaHelper.convert(mp4Video);
@@ -173,7 +174,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void convertM4vWithAudio() throws Exception {
 		var m4vVideo = loadResource("video_with_audio.m4v");
 		var result = MediaHelper.convert(m4vVideo);
@@ -182,7 +183,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void convertShortAndLowFpsVideo() throws Exception {
 		var webmVideo = loadResource("short_low_fps.webm");
 		var result = MediaHelper.convert(webmVideo);
@@ -191,7 +192,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void resizeSmallWebmVideo() throws Exception {
 		var webmVideo = loadResource("small_video_sticker.webm");
 		var result = MediaHelper.convert(webmVideo);
@@ -200,7 +201,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void convertVerticalWebmVideo() throws Exception {
 		var webmVideo = loadResource("vertical_video_sticker.webm");
 		var result = MediaHelper.convert(webmVideo);
@@ -209,7 +210,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void convertGifVideo() throws Exception {
 		var gifVideo = loadResource("valid.gif");
 		var result = MediaHelper.convert(gifVideo);
@@ -218,7 +219,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void convertAviVideo() throws Exception {
 		var aviVideo = loadResource("valid.avi");
 		var result = MediaHelper.convert(aviVideo);
@@ -227,7 +228,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void noVideoConversionNeeded() throws Exception {
 		var webmVideo = loadResource("no_conversion_needed.webm");
 		var result = MediaHelper.convert(webmVideo);
@@ -236,7 +237,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("Video")
+	@Tag("video")
 	void resizeAnimatedWebpVideo() {
 		var webpVideo = loadResource("animated.webp");
 
@@ -244,7 +245,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("AnimatedSticker")
+	@Tag("animatedSticker")
 	void noAnimatedStickerConversionNeeded() throws Exception {
 		var animatedSticker = loadResource("animated_sticker.tgs");
 		var result = MediaHelper.convert(animatedSticker);
@@ -253,7 +254,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("AnimatedSticker")
+	@Tag("animatedSticker")
 	void noLowFpsAnimatedStickerConversionNeeded() throws Exception {
 		var animatedSticker = loadResource("low_fps_animated_sticker.tgs");
 		var result = MediaHelper.convert(animatedSticker);
@@ -262,7 +263,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("AnimatedSticker")
+	@Tag("animatedSticker")
 	void nonCompliantAnimatedSticker() {
 		var animatedSticker = loadResource("non_compliant_animated_sticker.tgs");
 
@@ -270,7 +271,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("AnimatedSticker")
+	@Tag("animatedSticker")
 	void unsupportedGzipArchive() {
 		var archive = loadResource("unsupported_archive.gz");
 
@@ -278,7 +279,7 @@ class MediaHelperTest {
 	}
 
 	@Test
-	@Tag("UnsupportedFile")
+	@Tag("unsupportedFile")
 	void unsupportedFile() {
 		var document = loadResource("document.txt");
 
@@ -286,12 +287,13 @@ class MediaHelperTest {
 	}
 
 	@Nested
+	@Tag("concurrent")
 	@DisplayName("Concurrently convert")
 	@EnabledIfEnvironmentVariable(named = "CI", matches = "true")
 	class ConcurrencyTest {
 
 		@Test
-		@Tag("Video")
+		@Tag("video")
 		@DisplayName("mov videos")
 		void concurrentMovVideoConversions() {
 			var movVideo = loadResource("long.mov");
@@ -322,7 +324,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Video")
+		@Tag("video")
 		@DisplayName("mp4 videos")
 		void concurrentMp4VideoConversions() {
 			var mp4Video = loadResource("video_with_audio.mp4");
@@ -331,7 +333,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Video")
+		@Tag("video")
 		@DisplayName("m4v videos")
 		void concurrentM4vVideoConversions() {
 			var m4vVideo = loadResource("video_with_audio.m4v");
@@ -340,7 +342,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Video")
+		@Tag("video")
 		@DisplayName("webm videos")
 		void concurrentWebmVideoConversions() {
 			var webmVideo = loadResource("small_video_sticker.webm");
@@ -349,7 +351,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Video")
+		@Tag("video")
 		@DisplayName("avi videos")
 		void concurrentAviVideoConversions() {
 			var aviVideo = loadResource("valid.avi");
@@ -358,7 +360,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Video")
+		@Tag("video")
 		@DisplayName("gif videos")
 		void concurrentGifVideoConversions() {
 			var gifVideo = loadResource("valid.gif");
@@ -367,7 +369,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Image")
+		@Tag("image")
 		@DisplayName("webp images")
 		void concurrentWebpImageConversions() {
 			var webpImage = loadResource("static.webp");
@@ -376,7 +378,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Image")
+		@Tag("image")
 		@DisplayName("jpg images")
 		void concurrentJpgImageConversions() {
 			var jpgImage = loadResource("big.jpg");
@@ -385,7 +387,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Image")
+		@Tag("image")
 		@DisplayName("png images")
 		void concurrentPngImageConversions() {
 			var pngImage = loadResource("big.png");
@@ -394,7 +396,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Image")
+		@Tag("image")
 		@DisplayName("ico images")
 		void concurrentFaviconImageConversions() {
 			var faviconImage = loadResource("favicon.ico");
@@ -403,7 +405,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Image")
+		@Tag("image")
 		@DisplayName("tiff images")
 		void concurrentTiffImageConversions() {
 			var tiffImage = loadResource("valid.tiff");
@@ -412,7 +414,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Image")
+		@Tag("image")
 		@DisplayName("psd images")
 		void concurrentPsdImageConversions() {
 			var psdImage = loadResource("valid.psd");
@@ -421,7 +423,7 @@ class MediaHelperTest {
 		}
 
 		@Test
-		@Tag("Image")
+		@Tag("image")
 		@DisplayName("svg images")
 		void concurrentSvgImageConversions() {
 			var psdImage = loadResource("valid.svg");
