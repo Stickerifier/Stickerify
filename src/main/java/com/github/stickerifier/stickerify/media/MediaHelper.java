@@ -50,6 +50,7 @@ public final class MediaHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
+	private static final Tika TIKA = new Tika();
 	private static final Gson GSON = new Gson();
 	static final ProcessLocator FFMPEG_LOCATOR = new PathLocator();
 	private static final int PRESERVE_ASPECT_RATIO = -2;
@@ -102,7 +103,7 @@ public final class MediaHelper {
 		String mimeType = null;
 
 		try {
-			mimeType = new Tika().detect(file);
+			mimeType = TIKA.detect(file);
 
 			LOGGER.atDebug().log("The file has {} MIME type", mimeType);
 		} catch (IOException _) {
