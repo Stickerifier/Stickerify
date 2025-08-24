@@ -205,8 +205,8 @@ public final class MediaHelper {
 	 * @return the image, if supported by {@link ImageIO}
 	 */
 	private static ImmutableImage toImage(File file) {
-		try {
-			return ImmutableImage.loader().fromFile(file);
+		try (var inputStream = new FileInputStream(file)) {
+			return ImmutableImage.loader().fromStream(inputStream);
 		} catch (IOException _) {
 			return null;
 		}
