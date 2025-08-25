@@ -9,12 +9,13 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import com.github.stickerifier.stickerify.junit.Tags;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-@Tag("log")
+@Tag(Tags.LOG)
 class ExceptionHighlighterTest {
 
 	private static final String LOG_MESSAGE = "Received request";
