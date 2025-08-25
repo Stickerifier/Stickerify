@@ -50,6 +50,7 @@ public final class MediaHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
 
+	private static final Tika TIKA = new Tika();
 	private static final Gson GSON = new Gson();
 	static final ProcessLocator FFMPEG_LOCATOR = new PathLocator();
 	private static final int PRESERVE_ASPECT_RATIO = -2;
@@ -102,7 +103,7 @@ public final class MediaHelper {
 		String mimeType = null;
 
 		try {
-			mimeType = new Tika().detect(file);
+			mimeType = TIKA.detect(file);
 
 			LOGGER.atDebug().log("The file has {} MIME type", mimeType);
 		} catch (IOException _) {
@@ -204,8 +205,8 @@ public final class MediaHelper {
 	 * @return the image, if supported by {@link ImageIO}
 	 */
 	private static ImmutableImage toImage(File file) {
-		try {
-			return ImmutableImage.loader().fromFile(file);
+		try (var inputStream = new FileInputStream(file)) {
+			return ImmutableImage.loader().fromStream(inputStream);
 		} catch (IOException _) {
 			return null;
 		}
@@ -318,7 +319,9 @@ public final class MediaHelper {
 	 */
 	private static void deleteFile(File file) throws FileOperationException {
 		try {
-			Files.deleteIfExists(file.toPath());
+			if (!Files.deleteIfExists(file.toPath())) {
+				LOGGER.atInfo().log("Unable to delete file {}", file.toPath());
+			}
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred deleting the file", e);
 		}
