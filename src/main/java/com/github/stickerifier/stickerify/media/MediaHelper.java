@@ -10,6 +10,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDE
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
+import static com.github.stickerifier.stickerify.process.ProcessHelper.IS_WINDOWS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.stickerifier.stickerify.exception.CorruptedVideoException;
@@ -52,7 +53,6 @@ public final class MediaHelper {
 
 	private static final Gson GSON = new Gson();
 	static final ProcessLocator FFMPEG_LOCATOR = new PathLocator();
-	private static final int PRESERVE_ASPECT_RATIO = -2;
 	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm",
 			"video/mp4", "video/x-m4v", "application/x-matroska", "video/x-msvideo");
 
@@ -333,15 +333,36 @@ public final class MediaHelper {
 	 * @throws MediaException if file conversion is not successful
 	 */
 	private static File convertToWebm(File file) throws MediaException {
-		var mediaInfo = retrieveMultimediaInfo(file);
-
-		if (isVideoCompliant(file, mediaInfo)) {
+		if (isVideoCompliant(file)) {
 			LOGGER.atInfo().log("The video doesn't need conversion");
 
 			return null;
 		}
 
-		return convertWithFfmpeg(file, mediaInfo);
+		return convertWithFfmpeg(file);
+	}
+
+	/**
+	 * Checks if passed-in file is already compliant with Telegram's requisites.
+	 * If so, conversion won't take place and no file will be returned to the user.
+	 *
+	 * @param file the file to check
+	 * @return {@code true} if the file is compliant
+	 * @throws FileOperationException if an error occurred retrieving the size of the file
+	 */
+	private static boolean isVideoCompliant(File file) throws FileOperationException, CorruptedVideoException {
+		var mediaInfo = retrieveMultimediaInfo(file);
+		var videoInfo = mediaInfo.getVideo();
+		var videoSize = videoInfo.getSize();
+
+		return isSizeCompliant(videoSize.getWidth(), videoSize.getHeight())
+				&& videoInfo.getFrameRate() <= MAX_VIDEO_FRAMES
+				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
+				&& mediaInfo.getDuration() > 0L
+				&& mediaInfo.getDuration() <= MAX_VIDEO_DURATION_MILLIS
+				&& mediaInfo.getAudio() == null
+				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat())
+				&& isFileSizeLowerThan(file, MAX_VIDEO_FILE_SIZE);
 	}
 
 	/**
@@ -360,84 +381,71 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Checks if passed-in file is already compliant with Telegram's requisites.
-	 * If so, conversion won't take place and no file will be returned to the user.
-	 *
-	 * @param file the file to check
-	 * @param mediaInfo video's multimedia information
-	 * @return {@code true} if the file is compliant
-	 * @throws FileOperationException if an error occurred retrieving the size of the file
-	 */
-	private static boolean isVideoCompliant(File file, MultimediaInfo mediaInfo) throws FileOperationException {
-		var videoInfo = mediaInfo.getVideo();
-		var videoSize = videoInfo.getSize();
-
-		return isSizeCompliant(videoSize.getWidth(), videoSize.getHeight())
-				&& videoInfo.getFrameRate() <= MAX_VIDEO_FRAMES
-				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
-				&& mediaInfo.getDuration() > 0L
-				&& mediaInfo.getDuration() <= MAX_VIDEO_DURATION_MILLIS
-				&& mediaInfo.getAudio() == null
-				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat())
-				&& isFileSizeLowerThan(file, MAX_VIDEO_FILE_SIZE);
-	}
-
-	/**
 	 * Converts the passed-in file using FFmpeg applying Telegram's video stickers' constraints.
 	 *
 	 * @param file the file to convert
-	 * @param mediaInfo video's multimedia information
 	 * @return converted video
 	 * @throws MediaException if file conversion is not successful
 	 */
-	private static File convertWithFfmpeg(File file, MultimediaInfo mediaInfo) throws MediaException {
+	private static File convertWithFfmpeg(File file) throws MediaException {
 		var webmVideo = createTempFile("webm");
-		var videoDetails = getResultingVideoDetails(mediaInfo);
-
-		var ffmpegCommand = new String[] {
+		var logPrefix = webmVideo.getAbsolutePath() + "-passlog";
+		var baseCommand = new String[] {
 				"ffmpeg",
+				"-y",
 				"-v", "error",
 				"-i", file.getAbsolutePath(),
-				"-vf", "scale=" + videoDetails.width() + ":" + videoDetails.height() + ",fps=" + videoDetails.frameRate(),
+				"-vf", "scale='if(gt(iw,ih),%1$d,-2)':'if(gt(iw,ih),-2,%1$d)',fps=min(%2$d\\,source_fps)".formatted(MAX_SIDE_LENGTH, MAX_VIDEO_FRAMES),
 				"-c:v", "libvpx-" + VP9_CODEC,
-				"-b:v", "256k",
-				"-crf", "32",
-				"-g", "60",
+				"-b:v", "650K",
+				"-pix_fmt", "yuv420p",
+				"-t", "" + MAX_VIDEO_DURATION_MILLIS / 1000,
 				"-an",
-				"-t", videoDetails.duration(),
-				"-y", webmVideo.getAbsolutePath()
+				"-passlogfile", logPrefix
 		};
 
 		try {
-			ProcessHelper.executeCommand(ffmpegCommand);
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "1", "-f", "webm", IS_WINDOWS ? "NUL" : "/dev/null"));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "2", webmVideo.getAbsolutePath()));
 		} catch (ProcessException e) {
-			deleteFile(webmVideo);
+			try {
+				deleteFile(webmVideo);
+			} catch (FileOperationException ex) {
+				e.addSuppressed(ex);
+			}
 			throw new MediaException(e.getMessage());
+		} finally {
+			deleteLogFile(logPrefix);
 		}
 
 		return webmVideo;
 	}
 
 	/**
-	 * Convenience method to group resulting video's details,
-	 * calculated checking passed-in media info against Telegram's constraints.
+	 * Builds the ffmpeg command combining a base part with a specific part (useful for 2 pass processing)
 	 *
-	 * @param mediaInfo video's multimedia information
-	 * @return resulting video's details
+	 * @param baseCommand the common ffmpeg command
+	 * @param additionalOptions command specific options
+	 * @return the complete ffmpeg invocation command
 	 */
-	private static ResultingVideoDetails getResultingVideoDetails(MultimediaInfo mediaInfo) {
-		var videoInfo = mediaInfo.getVideo();
-		float frameRate = Math.min(videoInfo.getFrameRate(), MAX_VIDEO_FRAMES);
-		long duration = Math.min(mediaInfo.getDuration(), MAX_VIDEO_DURATION_MILLIS) / 1_000L;
-
-		boolean isWidthBigger = videoInfo.getSize().getWidth() >= videoInfo.getSize().getHeight();
-		int width = isWidthBigger ? MAX_SIDE_LENGTH : PRESERVE_ASPECT_RATIO;
-		int height = isWidthBigger ? PRESERVE_ASPECT_RATIO : MAX_SIDE_LENGTH;
-
-		return new ResultingVideoDetails(width, height, frameRate, String.valueOf(duration));
+	private static String[] buildFfmpegCommand(String[] baseCommand, String... additionalOptions) {
+		var commands = new String[baseCommand.length + additionalOptions.length];
+		System.arraycopy(baseCommand, 0, commands, 0, baseCommand.length);
+		System.arraycopy(additionalOptions, 0, commands, baseCommand.length, additionalOptions.length);
+		return commands;
 	}
 
-	private record ResultingVideoDetails(int width, int height, float frameRate, String duration) {}
+	/**
+	 * Delete the passlog file based on the prefix
+	 *
+	 * @param prefix the prefix of the passlog file
+	 */
+	private static void deleteLogFile(String prefix) {
+		try {
+			deleteFile(new File(prefix + "-0.log"));
+		} catch (FileOperationException _) {
+		}
+	}
 
 	private MediaHelper() {
 		throw new UnsupportedOperationException();
