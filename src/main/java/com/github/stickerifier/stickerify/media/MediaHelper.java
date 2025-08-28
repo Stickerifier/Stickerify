@@ -399,11 +399,11 @@ public final class MediaHelper {
 				"-y",
 				"-v", "error",
 				"-i", file.getAbsolutePath(),
-				"-vf", "scale='if(gt(iw,ih),512,-2)':'if(gt(iw,ih),-2,512)',fps=min(30\\,source_fps)",
+				"-vf", "scale='if(gt(iw,ih),%1$d,-2)':'if(gt(iw,ih),-2,%1$d)',fps=min(%2$d\\,source_fps)".formatted(MAX_SIDE_LENGTH, MAX_VIDEO_FRAMES),
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-b:v", "650K",
 				"-pix_fmt", "yuv420p",
-				"-t", "3",
+				"-t", "" + MAX_VIDEO_DURATION_MILLIS / 1000,
 				"-an",
 				"-passlogfile", logFile.getAbsolutePath()
 		};
@@ -424,7 +424,6 @@ public final class MediaHelper {
 		var webmVideo = createTempFile("webm");
 		var pass2Options = new String[] {
 				"-pass", "2",
-				"-movflags", "+faststart",
 				webmVideo.getAbsolutePath()
 		};
 
