@@ -39,9 +39,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 public final class MediaHelper {
@@ -393,8 +391,9 @@ public final class MediaHelper {
 	 * @throws MediaException if file conversion is not successful
 	 */
 	private static File convertWithFfmpeg(File file) throws MediaException {
-		var logPrefix = new File(System.getProperty("java.io.tmpdir"), "passlog-" + file.getName()).getAbsolutePath();
-		var baseFfmpegCommand = new String[] {
+		var webmVideo = createTempFile("webm");
+		var logPrefix = webmVideo.getAbsolutePath() + "-passlog";
+		var baseCommand = new String[] {
 				"ffmpeg",
 				"-y",
 				"-v", "error",
@@ -408,27 +407,9 @@ public final class MediaHelper {
 				"-passlogfile", logPrefix
 		};
 
-		var pass1Options = new String[] {
-				"-pass", "1",
-				"-f", "webm",
-				IS_WINDOWS ? "NUL" : "/dev/null"
-		};
-
 		try {
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseFfmpegCommand, pass1Options));
-		} catch (ProcessException e) {
-			deleteLogFile(logPrefix);
-			throw new MediaException(e.getMessage());
-		}
-
-		var webmVideo = createTempFile("webm");
-		var pass2Options = new String[] {
-				"-pass", "2",
-				webmVideo.getAbsolutePath()
-		};
-
-		try {
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseFfmpegCommand, pass2Options));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "1", "-f", "webm", IS_WINDOWS ? "NUL" : "/dev/null"));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "2", webmVideo.getAbsolutePath()));
 		} catch (ProcessException e) {
 			deleteFile(webmVideo);
 			throw new MediaException(e.getMessage());
@@ -446,8 +427,11 @@ public final class MediaHelper {
 	 * @param additionalOptions command specific options
 	 * @return the complete ffmpeg invocation command
 	 */
-	private static String[] buildFfmpegCommand(String[] baseCommand, String[] additionalOptions) {
-		return Stream.concat(Arrays.stream(baseCommand), Arrays.stream(additionalOptions)).toArray(String[]::new);
+	private static String[] buildFfmpegCommand(String[] baseCommand, String... additionalOptions) {
+		var commands = new String[baseCommand.length + additionalOptions.length];
+		System.arraycopy(baseCommand, 0, commands, 0, baseCommand.length);
+		System.arraycopy(additionalOptions, 0, commands, baseCommand.length, additionalOptions.length);
+		return commands;
 	}
 
 	/**
