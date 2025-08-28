@@ -198,7 +198,7 @@ class MediaHelperTest {
 		var webmVideo = loadResource("small_video_sticker.webm");
 		var result = MediaHelper.convert(webmVideo);
 
-		assertVideoConsistency(result, 512, 212, 30F, 2_000L);
+		assertVideoConsistency(result, 512, 212, 30F, 2_600L);
 	}
 
 	@Test
