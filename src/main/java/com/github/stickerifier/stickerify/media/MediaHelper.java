@@ -393,7 +393,7 @@ public final class MediaHelper {
 	 * @throws MediaException if file conversion is not successful
 	 */
 	private static File convertWithFfmpeg(File file) throws MediaException {
-		var logFile = createTempFile("log");
+		var logPrefix = new File(System.getProperty("java.io.tmpdir"), "passlog-" + file.getName()).getAbsolutePath();
 		var baseFfmpegCommand = new String[] {
 				"ffmpeg",
 				"-y",
@@ -405,7 +405,7 @@ public final class MediaHelper {
 				"-pix_fmt", "yuv420p",
 				"-t", "" + MAX_VIDEO_DURATION_MILLIS / 1000,
 				"-an",
-				"-passlogfile", logFile.getAbsolutePath()
+				"-passlogfile", logPrefix
 		};
 
 		var pass1Options = new String[] {
@@ -417,7 +417,7 @@ public final class MediaHelper {
 		try {
 			ProcessHelper.executeCommand(buildFfmpegCommand(baseFfmpegCommand, pass1Options));
 		} catch (ProcessException e) {
-			deleteFile(logFile);
+			deleteLogFile(logPrefix);
 			throw new MediaException(e.getMessage());
 		}
 
@@ -433,7 +433,7 @@ public final class MediaHelper {
 			deleteFile(webmVideo);
 			throw new MediaException(e.getMessage());
 		} finally {
-			deleteFile(logFile);
+			deleteLogFile(logPrefix);
 		}
 
 		return webmVideo;
@@ -448,6 +448,18 @@ public final class MediaHelper {
 	 */
 	private static String[] buildFfmpegCommand(String[] baseCommand, String[] additionalOptions) {
 		return Stream.concat(Arrays.stream(baseCommand), Arrays.stream(additionalOptions)).toArray(String[]::new);
+	}
+
+	/**
+	 * Delete the passlog file based on the prefix
+	 *
+	 * @param prefix the prefix of the passlog file
+	 */
+	private static void deleteLogFile(String prefix) {
+		try {
+			deleteFile(new File(prefix + "-0.log"));
+		} catch (FileOperationException _) {
+		}
 	}
 
 	private MediaHelper() {
