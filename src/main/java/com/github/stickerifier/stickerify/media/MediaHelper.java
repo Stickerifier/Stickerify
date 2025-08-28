@@ -415,9 +415,7 @@ public final class MediaHelper {
 		};
 
 		try {
-			var command = Stream.concat(Arrays.stream(baseFfmpegCommand), Arrays.stream(pass1Options))
-					.toArray(String[]::new);
-			ProcessHelper.executeCommand(command);
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseFfmpegCommand, pass1Options));
 		} catch (ProcessException e) {
 			deleteFile(logFile);
 			throw new MediaException(e.getMessage());
@@ -431,9 +429,7 @@ public final class MediaHelper {
 		};
 
 		try {
-			var command = Stream.concat(Arrays.stream(baseFfmpegCommand), Arrays.stream(pass2Options))
-					.toArray(String[]::new);
-			ProcessHelper.executeCommand(command);
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseFfmpegCommand, pass2Options));
 		} catch (ProcessException e) {
 			deleteFile(webmVideo);
 			throw new MediaException(e.getMessage());
@@ -442,6 +438,17 @@ public final class MediaHelper {
 		}
 
 		return webmVideo;
+	}
+
+	/**
+	 * Builds the ffmpeg command combining a base part with a specific part (useful for 2 pass processing)
+	 *
+	 * @param baseCommand the common ffmpeg command
+	 * @param additionalOptions command specific options
+	 * @return the complete ffmpeg invocation command
+	 */
+	private static String[] buildFfmpegCommand(String[] baseCommand, String[] additionalOptions) {
+		return Stream.concat(Arrays.stream(baseCommand), Arrays.stream(additionalOptions)).toArray(String[]::new);
 	}
 
 	private MediaHelper() {
