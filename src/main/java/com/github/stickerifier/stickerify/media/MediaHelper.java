@@ -411,7 +411,11 @@ public final class MediaHelper {
 			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "1", "-f", "webm", IS_WINDOWS ? "NUL" : "/dev/null"));
 			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "2", webmVideo.getAbsolutePath()));
 		} catch (ProcessException e) {
-			deleteFile(webmVideo);
+			try {
+				deleteFile(webmVideo);
+			} catch (FileOperationException ex) {
+				e.addSuppressed(ex);
+			}
 			throw new MediaException(e.getMessage());
 		} finally {
 			deleteLogFile(logPrefix);
