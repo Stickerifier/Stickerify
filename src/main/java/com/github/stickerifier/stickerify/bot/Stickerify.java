@@ -20,6 +20,7 @@ import com.github.stickerifier.stickerify.telegram.model.TelegramFile;
 import com.github.stickerifier.stickerify.telegram.model.TelegramRequest;
 import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.TelegramException;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.LinkPreviewOptions;
 import com.pengrad.telegrambot.model.Update;
@@ -47,14 +48,11 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author Roberto Cella
  */
-public class Stickerify {
+public record Stickerify(TelegramBot bot, Executor executor) implements ExceptionHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
-
-	private final TelegramBot bot;
-	private final Executor executor;
 
 	/**
 	 * Instantiate the bot processing requests with virtual threads.
@@ -70,13 +68,13 @@ public class Stickerify {
 	 *
 	 * @see Stickerify
 	 */
-	Stickerify(TelegramBot bot, Executor executor) {
-		this.bot = bot;
-		this.executor = executor;
+	public Stickerify {
+		bot.setUpdatesListener(this::handleUpdates, this, new GetUpdates().timeout(50));
+	}
 
-		ExceptionHandler exceptionHandler = e -> LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
-
-		bot.setUpdatesListener(this::handleUpdates, exceptionHandler, new GetUpdates().timeout(50));
+	@Override
+	public void onException(TelegramException e) {
+		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
 	}
 
 	private int handleUpdates(List<Update> updates) {
@@ -220,7 +218,9 @@ public class Stickerify {
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
 		for (var path : pathsToDelete) {
 			try {
-				Files.deleteIfExists(path);
+				if (!Files.deleteIfExists(path)) {
+					LOGGER.atInfo().log("Unable to delete temp file {}", path);
+				}
 			} catch (IOException e) {
 				LOGGER.atError().setCause(e).log("An error occurred trying to delete temp file {}", path);
 			}
