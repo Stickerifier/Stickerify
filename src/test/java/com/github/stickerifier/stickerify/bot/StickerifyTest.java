@@ -8,15 +8,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
+import com.github.stickerifier.stickerify.junit.Tags;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
 import mockwebserver3.junit5.StartStop;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.net.URLEncoder;
 
+@Tag(Tags.TELEGRAM_API)
 @ClearTempFiles
 class StickerifyTest {
 
