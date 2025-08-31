@@ -64,8 +64,9 @@ public final class MediaHelper {
 	 * @param inputFile the file to convert
 	 * @return a resized and converted file
 	 * @throws MediaException if the file is not supported or if the conversion failed
+	 * @throws InterruptedException if the current thread is interrupted while converting a video file
 	 */
-	public static File convert(File inputFile) throws MediaException {
+	public static File convert(File inputFile) throws MediaException, InterruptedException {
 		var mimeType = detectMimeType(inputFile);
 
 		try {
@@ -334,8 +335,9 @@ public final class MediaHelper {
 	 * @param file the file to convert
 	 * @return converted video, {@code null} if no conversion was needed
 	 * @throws MediaException if file conversion is not successful
+	 * @throws InterruptedException if the current thread is interrupted while converting the video file
 	 */
-	private static File convertToWebm(File file) throws MediaException {
+	private static File convertToWebm(File file) throws MediaException, InterruptedException {
 		if (isVideoCompliant(file)) {
 			LOGGER.atInfo().log("The video doesn't need conversion");
 
@@ -389,8 +391,9 @@ public final class MediaHelper {
 	 * @param file the file to convert
 	 * @return converted video
 	 * @throws MediaException if file conversion is not successful
+	 * @throws InterruptedException if the current thread is interrupted while converting the file
 	 */
-	private static File convertWithFfmpeg(File file) throws MediaException {
+	private static File convertWithFfmpeg(File file) throws MediaException, InterruptedException {
 		var webmVideo = createTempFile("webm");
 		var logPrefix = webmVideo.getAbsolutePath() + "-passlog";
 		var baseCommand = new String[] {
@@ -416,9 +419,13 @@ public final class MediaHelper {
 			} catch (FileOperationException ex) {
 				e.addSuppressed(ex);
 			}
-			throw new MediaException(e.getMessage());
+			throw new MediaException(e);
 		} finally {
-			deleteLogFile(logPrefix);
+			try {
+				deleteFile(new File(logPrefix + "-0.log"));
+			} catch (FileOperationException _) {
+				// ignore the exception
+			}
 		}
 
 		return webmVideo;
@@ -436,18 +443,6 @@ public final class MediaHelper {
 		System.arraycopy(baseCommand, 0, commands, 0, baseCommand.length);
 		System.arraycopy(additionalOptions, 0, commands, baseCommand.length, additionalOptions.length);
 		return commands;
-	}
-
-	/**
-	 * Delete the passlog file based on the prefix
-	 *
-	 * @param prefix the prefix of the passlog file
-	 */
-	private static void deleteLogFile(String prefix) {
-		try {
-			deleteFile(new File(prefix + "-0.log"));
-		} catch (FileOperationException _) {
-		}
 	}
 
 	private MediaHelper() {
