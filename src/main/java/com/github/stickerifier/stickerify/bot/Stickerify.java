@@ -136,6 +136,8 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 			}
 		} catch (TelegramApiException | MediaException e) {
 			processFailure(request, e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}

@@ -1,7 +1,6 @@
 package com.github.stickerifier.stickerify.process;
 
 import static com.github.stickerifier.stickerify.process.ProcessHelper.IS_WINDOWS;
-import static java.lang.System.lineSeparator;
 
 import com.github.stickerifier.stickerify.exception.ProcessException;
 import org.slf4j.Logger;
@@ -24,12 +23,14 @@ public class PathLocator implements ProcessLocator {
 	public PathLocator() {
 		try {
 			if (ffmpegLocation == null || ffmpegLocation.isBlank()) {
-				ffmpegLocation = ProcessHelper.executeCommand(FIND_FFMPEG).split(lineSeparator())[0];
+				ffmpegLocation = ProcessHelper.executeCommand(FIND_FFMPEG).getFirst();
 			}
 
 			LOGGER.atInfo().log("FFmpeg is installed at {}", ffmpegLocation);
 		} catch (ProcessException e) {
 			LOGGER.atError().setCause(e).log("Unable to detect FFmpeg's installation path");
+		} catch (InterruptedException _) {
+			Thread.currentThread().interrupt();
 		}
 	}
 
