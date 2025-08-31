@@ -405,7 +405,7 @@ public final class MediaHelper {
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-b:v", "650K",
 				"-pix_fmt", "yuv420p",
-				"-t", "" + MAX_VIDEO_DURATION_MILLIS / 1000,
+				"-t", String.valueOf(MAX_VIDEO_DURATION_MILLIS / 1000),
 				"-an",
 				"-passlogfile", logPrefix
 		};
@@ -419,7 +419,7 @@ public final class MediaHelper {
 			} catch (FileOperationException ex) {
 				e.addSuppressed(ex);
 			}
-			throw new MediaException(e);
+			throw new MediaException("FFmpeg two-pass conversion failed", e);
 		} finally {
 			try {
 				deleteFile(new File(logPrefix + "-0.log"));
