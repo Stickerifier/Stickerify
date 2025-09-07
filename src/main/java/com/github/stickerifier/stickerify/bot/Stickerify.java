@@ -136,7 +136,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 				execute(answerWithFile);
 			}
 		} catch (TelegramApiException | MediaException e) {
-			processFailure(request, e);
+			processFailure(request, e, fileId);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} finally {
@@ -158,7 +158,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 	}
 
-	private void processFailure(TelegramRequest request, BaseException e) {
+	private void processFailure(TelegramRequest request, BaseException e, String fileId) {
 		if (e instanceof TelegramApiException telegramException) {
 			processTelegramFailure(request.getDescription(), telegramException, false);
 		}
@@ -167,20 +167,20 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
 			answerText(CORRUPTED, request);
 		} else {
-			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
+			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", fileId);
 			answerText(ERROR, request);
 		}
 	}
 
 	private void processTelegramFailure(String requestDescription, TelegramApiException e, boolean logUnmatchedFailure) {
-		var exceptionMessage = e.getMessage();
-
-		if (exceptionMessage.endsWith("Bad Request: message to be replied not found")) {
-			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", requestDescription);
-		} else if (exceptionMessage.endsWith("Forbidden: bot was blocked by the user")) {
-			LOGGER.atInfo().log("Unable to reply to the {}: the user blocked the bot", requestDescription);
-		} else if (logUnmatchedFailure) {
-			LOGGER.atError().setCause(e).log("Unable to reply to the {}", requestDescription);
+		switch (e.getDescription()) {
+			case "Bad Request: message to be replied not found" -> LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", requestDescription);
+			case "Forbidden: bot was blocked by the user" -> LOGGER.atInfo().log("Unable to reply to the {}: the user blocked the bot", requestDescription);
+			default -> {
+				if (logUnmatchedFailure) {
+					LOGGER.atError().setCause(e).log("Unable to reply to the {}", requestDescription);
+				}
+			}
 		}
 	}
 
@@ -215,7 +215,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 			return response;
 		}
 
-		throw new TelegramApiException("Telegram couldn't execute the {} request: {}", request.getMethod(), response.description());
+		throw new TelegramApiException(request.getMethod(), response.description());
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {

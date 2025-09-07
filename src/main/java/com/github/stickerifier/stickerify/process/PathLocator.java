@@ -6,6 +6,8 @@ import ws.schild.jave.process.ProcessLocator;
 import ws.schild.jave.process.ProcessWrapper;
 import ws.schild.jave.process.ffmpeg.FFMPEGProcess;
 
+import java.util.Objects;
+
 /**
  * Custom locator class to be used by Jave to find the path where FFmpeg is installed at in the system.
  *
@@ -14,10 +16,11 @@ import ws.schild.jave.process.ffmpeg.FFMPEGProcess;
 public enum PathLocator implements ProcessLocator {
 	INSTANCE;
 
-	private String ffmpegLocation = System.getenv("FFMPEG_PATH");
+	private final String ffmpegLocation;
 
 	PathLocator() {
 		var logger = LoggerFactory.getLogger(PathLocator.class);
+		var ffmpegLocation = System.getenv("FFMPEG_PATH");
 		try {
 			if (ffmpegLocation == null || ffmpegLocation.isBlank()) {
 				ffmpegLocation = ProcessHelper.executeCommand(OsConstants.FIND_EXECUTABLE, "ffmpeg").getFirst();
@@ -29,6 +32,7 @@ public enum PathLocator implements ProcessLocator {
 		} catch (InterruptedException _) {
 			Thread.currentThread().interrupt();
 		}
+		this.ffmpegLocation = Objects.requireNonNull(ffmpegLocation);
 	}
 
 	@Override
@@ -38,6 +42,6 @@ public enum PathLocator implements ProcessLocator {
 
 	@Override
 	public ProcessWrapper createExecutor() {
-		return new FFMPEGProcess(getExecutablePath());
+		return new FFMPEGProcess(ffmpegLocation);
 	}
 }

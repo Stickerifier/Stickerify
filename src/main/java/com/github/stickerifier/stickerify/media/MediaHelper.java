@@ -23,7 +23,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import org.apache.tika.Tika;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,7 +200,6 @@ public final class MediaHelper {
 			return (end - start) / frameRate;
 		}
 
-		@NonNull
 		@Override
 		public String toString() {
 			return "animated sticker [" +
@@ -220,7 +218,7 @@ public final class MediaHelper {
 	 * @param animation the animation to check
 	 * @return {@code true} if the animation is compliant
 	 */
-	private static boolean isAnimationCompliant(AnimationDetails animation) {
+	private static boolean isAnimationCompliant(@Nullable AnimationDetails animation) {
 		return animation != null
 				&& animation.frameRate() <= MAX_ANIMATION_FRAME_RATE
 				&& animation.duration() <= MAX_ANIMATION_DURATION_SECONDS
