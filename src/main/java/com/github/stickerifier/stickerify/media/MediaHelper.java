@@ -23,7 +23,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import org.apache.tika.Tika;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ws.schild.jave.EncoderException;
@@ -58,7 +59,7 @@ public final class MediaHelper {
 	 * @throws MediaException if the file is not supported or if the conversion failed
 	 * @throws InterruptedException if the current thread is interrupted while converting a video file
 	 */
-	public static File convert(File inputFile) throws MediaException, InterruptedException {
+	public static @Nullable File convert(File inputFile) throws MediaException, InterruptedException {
 		var mimeType = detectMimeType(inputFile);
 
 		try {
@@ -97,19 +98,18 @@ public final class MediaHelper {
 	 *
 	 * @param file the file sent to the bot
 	 * @return the MIME type of the passed-in file
+	 * @throws MediaException if the file could not be read
 	 */
-	private static String detectMimeType(File file) {
-		String mimeType = null;
-
+	private static String detectMimeType(File file) throws MediaException {
 		try {
-			mimeType = TIKA.detect(file);
-
+			var mimeType = TIKA.detect(file);
 			LOGGER.atDebug().log("The file has {} MIME type", mimeType);
-		} catch (IOException _) {
-			LOGGER.atError().log("Unable to retrieve MIME type for file {}", file.getName());
-		}
 
-		return mimeType;
+			return mimeType;
+		} catch (IOException e) {
+			LOGGER.atError().log("Unable to retrieve MIME type for file {}", file.getName());
+			throw new MediaException(e);
+		}
 	}
 
 	/**
@@ -201,7 +201,7 @@ public final class MediaHelper {
 			return (end - start) / frameRate;
 		}
 
-		@NotNull
+		@NonNull
 		@Override
 		public String toString() {
 			return "animated sticker [" +

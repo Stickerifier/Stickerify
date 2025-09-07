@@ -2,9 +2,13 @@
 gson = "com.google.code.gson:gson:2.13.1"
 hamcrest = "org.hamcrest:hamcrest:3.0"
 jave = "ws.schild:jave-core:3.5.0"
+jspecify = "org.jspecify:jspecify:1.0.0"
 junit-jupiter = "org.junit.jupiter:junit-jupiter:5.13.4"
 junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
 logback-classic = "ch.qos.logback:logback-classic:1.5.18"
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.1.0"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:9.2.0"
 tika = "org.apache.tika:tika-core:3.2.2"
+
+[plugins]
+spring-nullability = "io.spring.nullability:0.0.4"

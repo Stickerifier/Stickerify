@@ -12,7 +12,7 @@ import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Sticker;
 import com.pengrad.telegrambot.model.Video;
 import com.pengrad.telegrambot.model.VideoNote;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -96,7 +96,7 @@ public record TelegramRequest(Message message) {
 		};
 	}
 
-	@NotNull
+	@NonNull
 	@Override
 	public String toString() {
 		var file = Optional.ofNullable(getFile()).map(TelegramFile::id).orElse(null);

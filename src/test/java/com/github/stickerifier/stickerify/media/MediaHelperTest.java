@@ -143,8 +143,8 @@ class MediaHelperTest {
 	}
 
 	private static void assumeSvgSupport() throws Exception {
-		var lines = ProcessHelper.executeCommand("ffmpeg", "-decoders");
-		var supportsSvg = lines.stream().anyMatch(line -> line.contains("svg"));
+		var lines = ProcessHelper.executeCommand("ffmpeg", "-v", "quiet", "-hide_banner", "-decoders");
+		var supportsSvg = lines.stream().anyMatch(line -> line.contains("(codec svg)"));
 		assumeTrue(supportsSvg, "FFmpeg was not compiled with SVG support");
 	}
 

@@ -15,18 +15,18 @@ public final class ProcessHelper {
 
 	/**
 	 * Executes passed-in command and ensures it completed successfully.
-	 * Based on the operating system, the method limits the number of processes running concurrently:
-	 * on Windows they will be at most 4, on every other system they will be at most 5.
+	 * Concurrency is limited by a process-wide semaphore sized by the CONCURRENT_PROCESSES
+	 * environment variable (default 4).
 	 *
 	 * @param command the command to be executed
-	 * @return the output of the command, split by lines
+	 * @return the merged stdout/stderr of the command, split by lines
 	 * @throws ProcessException either if:
 	 * <ul>
 	 *     <li>the command was unsuccessful
 	 *     <li>an unexpected failure happened running the command
 	 *     <li>an unexpected failure happened reading the output
 	 * </ul>
-	 * @throws InterruptedException if the current thread is interrupted while waiting for the command to finish execution
+	 * @throws InterruptedException if the current thread is interrupted while waiting for the command to finish
 	 */
 	public static List<String> executeCommand(final String... command) throws ProcessException, InterruptedException {
 		SEMAPHORE.acquire();

@@ -5,6 +5,7 @@ plugins {
     id('java')
     id('jacoco')
     id('application')
+    alias(libs.plugins.spring.nullability)
 }
 
 repositories {
@@ -14,6 +15,7 @@ repositories {
 dependencies {
     implementation(libs.gson)
     implementation(libs.jave)
+    implementation(libs.jspecify)
     implementation(libs.logback.classic)
     implementation(libs.telegram.bot.api)
     implementation(libs.tika)
