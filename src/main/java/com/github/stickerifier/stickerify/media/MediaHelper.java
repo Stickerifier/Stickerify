@@ -34,7 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 public final class MediaHelper {
@@ -43,7 +43,7 @@ public final class MediaHelper {
 
 	private static final Tika TIKA = new Tika();
 	private static final Gson GSON = new Gson();
-	private static final List<String> SUPPORTED_VIDEOS = List.of("image/gif", "video/quicktime", "video/webm",
+	private static final Set<String> SUPPORTED_VIDEOS = Set.of("image/gif", "video/quicktime", "video/webm",
 			"video/mp4", "video/x-m4v", "application/x-matroska", "video/x-msvideo");
 
 	private static final int IMAGE_KEEP_ASPECT_RATIO = -1;
@@ -118,7 +118,7 @@ public final class MediaHelper {
 	 * @return {@code true} if the MIME type is supported
 	 */
 	private static boolean isSupportedVideo(String mimeType) {
-		return SUPPORTED_VIDEOS.stream().anyMatch(format -> format.equals(mimeType));
+		return SUPPORTED_VIDEOS.contains(mimeType);
 	}
 
 	/**
@@ -274,12 +274,13 @@ public final class MediaHelper {
 		var command = new String[] {
 				"ffmpeg",
 				"-y",
+				"-hide_banner",
 				"-v", "error",
 				"-i", file.getAbsolutePath(),
 				"-vf", "scale='if(gt(iw,ih),%1$d,%2$d)':'if(gt(iw,ih),%2$d,%1$d)'".formatted(MAX_SIDE_LENGTH, IMAGE_KEEP_ASPECT_RATIO),
 				"-c:v", "libwebp",
 				"-lossless", "1",
-				"-q:v", "100",
+				"-compression_level", "6",
 				webpImage.getAbsolutePath()
 		};
 
@@ -355,6 +356,7 @@ public final class MediaHelper {
 		var baseCommand = new String[] {
 				"ffmpeg",
 				"-y",
+				"-hide_banner",
 				"-v", "error",
 				"-i", file.getAbsolutePath(),
 				"-vf", "scale='if(gt(iw,ih),%1$d,%2$d)':'if(gt(iw,ih),%2$d,%1$d)',fps='min(%3$d,source_fps)'".formatted(MAX_SIDE_LENGTH, VIDEO_KEEP_ASPECT_RATIO, MAX_VIDEO_FRAMES),

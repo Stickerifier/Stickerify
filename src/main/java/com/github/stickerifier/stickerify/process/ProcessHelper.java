@@ -3,14 +3,18 @@ package com.github.stickerifier.stickerify.process;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.stickerifier.stickerify.exception.ProcessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public final class ProcessHelper {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProcessHelper.class);
 	private static final Semaphore SEMAPHORE = new Semaphore(getMaxConcurrentProcesses());
 
 	/**
@@ -23,6 +27,7 @@ public final class ProcessHelper {
 	 * @throws ProcessException either if:
 	 * <ul>
 	 *     <li>the command was unsuccessful
+	 *     <li>the waiting time elapsed
 	 *     <li>an unexpected failure happened running the command
 	 *     <li>an unexpected failure happened reading the output
 	 * </ul>
@@ -33,19 +38,28 @@ public final class ProcessHelper {
 		try {
 			var process = new ProcessBuilder(command).redirectErrorStream(true).start();
 
-			var output = new LinkedList<String>();
-			try (var reader = process.inputReader(UTF_8)) {
-				reader.lines().forEach(output::add);
+			var output = new ArrayList<String>(64);
+			Thread.ofVirtual().start(() -> {
+				try (var reader = process.inputReader(UTF_8)) {
+					reader.lines().forEach(output::add);
+				} catch (IOException e) {
+					LOGGER.atError().setCause(e).log("Error while closing process output reader");
+				}
+			});
+
+			var finished = process.waitFor(1, TimeUnit.MINUTES);
+			if (!finished) {
+				process.destroyForcibly();
+				throw new ProcessException("The command {} timed out after 1m\n{}", command[0], String.join("\n", output));
 			}
 
-			var exitCode = process.waitFor();
+			var exitCode = process.exitValue();
 			if (exitCode != 0) {
-				process.destroy();
 				var lines = String.join("\n", output);
 				throw new ProcessException("The command {} exited with code {}\n{}", command[0], exitCode, lines);
 			}
 
-			return output;
+			return List.copyOf(output);
 		} catch (IOException e) {
 			throw new ProcessException(e);
 		} finally {
@@ -54,8 +68,12 @@ public final class ProcessHelper {
 	}
 
 	private static int getMaxConcurrentProcesses() {
-		var value = System.getenv("CONCURRENT_PROCESSES");
-		return value == null ? 4 : Integer.parseInt(value);
+		var env = System.getenv("CONCURRENT_PROCESSES");
+		var value = env == null ? 4 : Integer.parseInt(env);
+		if (value <= 1) {
+			throw new IllegalArgumentException("CONCURRENT_PROCESSES must be >= 1 (was " + env + ")");
+		}
+		return value;
 	}
 
 	private ProcessHelper() {

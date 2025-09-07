@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public final class HighlightHelper {
 
 	static final String START_GREEN = changeColorTo(BOLD + GREEN_FG);
-	private static final Pattern MIME_TYPE_PATTERN = Pattern.compile(" (\\w+/[-+.\\w]+) ");
+	private static final Pattern MIME_TYPE_PATTERN = Pattern.compile("(^|\\s)(\\w+/[-+.\\w]+)(?=\\s|$)");
 
 	static String changeColorTo(final String color) {
 		return ESC_START + color + ESC_END;
@@ -33,7 +33,7 @@ public final class HighlightHelper {
 	static @Nullable String retrieveMimeType(final String message) {
 		var matcher = MIME_TYPE_PATTERN.matcher(message);
 
-		return matcher.find() ? matcher.group(1) : null;
+		return matcher.find() ? matcher.group(2) : null;
 	}
 
 	static String replaceFirst(String message, String textToReplace, String replacement) {

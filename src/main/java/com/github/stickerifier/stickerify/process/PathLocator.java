@@ -21,6 +21,7 @@ public enum PathLocator implements ProcessLocator {
 	PathLocator() {
 		var logger = LoggerFactory.getLogger(PathLocator.class);
 		var ffmpegLocation = System.getenv("FFMPEG_PATH");
+
 		try {
 			if (ffmpegLocation == null || ffmpegLocation.isBlank()) {
 				ffmpegLocation = ProcessHelper.executeCommand(OsConstants.FIND_EXECUTABLE, "ffmpeg").getFirst();
@@ -32,6 +33,7 @@ public enum PathLocator implements ProcessLocator {
 		} catch (InterruptedException _) {
 			Thread.currentThread().interrupt();
 		}
+
 		this.ffmpegLocation = Objects.requireNonNull(ffmpegLocation);
 	}
 

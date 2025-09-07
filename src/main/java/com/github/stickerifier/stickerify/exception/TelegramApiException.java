@@ -9,7 +9,7 @@ public class TelegramApiException extends BaseException {
 	}
 
 	/**
-	 * @return the description of the error received by the api call
+	 * @return the description of the error received by the API call
 	 */
 	public String getDescription() {
 		return description;
