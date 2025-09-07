@@ -2,10 +2,9 @@ import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
 
 plugins {
-    id('application')
     id('java')
     id('jacoco')
-    alias(libs.plugins.shadow)
+    id('application')
 }
 
 repositories {
@@ -13,17 +12,9 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.batik)
     implementation(libs.gson)
-    implementation(libs.imageio.batik)
-    implementation(libs.imageio.psd)
     implementation(libs.jave)
     implementation(libs.logback.classic)
-    implementation(libs.logback.core)
-    implementation(libs.scrimage.core)
-    implementation(libs.scrimage.formats.extra)
-    implementation(libs.scrimage.webp)
-    implementation(libs.slf4j.api)
     implementation(libs.telegram.bot.api)
     implementation(libs.tika)
 
@@ -31,19 +22,10 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockwebserver)
     testRuntimeOnly(libs.junit.platform)
-
-    constraints {
-        implementation('org.apache.commons:commons-lang3') {
-            version {
-                strictly('[3.18.0, 4)')
-            }
-            because('CVE-2025-48924: Apache Commons Lang is vulnerable to Uncontrolled Recursion when processing long inputs')
-        }
-    }
 }
 
 group = 'com.github.stickerifier'
-version = '1.0'
+version = '2.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
 
 java.toolchain {
@@ -58,7 +40,12 @@ updateDaemonJvm {
 
 def jlink = tasks.register('jlink', JlinkTask) {
     options = ['--strip-debug', '--no-header-files', '--no-man-pages']
-    modules = ['java.desktop', 'java.instrument', 'java.naming', 'java.sql', 'jdk.crypto.ec', 'jdk.unsupported']
+    modules = [
+            'java.instrument', // for junit
+            'java.naming',     // for logback
+            'java.sql',        // for tika
+            'jdk.unsupported', // for gson
+    ]
     includeModulePath = false
 
     group = 'build'
@@ -73,7 +60,7 @@ test {
     finalizedBy(jacocoTestReport)
 
     testLogging {
-        events 'passed', 'failed', 'skipped'
+        events('passed', 'failed', 'skipped')
     }
 }
 
@@ -99,19 +86,15 @@ application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
 }
 
-shadowJar {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    mergeServiceFiles()
-    failOnDuplicateEntries = true
+distributions {
+    main {
+        contents {
+            from(jlink)
+        }
+    }
+}
 
-    exclude('dist_webp_binaries/',
-            'META-INF/LICENSE',
-            'META-INF/LICENSE.txt',
-            'META-INF/NOTICE',
-            'META-INF/NOTICE.txt',
-            'license/LICENSE',
-            'license/LICENSE.dom-documentation.txt',
-            'license/LICENSE.dom-software.txt',
-            'license/NOTICE',
-            'license/README.dom.txt')
+tasks.named('startScripts', CreateStartScripts) {
+    unixStartScriptGenerator.template = resources.text.fromFile('src/main/resources/customUnixStartScript.txt')
+    windowsStartScriptGenerator.template = resources.text.fromFile('src/main/resources/customWindowsStartScript.txt')
 }

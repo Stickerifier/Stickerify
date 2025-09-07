@@ -7,7 +7,7 @@ import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
 import com.github.stickerifier.stickerify.exception.BaseException;
 import com.github.stickerifier.stickerify.exception.CorruptedVideoException;
@@ -48,7 +48,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author Roberto Cella
  */
-public record Stickerify(TelegramBot bot, Executor executor) implements ExceptionHandler {
+public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesListener, ExceptionHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
@@ -60,7 +60,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), newFixedThreadPool(getMaxConcurrentThreads(), VIRTUAL_THREAD_FACTORY));
+		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), newThreadPerTaskExecutor(VIRTUAL_THREAD_FACTORY));
 	}
 
 	/**
@@ -69,15 +69,11 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 	 * @see Stickerify
 	 */
 	public Stickerify {
-		bot.setUpdatesListener(this::handleUpdates, this, new GetUpdates().timeout(50));
+		bot.setUpdatesListener(this, this, new GetUpdates().timeout(50));
 	}
 
 	@Override
-	public void onException(TelegramException e) {
-		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
-	}
-
-	private int handleUpdates(List<Update> updates) {
+	public int process(List<Update> updates) {
 		updates.forEach(update -> executor.execute(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
@@ -88,6 +84,11 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 		}));
 
 		return UpdatesListener.CONFIRMED_UPDATES_ALL;
+	}
+
+	@Override
+	public void onException(TelegramException e) {
+		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
 	}
 
 	private void answer(TelegramRequest request) {
@@ -227,10 +228,5 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 				LOGGER.atError().setCause(e).log("An error occurred trying to delete temp file {}", path);
 			}
 		}
-	}
-
-	private static int getMaxConcurrentThreads() {
-		var value = System.getenv("CONCURRENT_THREADS");
-		return value == null ? 5 : Integer.parseInt(value);
 	}
 }

@@ -53,7 +53,7 @@ public abstract class JlinkTask extends DefaultTask {
 		getOptions().convention(List.of());
 		getModules().convention(List.of("ALL-MODULE-PATH"));
 		getIncludeModulePath().convention(true);
-		getOutputDirectory().convention(layout.getBuildDirectory().dir("jlink"));
+		getOutputDirectory().convention(layout.getBuildDirectory().dir(getName()));
 
 		var toolchain = getProject().getExtensions().getByType(JavaPluginExtension.class).getToolchain();
 		getJavaCompiler().convention(javaToolchain.compilerFor(toolchain));

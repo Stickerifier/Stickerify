@@ -5,8 +5,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
-import static com.github.stickerifier.stickerify.media.MediaHelper.FFMPEG_LOCATOR;
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -15,21 +14,22 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.junit.Tags;
-import com.sksamuel.scrimage.ImmutableImage;
+import com.github.stickerifier.stickerify.process.PathLocator;
+import com.github.stickerifier.stickerify.process.ProcessHelper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
+import ws.schild.jave.info.MultimediaInfo;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,16 +48,20 @@ class MediaHelperTest {
 		assertImageConsistency(result, 512, 341);
 	}
 
-	private static void assertImageConsistency(File result, int expectedWidth, int expectedHeight) throws IOException {
-		var image = ImmutableImage.loader().fromFile(result);
+	private static void assertImageConsistency(File result, int expectedWidth, int expectedHeight) throws Exception {
+		var size = getFileInfo(result).getVideo().getSize();
 		var actualExtension = getExtension(result);
 
 		assertAll("Image validation failed",
 				() -> assertThat("image's extension must be webp", actualExtension, is(equalTo(".webp"))),
-				() -> assertThat("image's width is not correct", image.width, is(equalTo(expectedWidth))),
-				() -> assertThat("image's height is not correct", image.height, is(equalTo(expectedHeight))),
+				() -> assertThat("image's width is not correct", size.getWidth(), is(equalTo(expectedWidth))),
+				() -> assertThat("image's height is not correct", size.getHeight(), is(equalTo(expectedHeight))),
 				() -> assertThat("image size should not exceed 512 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_IMAGE_FILE_SIZE)))
 		);
+	}
+
+	private static MultimediaInfo getFileInfo(File file) throws Exception {
+		return new MultimediaObject(file, PathLocator.INSTANCE).getInfo();
 	}
 
 	private static String getExtension(File file) {
@@ -106,7 +110,7 @@ class MediaHelperTest {
 		var tiffImage = loadResource("valid.tiff");
 		var result = MediaHelper.convert(tiffImage);
 
-		assertImageConsistency(result, 512, 341);
+		assertImageConsistency(result, 512, 342);
 	}
 
 	@Test
@@ -115,7 +119,7 @@ class MediaHelperTest {
 		var psdImage = loadResource("valid.psd");
 		var result = MediaHelper.convert(psdImage);
 
-		assertImageConsistency(result, 512, 383);
+		assertImageConsistency(result, 512, 384);
 	}
 
 	@Test
@@ -130,10 +134,18 @@ class MediaHelperTest {
 	@Test
 	@Tag(Tags.IMAGE)
 	void resizeSvgImage() throws Exception {
+		assumeSvgSupport();
+
 		var svgImage = loadResource("valid.svg");
 		var result = MediaHelper.convert(svgImage);
 
 		assertImageConsistency(result, 512, 512);
+	}
+
+	private static void assumeSvgSupport() throws Exception {
+		var lines = ProcessHelper.executeCommand("ffmpeg", "-decoders");
+		var supportsSvg = lines.stream().anyMatch(line -> line.contains("svg"));
+		assumeTrue(supportsSvg, "FFmpeg was not compiled with SVG support");
 	}
 
 	@Test
@@ -145,8 +157,8 @@ class MediaHelperTest {
 		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
 	}
 
-	private static void assertVideoConsistency(File result, int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws EncoderException {
-		var mediaInfo = new MultimediaObject(result, FFMPEG_LOCATOR).getInfo();
+	private static void assertVideoConsistency(File result, int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws Exception {
+		var mediaInfo = getFileInfo(result);
 		var videoInfo = mediaInfo.getVideo();
 		var videoSize = videoInfo.getSize();
 
@@ -243,7 +255,7 @@ class MediaHelperTest {
 		var webpVideo = loadResource("animated.webp");
 
 		var ex = assertThrows(MediaException.class, () -> MediaHelper.convert(webpVideo));
-		assertThat(ex.getMessage(), equalTo("The file with image/webp MIME type is not supported"));
+		assertThat(ex.getMessage(), equalTo("Couldn't read image dimensions"));
 	}
 
 	@Test
@@ -302,7 +314,6 @@ class MediaHelperTest {
 		@DisplayName("mov videos")
 		void concurrentMovVideoConversions() {
 			var movVideo = loadResource("long.mov");
-
 			executeConcurrentConversionsOf(movVideo);
 		}
 
@@ -311,7 +322,7 @@ class MediaHelperTest {
 			var failedConversions = new AtomicInteger(0);
 			var failureReasons = ConcurrentHashMap.newKeySet();
 
-			try (var executor = newFixedThreadPool(5, Thread.ofVirtual().factory())) {
+			try (var executor = newVirtualThreadPerTaskExecutor()) {
 				IntStream.range(0, concurrentRequests).forEach(_ -> executor.execute(() -> {
 					try {
 						MediaHelper.convert(inputFile);
@@ -333,7 +344,6 @@ class MediaHelperTest {
 		@DisplayName("mp4 videos")
 		void concurrentMp4VideoConversions() {
 			var mp4Video = loadResource("video_with_audio.mp4");
-
 			executeConcurrentConversionsOf(mp4Video);
 		}
 
@@ -342,7 +352,6 @@ class MediaHelperTest {
 		@DisplayName("m4v videos")
 		void concurrentM4vVideoConversions() {
 			var m4vVideo = loadResource("video_with_audio.m4v");
-
 			executeConcurrentConversionsOf(m4vVideo);
 		}
 
@@ -351,7 +360,6 @@ class MediaHelperTest {
 		@DisplayName("webm videos")
 		void concurrentWebmVideoConversions() {
 			var webmVideo = loadResource("small_video_sticker.webm");
-
 			executeConcurrentConversionsOf(webmVideo);
 		}
 
@@ -360,7 +368,6 @@ class MediaHelperTest {
 		@DisplayName("avi videos")
 		void concurrentAviVideoConversions() {
 			var aviVideo = loadResource("valid.avi");
-
 			executeConcurrentConversionsOf(aviVideo);
 		}
 
@@ -369,7 +376,6 @@ class MediaHelperTest {
 		@DisplayName("gif videos")
 		void concurrentGifVideoConversions() {
 			var gifVideo = loadResource("valid.gif");
-
 			executeConcurrentConversionsOf(gifVideo);
 		}
 
@@ -378,7 +384,6 @@ class MediaHelperTest {
 		@DisplayName("webp images")
 		void concurrentWebpImageConversions() {
 			var webpImage = loadResource("static.webp");
-
 			executeConcurrentConversionsOf(webpImage);
 		}
 
@@ -387,7 +392,6 @@ class MediaHelperTest {
 		@DisplayName("jpg images")
 		void concurrentJpgImageConversions() {
 			var jpgImage = loadResource("big.jpg");
-
 			executeConcurrentConversionsOf(jpgImage);
 		}
 
@@ -396,7 +400,6 @@ class MediaHelperTest {
 		@DisplayName("png images")
 		void concurrentPngImageConversions() {
 			var pngImage = loadResource("big.png");
-
 			executeConcurrentConversionsOf(pngImage);
 		}
 
@@ -405,7 +408,6 @@ class MediaHelperTest {
 		@DisplayName("ico images")
 		void concurrentFaviconImageConversions() {
 			var faviconImage = loadResource("favicon.ico");
-
 			executeConcurrentConversionsOf(faviconImage);
 		}
 
@@ -414,7 +416,6 @@ class MediaHelperTest {
 		@DisplayName("tiff images")
 		void concurrentTiffImageConversions() {
 			var tiffImage = loadResource("valid.tiff");
-
 			executeConcurrentConversionsOf(tiffImage);
 		}
 
@@ -423,17 +424,17 @@ class MediaHelperTest {
 		@DisplayName("psd images")
 		void concurrentPsdImageConversions() {
 			var psdImage = loadResource("valid.psd");
-
 			executeConcurrentConversionsOf(psdImage);
 		}
 
 		@Test
 		@Tag(Tags.IMAGE)
 		@DisplayName("svg images")
-		void concurrentSvgImageConversions() {
-			var psdImage = loadResource("valid.svg");
+		void concurrentSvgImageConversions() throws Exception {
+			assumeSvgSupport();
 
-			executeConcurrentConversionsOf(psdImage);
+			var svgImage = loadResource("valid.svg");
+			executeConcurrentConversionsOf(svgImage);
 		}
 	}
 }

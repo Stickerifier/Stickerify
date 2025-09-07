@@ -11,9 +11,7 @@ import java.util.concurrent.Semaphore;
 
 public final class ProcessHelper {
 
-	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("windows");
-	private static final int MAX_CONCURRENT_PROCESSES = IS_WINDOWS ? 4 : 5;
-	private static final Semaphore SEMAPHORE = new Semaphore(MAX_CONCURRENT_PROCESSES);
+	private static final Semaphore SEMAPHORE = new Semaphore(getMaxConcurrentProcesses());
 
 	/**
 	 * Executes passed-in command and ensures it completed successfully.
@@ -30,9 +28,9 @@ public final class ProcessHelper {
 	 * </ul>
 	 * @throws InterruptedException if the current thread is interrupted while waiting for the command to finish execution
 	 */
-	public static List<String> executeCommand(final String[] command) throws ProcessException, InterruptedException {
+	public static List<String> executeCommand(final String... command) throws ProcessException, InterruptedException {
+		SEMAPHORE.acquire();
 		try {
-			SEMAPHORE.acquire();
 			var process = new ProcessBuilder(command).redirectErrorStream(true).start();
 
 			var output = new LinkedList<String>();
@@ -53,6 +51,11 @@ public final class ProcessHelper {
 		} finally {
 			SEMAPHORE.release();
 		}
+	}
+
+	private static int getMaxConcurrentProcesses() {
+		var value = System.getenv("CONCURRENT_PROCESSES");
+		return value == null ? 4 : Integer.parseInt(value);
 	}
 
 	private ProcessHelper() {
