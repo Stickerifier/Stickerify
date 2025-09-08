@@ -39,7 +39,7 @@ public final class ProcessHelper {
 			var process = new ProcessBuilder(command).redirectErrorStream(true).start();
 
 			var output = new ArrayList<String>(64);
-			Thread.ofVirtual().start(() -> {
+			var readerThread = Thread.ofVirtual().start(() -> {
 				try (var reader = process.inputReader(UTF_8)) {
 					reader.lines().forEach(output::add);
 				} catch (IOException e) {
@@ -50,9 +50,11 @@ public final class ProcessHelper {
 			var finished = process.waitFor(1, TimeUnit.MINUTES);
 			if (!finished) {
 				process.destroyForcibly();
+				readerThread.join();
 				throw new ProcessException("The command {} timed out after 1m\n{}", command[0], String.join("\n", output));
 			}
 
+			readerThread.join();
 			var exitCode = process.exitValue();
 			if (exitCode != 0) {
 				var lines = String.join("\n", output);
@@ -70,7 +72,7 @@ public final class ProcessHelper {
 	private static int getMaxConcurrentProcesses() {
 		var env = System.getenv("CONCURRENT_PROCESSES");
 		var value = env == null ? 4 : Integer.parseInt(env);
-		if (value <= 1) {
+		if (value < 1) {
 			throw new IllegalArgumentException("CONCURRENT_PROCESSES must be >= 1 (was " + env + ")");
 		}
 		return value;
