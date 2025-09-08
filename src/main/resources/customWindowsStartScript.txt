@@ -41,8 +41,8 @@ for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 @rem Add default JVM options here. You can also use JAVA_OPTS and ${optsEnvironmentVar} to pass JVM options to this script.
 set DEFAULT_JVM_OPTS=${defaultJvmOpts}
 
-@rem Find java.exe
-if defined JAVA_HOME goto findJavaFromJavaHome
+@rem Use bundled JRE when available
+if exist "%APP_HOME%/jre/" set JAVA_HOME="%APP_HOME%/jre/"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
