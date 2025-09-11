@@ -19,8 +19,8 @@ public final class ProcessHelper {
 
 	/**
 	 * Executes passed-in command and ensures it completed successfully.
-	 * Concurrency is limited by a process-wide semaphore sized by the CONCURRENT_PROCESSES
-	 * environment variable (default 4).
+	 * Concurrency is limited by a process-wide semaphore sized by the {@code CONCURRENT_PROCESSES}
+	 * environment variable (defaults to 4).
 	 *
 	 * @param command the command to be executed
 	 * @return the merged stdout/stderr of the command, split by lines
@@ -61,7 +61,7 @@ public final class ProcessHelper {
 				throw new ProcessException("The command {} exited with code {}\n{}", command[0], exitCode, lines);
 			}
 
-			return List.copyOf(output);
+			return output;
 		} catch (IOException e) {
 			throw new ProcessException(e);
 		} finally {

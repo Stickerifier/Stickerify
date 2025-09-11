@@ -244,7 +244,6 @@ public final class MediaHelper {
 
 	/**
 	 * Checks if passed-in image is already compliant with Telegram's requisites.
-	 * If so, conversion won't take place and no file will be returned to the user.
 	 *
 	 * @param image the image to check
 	 * @param mimeType the MIME type of the file
