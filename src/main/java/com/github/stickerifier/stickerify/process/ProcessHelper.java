@@ -70,10 +70,10 @@ public final class ProcessHelper {
 	}
 
 	private static int getMaxConcurrentProcesses() {
-		var env = System.getenv("CONCURRENT_PROCESSES");
-		var value = env == null ? 4 : Integer.parseInt(env);
+		var concurrentProcesses = System.getenv("CONCURRENT_PROCESSES");
+		var value = concurrentProcesses == null ? 4 : Integer.parseInt(concurrentProcesses);
 		if (value < 1) {
-			throw new IllegalArgumentException("CONCURRENT_PROCESSES must be >= 1 (was " + env + ")");
+			throw new IllegalArgumentException("The environment variable CONCURRENT_PROCESSES must be >= 1 (was " + concurrentProcesses + ")");
 		}
 		return value;
 	}
