@@ -5,6 +5,10 @@ public class FileOperationException extends MediaException {
 		super(cause);
 	}
 
+	public FileOperationException(String message) {
+		super(message);
+	}
+
 	public FileOperationException(String message, Throwable cause) {
 		super(message, cause);
 	}

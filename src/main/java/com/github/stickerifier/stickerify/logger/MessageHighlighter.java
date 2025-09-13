@@ -13,6 +13,7 @@ import static com.github.stickerifier.stickerify.telegram.model.TelegramRequest.
 import ch.qos.logback.classic.pattern.MessageConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.pattern.Converter;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Custom converter class to be used by Logback to highlight important substrings.
@@ -26,7 +27,7 @@ public class MessageHighlighter extends MessageConverter {
 	static final String HIGHLIGHTED_NEW_USER = " " + START_YELLOW + NEW_USER.substring(1) + CONTINUE_WHITE;
 
 	@Override
-	public String convert(ILoggingEvent event) {
+	public @Nullable String convert(ILoggingEvent event) {
 		var message = event.getFormattedMessage();
 
 		if (message != null) {

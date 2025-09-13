@@ -1,5 +1,7 @@
 package com.github.stickerifier.stickerify.logger;
 
+import org.jspecify.annotations.Nullable;
+
 import static ch.qos.logback.core.pattern.color.ANSIConstants.BOLD;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_END;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_START;
@@ -28,7 +30,7 @@ public final class HighlightHelper {
 		return START_GREEN + message + previousColor;
 	}
 
-	static String retrieveMimeType(final String message) {
+	static @Nullable String retrieveMimeType(final String message) {
 		var matcher = MIME_TYPE_PATTERN.matcher(message);
 
 		return matcher.find() ? matcher.group(1) : null;
