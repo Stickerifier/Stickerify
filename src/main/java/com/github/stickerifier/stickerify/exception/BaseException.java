@@ -3,8 +3,16 @@ package com.github.stickerifier.stickerify.exception;
 import org.slf4j.helpers.MessageFormatter;
 
 public class BaseException extends Exception {
+	public BaseException(String message) {
+		super(message);
+	}
+
 	public BaseException(Throwable cause) {
 		super(cause);
+	}
+
+	public BaseException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 	/**
