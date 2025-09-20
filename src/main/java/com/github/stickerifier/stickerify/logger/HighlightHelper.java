@@ -1,11 +1,11 @@
 package com.github.stickerifier.stickerify.logger;
 
-import org.jspecify.annotations.Nullable;
-
 import static ch.qos.logback.core.pattern.color.ANSIConstants.BOLD;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_END;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_START;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.GREEN_FG;
+
+import org.jspecify.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
