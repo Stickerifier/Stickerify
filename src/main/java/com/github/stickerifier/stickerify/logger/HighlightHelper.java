@@ -5,6 +5,8 @@ import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_END;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.ESC_START;
 import static ch.qos.logback.core.pattern.color.ANSIConstants.GREEN_FG;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.regex.Pattern;
 
 public final class HighlightHelper {
@@ -28,7 +30,7 @@ public final class HighlightHelper {
 		return START_GREEN + message + previousColor;
 	}
 
-	static String retrieveMimeType(final String message) {
+	static @Nullable String retrieveMimeType(final String message) {
 		var matcher = MIME_TYPE_PATTERN.matcher(message);
 
 		return matcher.find() ? matcher.group(1) : null;

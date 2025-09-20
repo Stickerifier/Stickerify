@@ -7,7 +7,7 @@ import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
 import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
 import com.github.stickerifier.stickerify.exception.BaseException;
 import com.github.stickerifier.stickerify.exception.CorruptedVideoException;
@@ -48,7 +48,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author Roberto Cella
  */
-public record Stickerify(TelegramBot bot, Executor executor) implements ExceptionHandler {
+public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesListener, ExceptionHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
@@ -60,7 +60,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 	 * @see Stickerify
 	 */
 	public Stickerify() {
-		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), newFixedThreadPool(getMaxConcurrentThreads(), VIRTUAL_THREAD_FACTORY));
+		this(new TelegramBot.Builder(BOT_TOKEN).updateListenerSleep(500).build(), newThreadPerTaskExecutor(VIRTUAL_THREAD_FACTORY));
 	}
 
 	/**
@@ -69,15 +69,11 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 	 * @see Stickerify
 	 */
 	public Stickerify {
-		bot.setUpdatesListener(this::handleUpdates, this, new GetUpdates().timeout(50));
+		bot.setUpdatesListener(this, this, new GetUpdates().timeout(50));
 	}
 
 	@Override
-	public void onException(TelegramException e) {
-		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
-	}
-
-	private int handleUpdates(List<Update> updates) {
+	public int process(List<Update> updates) {
 		updates.forEach(update -> executor.execute(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
@@ -88,6 +84,11 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 		}));
 
 		return UpdatesListener.CONFIRMED_UPDATES_ALL;
+	}
+
+	@Override
+	public void onException(TelegramException e) {
+		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
 	}
 
 	private void answer(TelegramRequest request) {
@@ -135,7 +136,9 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 				execute(answerWithFile);
 			}
 		} catch (TelegramApiException | MediaException e) {
-			processFailure(request, e);
+			processFailure(request, e, fileId);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
@@ -155,7 +158,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 		}
 	}
 
-	private void processFailure(TelegramRequest request, BaseException e) {
+	private void processFailure(TelegramRequest request, BaseException e, String fileId) {
 		if (e instanceof TelegramApiException telegramException) {
 			processTelegramFailure(request.getDescription(), telegramException, false);
 		}
@@ -164,20 +167,20 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
 			answerText(CORRUPTED, request);
 		} else {
-			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", request.getFile().id());
+			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", fileId);
 			answerText(ERROR, request);
 		}
 	}
 
 	private void processTelegramFailure(String requestDescription, TelegramApiException e, boolean logUnmatchedFailure) {
-		var exceptionMessage = e.getMessage();
-
-		if (exceptionMessage.endsWith("Bad Request: message to be replied not found")) {
-			LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", requestDescription);
-		} else if (exceptionMessage.endsWith("Forbidden: bot was blocked by the user")) {
-			LOGGER.atInfo().log("Unable to reply to the {}: the user blocked the bot", requestDescription);
-		} else if (logUnmatchedFailure) {
-			LOGGER.atError().setCause(e).log("Unable to reply to the {}", requestDescription);
+		switch (e.getDescription()) {
+			case "Bad Request: message to be replied not found" -> LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", requestDescription);
+			case "Forbidden: bot was blocked by the user" -> LOGGER.atInfo().log("Unable to reply to the {}: the user blocked the bot", requestDescription);
+			default -> {
+				if (logUnmatchedFailure) {
+					LOGGER.atError().setCause(e).log("Unable to reply to the {}", requestDescription);
+				}
+			}
 		}
 	}
 
@@ -212,7 +215,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 			return response;
 		}
 
-		throw new TelegramApiException("Telegram couldn't execute the {} request: {}", request.getMethod(), response.description());
+		throw new TelegramApiException(request.getMethod(), response.description());
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
@@ -225,10 +228,5 @@ public record Stickerify(TelegramBot bot, Executor executor) implements Exceptio
 				LOGGER.atError().setCause(e).log("An error occurred trying to delete temp file {}", path);
 			}
 		}
-	}
-
-	private static int getMaxConcurrentThreads() {
-		var value = System.getenv("CONCURRENT_THREADS");
-		return value == null ? 5 : Integer.parseInt(value);
 	}
 }

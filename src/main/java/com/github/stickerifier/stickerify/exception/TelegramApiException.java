@@ -1,10 +1,17 @@
 package com.github.stickerifier.stickerify.exception;
 
 public class TelegramApiException extends BaseException {
+	private final String description;
+
+	public TelegramApiException(String requestMethod, String description) {
+		super("Telegram couldn't execute the {} request: {}", requestMethod, description);
+		this.description = description;
+	}
+
 	/**
-	 * @see BaseException#BaseException(String, Object...)
+	 * @return the description of the error received by the API call
 	 */
-	public TelegramApiException(String message, Object... parameters) {
-		super(message, parameters);
+	public String getDescription() {
+		return description;
 	}
 }

@@ -12,7 +12,7 @@ import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Sticker;
 import com.pengrad.telegrambot.model.Video;
 import com.pengrad.telegrambot.model.VideoNote;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -25,19 +25,18 @@ import java.util.stream.Stream;
  * @param message the message to wrap
  */
 public record TelegramRequest(Message message) {
-
 	public static final String NEW_USER = " (new user)";
 	private static final String START_COMMAND = "/start";
 	private static final String HELP_COMMAND = "/help";
 	private static final String PRIVACY_COMMAND = "/privacy";
 
-	public TelegramFile getFile() {
+	public @Nullable TelegramFile getFile() {
 		return getMessageMedia()
 				.map(media -> switch (media) {
 					case PhotoSize[] photos when photos.length > 0 -> getBestPhoto(photos);
 					case Document document -> new TelegramFile(document.fileId(), document.fileSize());
 					case Sticker sticker -> new TelegramFile(sticker.fileId(), sticker.fileSize());
-					case Video video -> new TelegramFile(video.fileId(), video.fileSize());
+					case Video video -> getVideo(video);
 					case VideoNote videoNote -> new TelegramFile(videoNote.fileId(), videoNote.fileSize());
 					default -> TelegramFile.NOT_SUPPORTED;
 				})
@@ -58,6 +57,16 @@ public record TelegramRequest(Message message) {
 				.filter(TelegramFile::canBeDownloaded)
 				.max(comparing(TelegramFile::size))
 				.orElse(TelegramFile.TOO_LARGE);
+	}
+
+	private TelegramFile getVideo(Video video) {
+		var id = video.fileId();
+		var fileSize = video.fileSize();
+		if (fileSize == null) {
+			return new TelegramFile(id);
+		} else {
+			return new TelegramFile(id, fileSize);
+		}
 	}
 
 	public long getChatId() {
@@ -96,7 +105,6 @@ public record TelegramRequest(Message message) {
 		};
 	}
 
-	@NotNull
 	@Override
 	public String toString() {
 		var file = Optional.ofNullable(getFile()).map(TelegramFile::id).orElse(null);
@@ -110,7 +118,7 @@ public record TelegramRequest(Message message) {
 				+ "]";
 	}
 
-	private static String writeIfNotEmpty(String field, String value) {
+	private static String writeIfNotEmpty(String field, @Nullable String value) {
 		return value != null && !value.isEmpty()
 				? ", " + field + "=" + value
 				: "";
