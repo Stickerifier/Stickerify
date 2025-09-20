@@ -1,5 +1,5 @@
 [libraries]
-gson = "com.google.code.gson:gson:2.13.1"
+gson = "com.google.code.gson:gson:2.13.2"
 hamcrest = "org.hamcrest:hamcrest:3.0"
 jave = "ws.schild:jave-core:3.5.0"
 jspecify = "org.jspecify:jspecify:1.0.0"
