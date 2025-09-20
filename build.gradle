@@ -13,9 +13,9 @@ repositories {
 }
 
 dependencies {
+    compileOnly(libs.jspecify)
     implementation(libs.gson)
     implementation(libs.jave)
-    implementation(libs.jspecify)
     implementation(libs.logback.classic)
     implementation(libs.telegram.bot.api)
     implementation(libs.tika)
