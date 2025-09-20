@@ -8,7 +8,7 @@ junit-platform = "org.junit.platform:junit-platform-launcher:1.13.4"
 logback-classic = "ch.qos.logback:logback-classic:1.5.18"
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.1.0"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:9.2.0"
-tika = "org.apache.tika:tika-core:3.2.2"
+tika = "org.apache.tika:tika-core:3.2.3"
 
 [plugins]
 spring-nullability = "io.spring.nullability:0.0.4"
