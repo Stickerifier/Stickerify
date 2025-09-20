@@ -91,6 +91,7 @@ application {
 distributions {
     main {
         contents {
+            //noinspection GroovyAssignabilityCheck
             from(jlink)
         }
     }
