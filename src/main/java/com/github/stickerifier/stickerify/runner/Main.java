@@ -7,6 +7,12 @@ public class Main {
 
 	public static void main(String[] args) {
 		try (var _ = new Stickerify()) {
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+				synchronized (LOCK) {
+					LOCK.notifyAll();
+				}
+			}));
+
 			synchronized (LOCK) {
 				LOCK.wait();
 			}
