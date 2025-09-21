@@ -41,6 +41,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -94,6 +95,11 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	@Override
 	public void close() {
 		bot.removeGetUpdatesListener();
+
+		if (executor instanceof ExecutorService es) {
+			es.close();
+		}
+
 		bot.shutdown();
 	}
 
