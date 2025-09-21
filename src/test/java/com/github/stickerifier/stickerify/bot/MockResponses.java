@@ -8,6 +8,12 @@ import java.io.File;
 
 public final class MockResponses {
 
+	static final MockResponse EMPTY_UPDATES = new MockResponse.Builder().body("""
+			{
+				ok: true
+			}
+			""").build();
+
 	static final MockResponse START_MESSAGE = new MockResponse.Builder().body("""
 			{
 				ok: true,

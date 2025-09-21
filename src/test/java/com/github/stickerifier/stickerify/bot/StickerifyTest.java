@@ -12,6 +12,7 @@ import com.github.stickerifier.stickerify.junit.Tags;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
+import mockwebserver3.QueueDispatcher;
 import mockwebserver3.RecordedRequest;
 import mockwebserver3.junit5.StartStop;
 import org.junit.jupiter.api.Tag;
@@ -30,24 +31,26 @@ class StickerifyTest {
 	void startMessage() throws Exception {
 		server.enqueue(MockResponses.START_MESSAGE);
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
-
-		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
-		assertResponseContainsMessage(sendMessage, Answer.HELP);
+			var sendMessage = server.takeRequest();
+			assertEquals("/api/token/sendMessage", sendMessage.getTarget());
+			assertResponseContainsMessage(sendMessage, Answer.HELP);
+		}
 	}
 
-	private void startBot() {
+	private Stickerify startBot() {
+		((QueueDispatcher)server.getDispatcher()).setFailFast(MockResponses.EMPTY_UPDATES);
+
 		var bot = new TelegramBot.Builder("token")
 				.apiUrl(server.url("api/").toString())
 				.fileApiUrl(server.url("files/").toString())
 				.updateListenerSleep(500)
 				.build();
 
-		new Stickerify(bot, Runnable::run);
+		return new Stickerify(bot, Runnable::run);
 	}
 
 	private static void assertResponseContainsMessage(RecordedRequest request, Answer answer) {
@@ -60,56 +63,56 @@ class StickerifyTest {
 	void helpMessage() throws Exception {
 		server.enqueue(MockResponses.HELP_MESSAGE);
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
-
-		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
-		assertResponseContainsMessage(sendMessage, Answer.HELP);
+			var sendMessage = server.takeRequest();
+			assertEquals("/api/token/sendMessage", sendMessage.getTarget());
+			assertResponseContainsMessage(sendMessage, Answer.HELP);
+		}
 	}
 
 	@Test
 	void privacyMessage() throws Exception {
 		server.enqueue(MockResponses.PRIVACY_MESSAGE);
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
-
-		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
-		assertResponseContainsMessage(sendMessage, Answer.PRIVACY_POLICY);
+			var sendMessage = server.takeRequest();
+			assertEquals("/api/token/sendMessage", sendMessage.getTarget());
+			assertResponseContainsMessage(sendMessage, Answer.PRIVACY_POLICY);
+		}
 	}
 
 	@Test
 	void fileNotSupported() throws Exception {
 		server.enqueue(MockResponses.FILE_NOT_SUPPORTED);
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
-
-		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
-		assertResponseContainsMessage(sendMessage, Answer.ERROR);
+			var sendMessage = server.takeRequest();
+			assertEquals("/api/token/sendMessage", sendMessage.getTarget());
+			assertResponseContainsMessage(sendMessage, Answer.ERROR);
+		}
 	}
 
 	@Test
 	void fileTooBig() throws Exception {
 		server.enqueue(MockResponses.FILE_TOO_BIG);
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
-
-		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
-		assertResponseContainsMessage(sendMessage, Answer.FILE_TOO_LARGE);
+			var sendMessage = server.takeRequest();
+			assertEquals("/api/token/sendMessage", sendMessage.getTarget());
+			assertResponseContainsMessage(sendMessage, Answer.FILE_TOO_LARGE);
+		}
 	}
 
 	@Test
@@ -118,22 +121,22 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("animated_sticker.tgs"));
 		server.enqueue(MockResponses.fileDownload(loadResource("animated_sticker.tgs")));
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=animated_sticker.tgs", getFile.getBody().utf8());
 
-		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getTarget());
-		assertNotNull(getFile.getBody());
-		assertEquals("file_id=animated_sticker.tgs", getFile.getBody().utf8());
+			var download = server.takeRequest();
+			assertEquals("/files/token/animated_sticker.tgs", download.getTarget());
 
-		var download = server.takeRequest();
-		assertEquals("/files/token/animated_sticker.tgs", download.getTarget());
-
-		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
-		assertResponseContainsMessage(sendMessage, Answer.FILE_ALREADY_VALID);
+			var sendMessage = server.takeRequest();
+			assertEquals("/api/token/sendMessage", sendMessage.getTarget());
+			assertResponseContainsMessage(sendMessage, Answer.FILE_ALREADY_VALID);
+		}
 	}
 
 	@Test
@@ -142,23 +145,23 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("big.png"));
 		server.enqueue(MockResponses.fileDownload(loadResource("big.png")));
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=big.png", getFile.getBody().utf8());
 
-		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getTarget());
-		assertNotNull(getFile.getBody());
-		assertEquals("file_id=big.png", getFile.getBody().utf8());
+			var download = server.takeRequest();
+			assertEquals("/files/token/big.png", download.getTarget());
 
-		var download = server.takeRequest();
-		assertEquals("/files/token/big.png", download.getTarget());
-
-		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-		assertNotNull(sendDocument.getBody());
-		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+			assertNotNull(sendDocument.getBody());
+			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+		}
 	}
 
 	@Test
@@ -167,23 +170,23 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("static.webp"));
 		server.enqueue(MockResponses.fileDownload(loadResource("static.webp")));
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=static.webp", getFile.getBody().utf8());
 
-		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getTarget());
-		assertNotNull(getFile.getBody());
-		assertEquals("file_id=static.webp", getFile.getBody().utf8());
+			var download = server.takeRequest();
+			assertEquals("/files/token/static.webp", download.getTarget());
 
-		var download = server.takeRequest();
-		assertEquals("/files/token/static.webp", download.getTarget());
-
-		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-		assertNotNull(sendDocument.getBody());
-		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+			assertNotNull(sendDocument.getBody());
+			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+		}
 	}
 
 	@Test
@@ -192,23 +195,23 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("long.mov"));
 		server.enqueue(MockResponses.fileDownload(loadResource("long.mov")));
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=long.mov", getFile.getBody().utf8());
 
-		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getTarget());
-		assertNotNull(getFile.getBody());
-		assertEquals("file_id=long.mov", getFile.getBody().utf8());
+			var download = server.takeRequest();
+			assertEquals("/files/token/long.mov", download.getTarget());
 
-		var download = server.takeRequest();
-		assertEquals("/files/token/long.mov", download.getTarget());
-
-		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-		assertNotNull(sendDocument.getBody());
-		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+			assertNotNull(sendDocument.getBody());
+			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+		}
 	}
 
 	@Test
@@ -217,23 +220,23 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("short_low_fps.webm"));
 		server.enqueue(MockResponses.fileDownload(loadResource("short_low_fps.webm")));
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=short_low_fps.webm", getFile.getBody().utf8());
 
-		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getTarget());
-		assertNotNull(getFile.getBody());
-		assertEquals("file_id=short_low_fps.webm", getFile.getBody().utf8());
+			var download = server.takeRequest();
+			assertEquals("/files/token/short_low_fps.webm", download.getTarget());
 
-		var download = server.takeRequest();
-		assertEquals("/files/token/short_low_fps.webm", download.getTarget());
-
-		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-		assertNotNull(sendDocument.getBody());
-		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+			assertNotNull(sendDocument.getBody());
+			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+		}
 	}
 
 	@Test
@@ -242,23 +245,23 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("valid.gif"));
 		server.enqueue(MockResponses.fileDownload(loadResource("valid.gif")));
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=valid.gif", getFile.getBody().utf8());
 
-		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getTarget());
-		assertNotNull(getFile.getBody());
-		assertEquals("file_id=valid.gif", getFile.getBody().utf8());
+			var download = server.takeRequest();
+			assertEquals("/files/token/valid.gif", download.getTarget());
 
-		var download = server.takeRequest();
-		assertEquals("/files/token/valid.gif", download.getTarget());
-
-		var sendDocument = server.takeRequest();
-		assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-		assertNotNull(sendDocument.getBody());
-		assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+			assertNotNull(sendDocument.getBody());
+			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+		}
 	}
 
 	@Test
@@ -267,22 +270,22 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("document.txt"));
 		server.enqueue(MockResponses.fileDownload(loadResource("document.txt")));
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=document.txt", getFile.getBody().utf8());
 
-		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getTarget());
-		assertNotNull(getFile.getBody());
-		assertEquals("file_id=document.txt", getFile.getBody().utf8());
+			var download = server.takeRequest();
+			assertEquals("/files/token/document.txt", download.getTarget());
 
-		var download = server.takeRequest();
-		assertEquals("/files/token/document.txt", download.getTarget());
-
-		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
-		assertResponseContainsMessage(sendMessage, Answer.ERROR);
+			var sendMessage = server.takeRequest();
+			assertEquals("/api/token/sendMessage", sendMessage.getTarget());
+			assertResponseContainsMessage(sendMessage, Answer.ERROR);
+		}
 	}
 
 	@Test
@@ -291,21 +294,21 @@ class StickerifyTest {
 		server.enqueue(MockResponses.fileInfo("corrupted.mp4"));
 		server.enqueue(MockResponses.fileDownload(loadResource("corrupted.mp4")));
 
-		startBot();
+		try (var _ = startBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
 
-		var getUpdates = server.takeRequest();
-		assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=corrupted.mp4", getFile.getBody().utf8());
 
-		var getFile = server.takeRequest();
-		assertEquals("/api/token/getFile", getFile.getTarget());
-		assertNotNull(getFile.getBody());
-		assertEquals("file_id=corrupted.mp4", getFile.getBody().utf8());
+			var download = server.takeRequest();
+			assertEquals("/files/token/corrupted.mp4", download.getTarget());
 
-		var download = server.takeRequest();
-		assertEquals("/files/token/corrupted.mp4", download.getTarget());
-
-		var sendMessage = server.takeRequest();
-		assertEquals("/api/token/sendMessage", sendMessage.getTarget());
-		assertResponseContainsMessage(sendMessage, Answer.CORRUPTED);
+			var sendMessage = server.takeRequest();
+			assertEquals("/api/token/sendMessage", sendMessage.getTarget());
+			assertResponseContainsMessage(sendMessage, Answer.CORRUPTED);
+		}
 	}
 }
