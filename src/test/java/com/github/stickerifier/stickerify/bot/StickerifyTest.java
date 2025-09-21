@@ -14,6 +14,7 @@ import mockwebserver3.MockWebServer;
 import mockwebserver3.QueueDispatcher;
 import mockwebserver3.RecordedRequest;
 import mockwebserver3.junit5.StartStop;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,11 @@ class StickerifyTest {
 
 	@StartStop
 	private final MockWebServer server = new MockWebServer();
+
+	@BeforeEach
+	public void setup() {
+		((QueueDispatcher) server.getDispatcher()).setFailFast(MockResponses.EMPTY_UPDATES);
+	}
 
 	@Test
 	void startMessage() throws Exception {
@@ -41,8 +47,6 @@ class StickerifyTest {
 	}
 
 	private Stickerify runBot() {
-		((QueueDispatcher)server.getDispatcher()).setFailFast(MockResponses.EMPTY_UPDATES);
-
 		var bot = new TelegramBot.Builder("token")
 				.apiUrl(server.url("api/").toString())
 				.fileApiUrl(server.url("files/").toString())
