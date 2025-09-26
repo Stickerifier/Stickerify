@@ -1,12 +1,17 @@
 package com.github.stickerifier.stickerify.bot;
 
+import com.github.stickerifier.stickerify.ResourceHelper;
 import mockwebserver3.MockResponse;
 import okio.Buffer;
 import okio.Okio;
 
-import java.io.File;
-
 public final class MockResponses {
+
+	static final MockResponse EMPTY_UPDATES = new MockResponse.Builder().body("""
+			{
+				ok: true
+			}
+			""").build();
 
 	static final MockResponse START_MESSAGE = new MockResponse.Builder().body("""
 			{
@@ -314,7 +319,7 @@ public final class MockResponses {
 			}
 			""").build();
 
-	static MockResponse fileInfo(String id) {
+	static MockResponse fileInfo(String fileName) {
 		return new MockResponse.Builder().body("""
 				{
 					ok: true,
@@ -323,10 +328,11 @@ public final class MockResponses {
 						file_path: "%1$s"
 					}
 				}
-				""".formatted(id)).build();
+				""".formatted(fileName)).build();
 	}
 
-	static MockResponse fileDownload(File file) throws Exception {
+	static MockResponse fileDownload(String fileName) throws Exception {
+		var file = ResourceHelper.loadResource(fileName);
 		try (var buffer = new Buffer(); var source = Okio.source(file)) {
 			buffer.writeAll(source);
 			return new MockResponse.Builder().body(buffer).build();

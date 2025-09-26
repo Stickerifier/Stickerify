@@ -41,6 +41,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -48,7 +49,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author Roberto Cella
  */
-public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesListener, ExceptionHandler {
+public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesListener, ExceptionHandler, AutoCloseable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
@@ -89,6 +90,17 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	@Override
 	public void onException(TelegramException e) {
 		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
+	}
+
+	@Override
+	public void close() {
+		bot.removeGetUpdatesListener();
+
+		if (executor instanceof ExecutorService es) {
+			es.close();
+		}
+
+		bot.shutdown();
 	}
 
 	private void answer(TelegramRequest request) {
