@@ -1,5 +1,6 @@
 import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
+import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     id('java')
@@ -31,12 +32,12 @@ version = '2.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
 
 java.toolchain {
-    languageVersion = JavaLanguageVersion.of(24)
+    languageVersion = JavaLanguageVersion.of(25)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
 updateDaemonJvm {
-    languageVersion = JavaLanguageVersion.of(24)
+    languageVersion = JavaLanguageVersion.of(25)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
@@ -84,8 +85,26 @@ jacocoTestReport {
     }
 }
 
+def generateCohArchive = tasks.register('generateCohArchive', JavaExec) {
+    inputs.dir(jlink.map { it.outputDirectory.get().asFile })
+    def dir = Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin' : 'lib'
+    outputs.file(jlink.map { it.outputDirectory.file("$dir/server/classes_coh.jsa").get().asFile })
+
+    javaLauncher = providers.provider { new JlinkJavaLauncher(jlink.get()) }
+    jvmArgs('-XX:+UseCompactObjectHeaders', '-Xshare:dump')
+    mainClass = '' // needed to use JavaExec task
+}
+
+jlink.configure {
+    finalizedBy(generateCohArchive)
+}
+
+test.mustRunAfter(generateCohArchive)
+installDist.mustRunAfter(generateCohArchive)
+
 application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
+    applicationDefaultJvmArgs = ['-XX:+UseCompactObjectHeaders', '-XX:+UseShenandoahGC', '-XX:ShenandoahGCMode=generational']
 }
 
 distributions {
