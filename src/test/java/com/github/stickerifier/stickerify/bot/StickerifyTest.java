@@ -28,7 +28,7 @@ class StickerifyTest {
 	private final MockWebServer server = new MockWebServer();
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		((QueueDispatcher) server.getDispatcher()).setFailFast(MockResponses.EMPTY_UPDATES);
 	}
 
