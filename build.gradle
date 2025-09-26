@@ -31,12 +31,12 @@ version = '2.0'
 description = 'Telegram bot to convert medias in the format required to be used as Telegram stickers'
 
 java.toolchain {
-    languageVersion = JavaLanguageVersion.of(24)
+    languageVersion = JavaLanguageVersion.of(25)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
 updateDaemonJvm {
-    languageVersion = JavaLanguageVersion.of(24)
+    languageVersion = JavaLanguageVersion.of(25)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
@@ -84,8 +84,20 @@ jacocoTestReport {
     }
 }
 
+def generateCohArchive = tasks.register('generateCohArchive', Exec) {
+    inputs.dir(jlink.map { it.outputDirectory.get().asFile })
+
+    def java = jlink.map { it.outputDirectory.file('jre/bin/java').get().asFile.absolutePath }
+    doFirst { commandLine(java.get(), '-XX:+UseCompactObjectHeaders', '-Xshare:dump') }
+}
+
+jlink.configure { finalizedBy(generateCohArchive) }
+test.mustRunAfter(generateCohArchive)
+installDist.mustRunAfter(generateCohArchive)
+
 application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
+    applicationDefaultJvmArgs = ['-XX:+UseCompactObjectHeaders', '-XX:+UseShenandoahGC', '-XX:ShenandoahGCMode=generational']
 }
 
 distributions {
