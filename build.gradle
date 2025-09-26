@@ -1,6 +1,5 @@
 import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
-import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     id('java')
@@ -85,20 +84,14 @@ jacocoTestReport {
     }
 }
 
-def generateCohArchive = tasks.register('generateCohArchive', JavaExec) {
+def generateCohArchive = tasks.register('generateCohArchive', Exec) {
     inputs.dir(jlink.map { it.outputDirectory.get().asFile })
-    def dir = Os.isFamily(Os.FAMILY_WINDOWS) ? 'bin' : 'lib'
-    outputs.file(jlink.map { it.outputDirectory.file("$dir/server/classes_coh.jsa").get().asFile })
 
-    javaLauncher = providers.provider { new JlinkJavaLauncher(jlink.get()) }
-    jvmArgs('-XX:+UseCompactObjectHeaders', '-Xshare:dump')
-    mainClass = '' // needed to use JavaExec task
+    def java = jlink.map { it.outputDirectory.file('jre/bin/java').get().asFile.absolutePath }
+    doFirst { commandLine(java.get(), '-XX:+UseCompactObjectHeaders', '-Xshare:dump') }
 }
 
-jlink.configure {
-    finalizedBy(generateCohArchive)
-}
-
+jlink.configure { finalizedBy(generateCohArchive) }
 test.mustRunAfter(generateCohArchive)
 installDist.mustRunAfter(generateCohArchive)
 
