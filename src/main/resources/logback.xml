@@ -13,5 +13,4 @@
 	</root>
 
 	<logger name="org.apache.tika" level="info" />
-	<logger name="ws.schild.jave" level="error" />
 </configuration>
