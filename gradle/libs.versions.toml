@@ -1,7 +1,6 @@
 [libraries]
 gson = "com.google.code.gson:gson:2.13.2"
 hamcrest = "org.hamcrest:hamcrest:3.0"
-jave = "ws.schild:jave-core:3.5.0"
 jspecify = "org.jspecify:jspecify:1.0.0"
 junit-jupiter = "org.junit.jupiter:junit-jupiter:5.13.4"
 junit-platform = "org.junit.platform:junit-platform-launcher:1.13.4"

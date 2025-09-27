@@ -3,7 +3,6 @@
 .gradle/
 .idea/
 build/
-src/test/
 src/main/resources/images/
 .gitattributes
 .gitignore

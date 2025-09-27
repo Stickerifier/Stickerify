@@ -13,21 +13,19 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.junit.Tags;
-import com.github.stickerifier.stickerify.process.PathLocator;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import ws.schild.jave.MultimediaObject;
-import ws.schild.jave.info.MultimediaInfo;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -49,19 +47,16 @@ class MediaHelperTest {
 	}
 
 	private static void assertImageConsistency(File result, int expectedWidth, int expectedHeight) throws Exception {
-		var size = getFileInfo(result).getVideo().getSize();
+		var videoInfo = MediaHelper.retrieveMultimediaInfo(result).video();
+		assertNotNull(videoInfo);
 		var actualExtension = getExtension(result);
 
 		assertAll("Image validation failed",
 				() -> assertThat("image's extension must be webp", actualExtension, is(equalTo(".webp"))),
-				() -> assertThat("image's width is not correct", size.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat("image's height is not correct", size.getHeight(), is(equalTo(expectedHeight))),
+				() -> assertThat("image's width is not correct", videoInfo.width(), is(equalTo(expectedWidth))),
+				() -> assertThat("image's height is not correct", videoInfo.height(), is(equalTo(expectedHeight))),
 				() -> assertThat("image size should not exceed 512 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_IMAGE_FILE_SIZE)))
 		);
-	}
-
-	private static MultimediaInfo getFileInfo(File file) throws Exception {
-		return new MultimediaObject(file, PathLocator.INSTANCE).getInfo();
 	}
 
 	private static String getExtension(File file) {
@@ -154,25 +149,27 @@ class MediaHelperTest {
 		var movVideo = loadResource("long.mov");
 		var result = MediaHelper.convert(movVideo);
 
-		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
+		assertVideoConsistency(result, 512, 288, 29.97003F, 3_003L);
 	}
 
 	private static void assertVideoConsistency(File result, int expectedWidth, int expectedHeight, float expectedFrameRate, long expectedDuration) throws Exception {
-		var mediaInfo = getFileInfo(result);
-		var videoInfo = mediaInfo.getVideo();
-		var videoSize = videoInfo.getSize();
+		var mediaInfo = MediaHelper.retrieveMultimediaInfo(result);
+		var videoInfo = mediaInfo.video();
+		assertNotNull(videoInfo);
+		var formatInfo = mediaInfo.format();
+		assertNotNull(formatInfo);
 
 		var actualExtension = getExtension(result);
 
 		assertAll("Video validation failed",
 				() -> assertThat("video's extension must be webm", actualExtension, is(equalTo(".webm"))),
-				() -> assertThat("video's width is not correct", videoSize.getWidth(), is(equalTo(expectedWidth))),
-				() -> assertThat("video's height is not correct", videoSize.getHeight(), is(equalTo(expectedHeight))),
-				() -> assertThat("video's frame rate is not correct", videoInfo.getFrameRate(), is(equalTo(expectedFrameRate))),
-				() -> assertThat("video must be encoded with the VP9 codec", videoInfo.getDecoder(), startsWith(VP9_CODEC)),
-				() -> assertThat("video's duration is not correct", mediaInfo.getDuration(), is(equalTo(expectedDuration))),
-				() -> assertThat("video's format must be matroska", mediaInfo.getFormat(), is(equalTo(MATROSKA_FORMAT))),
-				() -> assertThat("video must have no audio stream", mediaInfo.getAudio(), is(nullValue())),
+				() -> assertThat("video's width is not correct", videoInfo.width(), is(equalTo(expectedWidth))),
+				() -> assertThat("video's height is not correct", videoInfo.height(), is(equalTo(expectedHeight))),
+				() -> assertThat("video's frame rate is not correct", videoInfo.frameRateAsFloat(), is(equalTo(expectedFrameRate))),
+				() -> assertThat("video must be encoded with the VP9 codec", videoInfo.codec(), is(equalTo(VP9_CODEC))),
+				() -> assertThat("video's duration is not correct", formatInfo.durationAsMillis(), is(equalTo(expectedDuration))),
+				() -> assertThat("video's format must be matroska", formatInfo.format(), startsWith(MATROSKA_FORMAT)),
+				() -> assertThat("video must have no audio stream", mediaInfo.audio(), is(nullValue())),
 				() -> assertThat("video size should not exceed 256 KB", Files.size(result.toPath()), is(lessThanOrEqualTo(MAX_VIDEO_FILE_SIZE)))
 		);
 	}
@@ -183,7 +180,7 @@ class MediaHelperTest {
 		var mp4Video = loadResource("video_with_audio.mp4");
 		var result = MediaHelper.convert(mp4Video);
 
-		assertVideoConsistency(result, 512, 288, 29.97F, 3_000L);
+		assertVideoConsistency(result, 512, 288, 29.97003F, 3_003L);
 	}
 
 	@Test
@@ -192,7 +189,7 @@ class MediaHelperTest {
 		var m4vVideo = loadResource("video_with_audio.m4v");
 		var result = MediaHelper.convert(m4vVideo);
 
-		assertVideoConsistency(result, 512, 214, 23.98F, 3_000L);
+		assertVideoConsistency(result, 512, 214, 23.976025F, 3_003L);
 	}
 
 	@Test
@@ -255,7 +252,7 @@ class MediaHelperTest {
 		var webpVideo = loadResource("animated.webp");
 
 		var ex = assertThrows(MediaException.class, () -> MediaHelper.convert(webpVideo));
-		assertThat(ex.getMessage(), equalTo("Couldn't read image dimensions"));
+		assertThat(ex.getMessage(), equalTo("FFmpeg image conversion failed"));
 	}
 
 	@Test
