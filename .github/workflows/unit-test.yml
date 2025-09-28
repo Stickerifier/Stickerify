@@ -52,9 +52,61 @@ jobs:
         if: runner.os == 'Linux'
         with:
           name: coverage_report
-          path: .qodana/code-coverage/report.xml
+          path: build/code-coverage/report.xml
           retention-days: 1
           if-no-files-found: error
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        if: runner.os == 'Linux'
+        with:
+          upload: false
+          output: build/sarif-results
+
+      - name: Upload CodeQL report
+        uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux'
+        with:
+          name: codeql_analysis
+          path: build/sarif-results/java.sarif
+          retention-days: 1
+          if-no-files-found: error
+
+  codeql:
+    name: Upload CodeQL analysis
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      security-events: write
+    steps:
+      - name: Checkout code changes
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v5
+        with:
+          name: codeql_analysis
+          path: build/sarif-results
+
+      - name: Filter SARIF
+        uses: advanced-security/filter-sarif@v1
+        if: runner.os == 'Linux'
+        with:
+          patterns: |
+            -.gradle/**
+            -**/generated/**
+          input: build/sarif-results/java.sarif
+          output: build/sarif-results/java.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: build/sarif-results/java.sarif
+          category: "/language:java-kotlin"
 
   qodana:
     name: Perform Qodana analysis

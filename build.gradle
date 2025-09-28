@@ -70,7 +70,7 @@ jacocoTestReport {
     reports {
         html.required = false
         xml.required = true
-        xml.outputLocation = file('.qodana/code-coverage/report.xml')
+        xml.outputLocation = file('build/code-coverage/report.xml')
     }
 
     afterEvaluate {
