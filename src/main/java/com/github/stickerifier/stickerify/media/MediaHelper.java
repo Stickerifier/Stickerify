@@ -6,18 +6,17 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIM
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAME_RATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIDE_LENGTH;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.github.stickerifier.stickerify.exception.CorruptedVideoException;
+import com.github.stickerifier.stickerify.exception.CorruptedFileException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.ProcessException;
 import com.github.stickerifier.stickerify.process.OsConstants;
-import com.github.stickerifier.stickerify.process.PathLocator;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -26,14 +25,12 @@ import org.apache.tika.Tika;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ws.schild.jave.EncoderException;
-import ws.schild.jave.MultimediaObject;
-import ws.schild.jave.info.MultimediaInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
@@ -128,20 +125,32 @@ public final class MediaHelper {
 	 * @param file the file to check
 	 * @return {@code true} if the file is compliant
 	 * @throws FileOperationException if an error occurred retrieving the size of the file
+	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	private static boolean isVideoCompliant(File file) throws FileOperationException, CorruptedVideoException {
+	private static boolean isVideoCompliant(File file) throws FileOperationException, CorruptedFileException, InterruptedException {
 		var mediaInfo = retrieveMultimediaInfo(file);
-		var videoInfo = mediaInfo.getVideo();
-		var videoSize = videoInfo.getSize();
 
-		return isSizeCompliant(videoSize.getWidth(), videoSize.getHeight())
-				&& videoInfo.getFrameRate() <= MAX_VIDEO_FRAMES
-				&& videoInfo.getDecoder().startsWith(VP9_CODEC)
-				&& mediaInfo.getDuration() > 0L
-				&& mediaInfo.getDuration() <= MAX_VIDEO_DURATION_MILLIS
-				&& mediaInfo.getAudio() == null
-				&& MATROSKA_FORMAT.equals(mediaInfo.getFormat())
-				&& isFileSizeLowerThan(file, MAX_VIDEO_FILE_SIZE);
+		var formatInfo = mediaInfo.format();
+		if (formatInfo == null) {
+			return false;
+		}
+
+		if (formatInfo.duration() == null) {
+			return false;
+		}
+
+		var videoInfo = mediaInfo.video();
+		if (videoInfo == null) {
+			return false;
+		}
+
+		return isSizeCompliant(videoInfo.width(), videoInfo.height())
+				&& videoInfo.frameRate() <= MAX_VIDEO_FRAMES
+				&& VP9_CODEC.equals(videoInfo.codec())
+				&& formatInfo.duration() <= MAX_VIDEO_DURATION_SECONDS
+				&& mediaInfo.audio() == null
+				&& formatInfo.format().startsWith(MATROSKA_FORMAT)
+				&& formatInfo.size() <= MAX_VIDEO_FILE_SIZE;
 	}
 
 	/**
@@ -149,15 +158,64 @@ public final class MediaHelper {
 	 *
 	 * @param file the video to check
 	 * @return passed-in video's multimedia information
-	 * @throws CorruptedVideoException if an error occurred retrieving video information
+	 * @throws CorruptedFileException if an error occurred retrieving file information
+	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	private static MultimediaInfo retrieveMultimediaInfo(File file) throws CorruptedVideoException {
+	static MultimediaInfo retrieveMultimediaInfo(File file) throws CorruptedFileException, InterruptedException {
+		var command = new String[] {
+				"ffprobe",
+				"-hide_banner",
+				"-v", "quiet",
+				"-print_format", "json",
+				"-show_format",
+				"-show_streams",
+				file.getAbsolutePath()
+		};
+
 		try {
-			return new MultimediaObject(file, PathLocator.INSTANCE).getInfo();
-		} catch (EncoderException e) {
-			throw new CorruptedVideoException("The video could not be processed successfully", e);
+			var output = ProcessHelper.executeCommand(command);
+
+			return GSON.fromJson(output, MultimediaInfo.class);
+		} catch (ProcessException | JsonSyntaxException e) {
+			throw new CorruptedFileException("The file could not be processed successfully", e);
 		}
 	}
+
+	record MultimediaInfo(List<StreamInfo> streams, @Nullable FormatInfo format) {
+		@Nullable
+		StreamInfo audio() {
+			return streams.stream()
+					.filter(s -> s.type == CodecType.AUDIO)
+					.findFirst()
+					.orElse(null);
+		}
+
+		@Nullable
+		StreamInfo video() {
+			return streams.stream()
+					.filter(s -> s.type == CodecType.VIDEO)
+					.findFirst()
+					.orElse(null);
+		}
+	}
+
+	record StreamInfo(@SerializedName("codec_name") String codec, @SerializedName("codec_type") CodecType type, int width, int height, @SerializedName("avg_frame_rate") String frameRateRatio) {
+		float frameRate() {
+			if (frameRateRatio.contains("/")) {
+				var ratio = frameRateRatio.split("/");
+				return Float.parseFloat(ratio[0]) / Float.parseFloat(ratio[1]);
+			} else {
+				return Float.parseFloat(frameRateRatio);
+			}
+		}
+	}
+
+	private enum CodecType {
+		@SerializedName("video") VIDEO,
+		@SerializedName("audio") AUDIO
+	}
+
+	record FormatInfo(@SerializedName("format_name") String format, @Nullable Float duration, long size) {}
 
 	/**
 	 * Checks if the file is a {@code gzip} archive, then it reads its content and verifies if it's a valid JSON.
@@ -183,7 +241,11 @@ public final class MediaHelper {
 
 				boolean isAnimationCompliant = isAnimationCompliant(sticker);
 				if (isAnimationCompliant) {
-					return isFileSizeLowerThan(file, MAX_ANIMATION_FILE_SIZE);
+					try {
+						return Files.size(file.toPath()) <= MAX_ANIMATION_FILE_SIZE;
+					} catch (IOException e) {
+						throw new FileOperationException(e);
+					}
 				}
 
 				LOGGER.atWarn().log("The {} doesn't meet Telegram's requirements", sticker);
@@ -227,37 +289,30 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Checks that passed-in file's size does not exceed the specified threshold.
-	 *
-	 * @param file the file to check
-	 * @param threshold max allowed file size
-	 * @return {@code true} if file's size is compliant
-	 * @throws FileOperationException if an error occurred retrieving the size of the file
-	 */
-	private static boolean isFileSizeLowerThan(File file, long threshold) throws FileOperationException {
-		try {
-			return Files.size(file.toPath()) <= threshold;
-		} catch (IOException e) {
-			throw new FileOperationException(e);
-		}
-	}
-
-	/**
 	 * Checks if passed-in image is already compliant with Telegram's requisites.
 	 *
 	 * @param image the image to check
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
+	 * @throws CorruptedFileException if an error occurred retrieving image information
+	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	private static boolean isImageCompliant(File image, String mimeType) throws CorruptedVideoException, FileOperationException {
-		var videoSize = retrieveMultimediaInfo(image).getVideo().getSize();
-		if (videoSize == null) {
-			throw new FileOperationException("Couldn't read image dimensions");
+	private static boolean isImageCompliant(File image, String mimeType) throws CorruptedFileException, InterruptedException {
+		var mediaInfo = retrieveMultimediaInfo(image);
+
+		var formatInfo = mediaInfo.format();
+		if (formatInfo == null) {
+			return false;
+		}
+
+		var imageInfo = mediaInfo.video();
+		if (imageInfo == null) {
+			return false;
 		}
 
 		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType))
-				&& isSizeCompliant(videoSize.getWidth(), videoSize.getHeight())
-				&& isFileSizeLowerThan(image, MAX_IMAGE_FILE_SIZE);
+				&& isSizeCompliant(imageInfo.width(), imageInfo.height())
+				&& formatInfo.size() <= MAX_IMAGE_FILE_SIZE;
 	}
 
 	/**
@@ -362,7 +417,7 @@ public final class MediaHelper {
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-b:v", "650K",
 				"-pix_fmt", "yuv420p",
-				"-t", String.valueOf(MAX_VIDEO_DURATION_MILLIS / 1000),
+				"-t", String.valueOf(MAX_VIDEO_DURATION_SECONDS),
 				"-an",
 				"-passlogfile", logPrefix
 		};

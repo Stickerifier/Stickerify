@@ -5,7 +5,7 @@ import com.github.stickerifier.stickerify.bot.Stickerify;
 public class Main {
 	static final Object LOCK = new Object();
 
-	public static void main(String[] args) {
+	static void main() {
 		try (var _ = new Stickerify()) {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				synchronized (LOCK) {
