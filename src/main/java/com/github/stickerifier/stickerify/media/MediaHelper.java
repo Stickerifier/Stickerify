@@ -147,10 +147,10 @@ public final class MediaHelper {
 		return isSizeCompliant(videoInfo.width(), videoInfo.height())
 				&& videoInfo.frameRate() <= MAX_VIDEO_FRAMES
 				&& VP9_CODEC.equals(videoInfo.codec())
-				&& Float.parseFloat(formatInfo.duration()) <= MAX_VIDEO_DURATION_SECONDS
+				&& formatInfo.duration() <= MAX_VIDEO_DURATION_SECONDS
 				&& mediaInfo.audio() == null
 				&& formatInfo.format().startsWith(MATROSKA_FORMAT)
-				&& Long.parseLong(formatInfo.size()) <= MAX_VIDEO_FILE_SIZE;
+				&& formatInfo.size() <= MAX_VIDEO_FILE_SIZE;
 	}
 
 	/**
@@ -173,8 +173,7 @@ public final class MediaHelper {
 		};
 
 		try {
-			var lines = ProcessHelper.executeCommand(command);
-			var body = String.join("\n", lines);
+			var body = ProcessHelper.executeCommand(command);
 
 			return GSON.fromJson(body, MultimediaInfo.class);
 		} catch (ProcessException | JsonSyntaxException e) {
@@ -183,20 +182,23 @@ public final class MediaHelper {
 	}
 
 	record MultimediaInfo(List<StreamInfo> streams, @Nullable FormatInfo format) {
-		@Nullable StreamInfo audio() {
+		@Nullable
+		StreamInfo audio() {
 			return streams.stream()
 					.filter(s -> s.type == CodecType.AUDIO)
 					.findFirst()
 					.orElse(null);
 		}
 
-		@Nullable StreamInfo video() {
+		@Nullable
+		StreamInfo video() {
 			return streams.stream()
 					.filter(s -> s.type == CodecType.VIDEO)
 					.findFirst()
 					.orElse(null);
 		}
 	}
+
 	record StreamInfo(@SerializedName("codec_name") String codec, @SerializedName("codec_type") CodecType type, int width, int height, @SerializedName("avg_frame_rate") String frameRateRatio) {
 		float frameRate() {
 			if (frameRateRatio.contains("/")) {
@@ -207,11 +209,13 @@ public final class MediaHelper {
 			}
 		}
 	}
+
 	private enum CodecType {
 		@SerializedName("video") VIDEO,
 		@SerializedName("audio") AUDIO
 	}
-	record FormatInfo(@SerializedName("format_name") String format, @Nullable String duration, String size) {}
+
+	record FormatInfo(@SerializedName("format_name") String format, @Nullable Float duration, long size) {}
 
 	/**
 	 * Checks if the file is a {@code gzip} archive, then it reads its content and verifies if it's a valid JSON.
@@ -301,14 +305,14 @@ public final class MediaHelper {
 			return false;
 		}
 
-		var videoInfo = mediaInfo.video();
-		if (videoInfo == null) {
+		var imageInfo = mediaInfo.video();
+		if (imageInfo == null) {
 			return false;
 		}
 
 		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType))
-				&& isSizeCompliant(videoInfo.width(), videoInfo.height())
-				&& Long.parseLong(formatInfo.size()) <= MAX_IMAGE_FILE_SIZE;
+				&& isSizeCompliant(imageInfo.width(), imageInfo.height())
+				&& formatInfo.size() <= MAX_IMAGE_FILE_SIZE;
 	}
 
 	/**

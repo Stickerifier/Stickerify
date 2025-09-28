@@ -7,8 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.StringJoiner;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +22,7 @@ public final class ProcessHelper {
 	 * environment variable (defaults to 4).
 	 *
 	 * @param command the command to be executed
-	 * @return the merged stdout/stderr of the command, split by lines
+	 * @return the merged stdout/stderr of the command
 	 * @throws ProcessException either if:
 	 * <ul>
 	 *     <li>the command was unsuccessful
@@ -33,12 +32,12 @@ public final class ProcessHelper {
 	 * </ul>
 	 * @throws InterruptedException if the current thread is interrupted while waiting for the command to finish
 	 */
-	public static List<String> executeCommand(final String... command) throws ProcessException, InterruptedException {
+	public static String executeCommand(final String... command) throws ProcessException, InterruptedException {
 		SEMAPHORE.acquire();
 		try {
 			var process = new ProcessBuilder(command).redirectErrorStream(true).start();
 
-			var output = new ArrayList<String>(64);
+			var output = new StringJoiner("\n");
 			var readerThread = Thread.ofVirtual().start(() -> {
 				try (var reader = process.inputReader(UTF_8)) {
 					reader.lines().forEach(output::add);
@@ -51,17 +50,16 @@ public final class ProcessHelper {
 			if (!finished) {
 				process.destroyForcibly();
 				readerThread.join();
-				throw new ProcessException("The command {} timed out after 1m\n{}", command[0], String.join("\n", output));
+				throw new ProcessException("The command {} timed out after 1m\n{}", command[0], output.toString());
 			}
 
 			readerThread.join();
 			var exitCode = process.exitValue();
 			if (exitCode != 0) {
-				var lines = String.join("\n", output);
-				throw new ProcessException("The command {} exited with code {}\n{}", command[0], exitCode, lines);
+				throw new ProcessException("The command {} exited with code {}\n{}", command[0], exitCode, output.toString());
 			}
 
-			return output;
+			return output.toString();
 		} catch (IOException e) {
 			throw new ProcessException(e);
 		} finally {
