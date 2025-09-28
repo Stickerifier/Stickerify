@@ -6,7 +6,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIM
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FRAME_RATE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_SIDE_LENGTH;
-import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_MILLIS;
+import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
@@ -132,29 +132,25 @@ public final class MediaHelper {
 
 		var formatInfo = mediaInfo.format();
 		if (formatInfo == null) {
-			return false; // not a video, maybe throw
+			return false;
 		}
 
-		var duration = formatInfo.durationAsMillis();
-		if (duration == null) {
-			return false; // not a video, maybe throw
+		if (formatInfo.duration() == null) {
+			return false;
 		}
 
 		var videoInfo = mediaInfo.video();
 		if (videoInfo == null) {
-			return false; // not a video, maybe throw
+			return false;
 		}
 
-		var size = formatInfo.sizeAsLong();
-		var frameRate = videoInfo.frameRateAsFloat();
-
 		return isSizeCompliant(videoInfo.width(), videoInfo.height())
-				&& frameRate <= MAX_VIDEO_FRAMES
+				&& videoInfo.frameRate() <= MAX_VIDEO_FRAMES
 				&& VP9_CODEC.equals(videoInfo.codec())
-				&& duration <= MAX_VIDEO_DURATION_MILLIS
+				&& Float.parseFloat(formatInfo.duration()) <= MAX_VIDEO_DURATION_SECONDS
 				&& mediaInfo.audio() == null
 				&& formatInfo.format().startsWith(MATROSKA_FORMAT)
-				&& size <= MAX_VIDEO_FILE_SIZE;
+				&& Long.parseLong(formatInfo.size()) <= MAX_VIDEO_FILE_SIZE;
 	}
 
 	/**
@@ -189,43 +185,33 @@ public final class MediaHelper {
 	record MultimediaInfo(List<StreamInfo> streams, @Nullable FormatInfo format) {
 		@Nullable StreamInfo audio() {
 			return streams.stream()
-					.filter(s -> StreamInfo.TYPE_AUDIO.equals(s.type))
+					.filter(s -> s.type == CodecType.AUDIO)
 					.findFirst()
 					.orElse(null);
 		}
 
 		@Nullable StreamInfo video() {
 			return streams.stream()
-					.filter(s -> StreamInfo.TYPE_VIDEO.equals(s.type))
+					.filter(s -> s.type == CodecType.VIDEO)
 					.findFirst()
 					.orElse(null);
 		}
 	}
-	record StreamInfo(@SerializedName("codec_name") String codec, @SerializedName("codec_type") String type, int width, int height, @SerializedName("avg_frame_rate") String frameRateFraction) {
-		private static final String TYPE_AUDIO = "audio";
-		private static final String TYPE_VIDEO = "video";
-
-		float frameRateAsFloat() {
-			if (frameRateFraction.contains("/")) {
-				var ratio = frameRateFraction.split("/");
+	record StreamInfo(@SerializedName("codec_name") String codec, @SerializedName("codec_type") CodecType type, int width, int height, @SerializedName("avg_frame_rate") String frameRateRatio) {
+		float frameRate() {
+			if (frameRateRatio.contains("/")) {
+				var ratio = frameRateRatio.split("/");
 				return Float.parseFloat(ratio[0]) / Float.parseFloat(ratio[1]);
 			} else {
-				return Float.parseFloat(frameRateFraction);
+				return Float.parseFloat(frameRateRatio);
 			}
 		}
 	}
-	record FormatInfo(@SerializedName("format_name") String format, @SerializedName("duration") @Nullable String duration, String size) {
-		@Nullable Long durationAsMillis() {
-			if (duration == null) {
-				return null;
-			}
-			return (long) (Float.parseFloat(duration) * 1000);
-		}
-
-		long sizeAsLong() {
-			return Long.parseLong(size);
-		}
+	private enum CodecType {
+		@SerializedName("video") VIDEO,
+		@SerializedName("audio") AUDIO
 	}
+	record FormatInfo(@SerializedName("format_name") String format, @Nullable String duration, String size) {}
 
 	/**
 	 * Checks if the file is a {@code gzip} archive, then it reads its content and verifies if it's a valid JSON.
@@ -312,19 +298,17 @@ public final class MediaHelper {
 
 		var formatInfo = mediaInfo.format();
 		if (formatInfo == null) {
-			return false; // not an image, maybe throw
+			return false;
 		}
 
 		var videoInfo = mediaInfo.video();
 		if (videoInfo == null) {
-			return false; // not an image, maybe throw
+			return false;
 		}
-
-		var size = formatInfo.sizeAsLong();
 
 		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType))
 				&& isSizeCompliant(videoInfo.width(), videoInfo.height())
-				&& size <= MAX_IMAGE_FILE_SIZE;
+				&& Long.parseLong(formatInfo.size()) <= MAX_IMAGE_FILE_SIZE;
 	}
 
 	/**
@@ -429,7 +413,7 @@ public final class MediaHelper {
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-b:v", "650K",
 				"-pix_fmt", "yuv420p",
-				"-t", String.valueOf(MAX_VIDEO_DURATION_MILLIS / 1000),
+				"-t", String.valueOf(MAX_VIDEO_DURATION_SECONDS),
 				"-an",
 				"-passlogfile", logPrefix
 		};

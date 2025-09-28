@@ -118,7 +118,7 @@ therefore counting towards the four-contribution goal.
 * The bot is deployed on [Railway](https://railway.app?referralCode=rob)
 * The official documentation of the Telegram Bot API can be found [here](https://core.telegram.org/bots)
 * The library used by the bot to work with Telegram is [Java Telegram Bot API](https://github.com/pengrad/java-telegram-bot-api)
-* Video and image conversions use [FFmpeg](https://ffmpeg.org/) and [JAVE2](https://github.com/a-schild/jave2)
+* Video and image conversions use [FFmpeg](https://ffmpeg.org/)
 * Animated sticker validation uses [Gson](https://github.com/google/gson)
 * MIME type analysis is performed using [Apache Tika](https://tika.apache.org/)
 
