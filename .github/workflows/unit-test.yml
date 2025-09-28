@@ -23,6 +23,13 @@ jobs:
       - name: Checkout code changes
         uses: actions/checkout@v5
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        if: runner.os == 'Linux'
+        with:
+          languages: "java"
+          queries: security-and-quality
+
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
         with:
@@ -106,7 +113,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: build/sarif-results/java.sarif
-          category: "/language:java-kotlin"
+          category: "/language:java"
 
   qodana:
     name: Perform Qodana analysis
