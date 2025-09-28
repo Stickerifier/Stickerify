@@ -88,7 +88,7 @@ def generateCohArchive = tasks.register('generateCohArchive', Exec) {
     inputs.dir(jlink.map { it.outputDirectory.get().asFile })
 
     def java = jlink.map { it.outputDirectory.file('jre/bin/java').get().asFile.absolutePath }
-    doFirst { commandLine(java.get(), '-XX:+UseCompactObjectHeaders', '-Xshare:dump', '-XX:+AllowArchivingWithJavaAgent') }
+    doFirst { commandLine(java.get(), '-XX:+UseCompactObjectHeaders', '-Xshare:dump', '-XX:+UnlockDiagnosticVMOptions', '-XX:+AllowArchivingWithJavaAgent') }
 }
 
 jlink.configure { finalizedBy(generateCohArchive) }

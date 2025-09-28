@@ -94,7 +94,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
-      - name: Download CodeQL anaysis
+      - name: Download CodeQL analysis
         uses: actions/download-artifact@v5
         with:
           name: codeql_analysis
