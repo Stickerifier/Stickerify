@@ -173,9 +173,9 @@ public final class MediaHelper {
 		};
 
 		try {
-			var body = ProcessHelper.executeCommand(command);
+			var output = ProcessHelper.executeCommand(command);
 
-			return GSON.fromJson(body, MultimediaInfo.class);
+			return GSON.fromJson(output, MultimediaInfo.class);
 		} catch (ProcessException | JsonSyntaxException e) {
 			throw new CorruptedFileException("The file could not be processed successfully", e);
 		}
