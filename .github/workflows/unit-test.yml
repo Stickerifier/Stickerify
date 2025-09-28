@@ -15,6 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
+      security-events: write
     strategy:
       fail-fast: false
       matrix:
@@ -93,7 +94,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
-      - name: Download coverage report
+      - name: Download CodeQL anaysis
         uses: actions/download-artifact@v5
         with:
           name: codeql_analysis
@@ -101,7 +102,6 @@ jobs:
 
       - name: Filter SARIF
         uses: advanced-security/filter-sarif@v1
-        if: runner.os == 'Linux'
         with:
           patterns: |
             -.gradle/**
