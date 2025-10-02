@@ -21,6 +21,7 @@ import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.junit.Tags;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -45,7 +46,9 @@ class MediaHelperTest {
 		assertImageConsistency(result, 512, 341);
 	}
 
-	private static void assertImageConsistency(File image, int expectedWidth, int expectedHeight) throws Exception {
+	private static void assertImageConsistency(@Nullable File image, int expectedWidth, int expectedHeight) throws Exception {
+		assertNotNull(image);
+
 		var mediaInfo = MediaHelper.retrieveMultimediaInfo(image);
 		var imageInfo = mediaInfo.video();
 		assertNotNull(imageInfo);
@@ -154,7 +157,9 @@ class MediaHelperTest {
 		assertVideoConsistency(result, 512, 288, 29.97003F, 2.969F);
 	}
 
-	private static void assertVideoConsistency(File video, int expectedWidth, int expectedHeight, float expectedFrameRate, float expectedDuration) throws Exception {
+	private static void assertVideoConsistency(@Nullable File video, int expectedWidth, int expectedHeight, float expectedFrameRate, float expectedDuration) throws Exception {
+		assertNotNull(video);
+
 		var mediaInfo = MediaHelper.retrieveMultimediaInfo(video);
 		var videoInfo = mediaInfo.video();
 		assertNotNull(videoInfo);
