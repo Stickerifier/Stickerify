@@ -54,6 +54,11 @@ def jlink = tasks.register('jlink', JlinkTask) {
     description = 'Generates a minimal JRE for the project.'
 }
 
+nullability {
+    errorProneVersion = libs.errorprone.get().version
+    nullAwayVersion = libs.nullaway.get().version
+}
+
 tasks.named("compileTestJava") {
     options.nullability.checking = "tests"
 }
