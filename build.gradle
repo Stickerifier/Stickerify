@@ -41,7 +41,7 @@ updateDaemonJvm {
 }
 
 def jlink = tasks.register('jlink', JlinkTask) {
-    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages', '--ignore-modified-runtime']
     modules = [
             'java.instrument', // for junit
             'java.naming',     // for logback
