@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.telegram.bot.api)
     implementation(libs.tika)
 
+    testCompileOnly(libs.jspecify)
     testImplementation(libs.hamcrest)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockwebserver)
@@ -51,6 +52,15 @@ def jlink = tasks.register('jlink', JlinkTask) {
 
     group = 'build'
     description = 'Generates a minimal JRE for the project.'
+}
+
+nullability {
+    errorProneVersion = libs.errorprone.get().version
+    nullAwayVersion = libs.nullaway.get().version
+}
+
+tasks.named("compileTestJava") {
+    options.nullability.checking = "tests"
 }
 
 test {

@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.LoggingEventVO;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.spi.ThrowableProxyVO;
 import com.github.stickerifier.stickerify.exception.TelegramApiException;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Test double that serves as an implementation of {@link ILoggingEvent}.
@@ -15,7 +16,7 @@ class LoggingEvent extends LoggingEventVO {
 	static final String EXCEPTION_CLASS = TelegramApiException.class.getName();
 
 	private final String formattedMessage;
-	private IThrowableProxy throwableProxy;
+	private @Nullable IThrowableProxy throwableProxy;
 
 	LoggingEvent(String formattedMessage) {
 		this.formattedMessage = formattedMessage;
@@ -54,6 +55,7 @@ class LoggingEvent extends LoggingEventVO {
 		return formattedMessage;
 	}
 
+	@Nullable
 	@Override
 	public IThrowableProxy getThrowableProxy() {
 		return throwableProxy;
