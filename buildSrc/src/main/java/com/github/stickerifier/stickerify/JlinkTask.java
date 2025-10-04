@@ -87,10 +87,6 @@ public abstract class JlinkTask extends DefaultTask {
 			execSpec.setErrorOutput(stdout);
 		});
 
-		if (result.getExitValue() != 0) {
-			getLogger().log(LogLevel.ERROR, "jlink failed with exit code: {}", result.getExitValue());
-		}
-
 		var stdoutStr = stdout.toString();
 		if (!stdoutStr.isEmpty()) {
 			var level = result.getExitValue() == 0 ? LogLevel.INFO : LogLevel.ERROR;
