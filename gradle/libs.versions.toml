@@ -15,4 +15,4 @@ telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:9.2.0"
 tika = "org.apache.tika:tika-core:3.2.3"
 
 [plugins]
-spring-nullability = "io.spring.nullability:0.0.5"
+spring-nullability = "io.spring.nullability:0.0.6"
