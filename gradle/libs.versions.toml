@@ -1,5 +1,5 @@
 [versions]
-junit = "6.0.0"
+junit = "6.0.1"
 
 [libraries]
 errorprone = "com.google.errorprone:error_prone_core:2.43.0"
