@@ -9,7 +9,7 @@ jspecify = "org.jspecify:jspecify:1.0.0"
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 logback-classic = "ch.qos.logback:logback-classic:1.5.20"
-mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.2.1"
+mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.3.0"
 nullaway = "com.uber.nullaway:nullaway:0.12.11"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:9.2.0"
 tika = "org.apache.tika:tika-core:3.2.3"
