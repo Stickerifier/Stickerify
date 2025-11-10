@@ -2,7 +2,7 @@
 junit = "6.0.1"
 
 [libraries]
-errorprone = "com.google.errorprone:error_prone_core:2.43.0"
+errorprone = "com.google.errorprone:error_prone_core:2.44.0"
 gson = "com.google.code.gson:gson:2.13.2"
 hamcrest = "org.hamcrest:hamcrest:3.0"
 jspecify = "org.jspecify:jspecify:1.0.0"
