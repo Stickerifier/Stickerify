@@ -21,7 +21,7 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-13 ] # pin macos to latest x64 image
     steps:
       - name: Checkout code changes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
@@ -66,7 +66,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout code changes
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
