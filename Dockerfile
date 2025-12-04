@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew check installDist --no-dae
 
 # bump: alpine /FROM alpine:([\d.]+)/ docker:alpine|^3
 # bump: alpine link "Release notes" https://alpinelinux.org/posts/Alpine-$LATEST-released.html
-FROM alpine:3.22.2
+FROM alpine:3.23.0
 
 COPY --from=builder /usr/bin/ff* /usr/bin/
 COPY --from=builder /app/build/install/Stickerify/ .
