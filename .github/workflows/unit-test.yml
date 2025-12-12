@@ -48,7 +48,7 @@ jobs:
         run: ./gradlew test
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: runner.os == 'Linux'
         with:
           name: coverage_report
@@ -72,7 +72,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download coverage report
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: coverage_report
           path: .qodana/code-coverage
