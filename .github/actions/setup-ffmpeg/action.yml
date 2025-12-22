@@ -1,5 +1,5 @@
 name: Setup FFmpeg and FFprobe
-description: Install FFmpeg and FFprobe across Linux, MacOS (Intel), and Windows
+description: Install FFmpeg and FFprobe across Linux, macOS, and Windows
 inputs:
   ffmpeg-version:
     description: FFmpeg version to install
@@ -28,11 +28,9 @@ runs:
           curl -L "https://evermeet.cx/ffmpeg/ffmpeg-$FF_VERSION.zip" -o ffmpeg.zip
           unzip -q ffmpeg.zip
           mv ffmpeg "$INSTALL_DIR/ffmpeg"
-
           curl -L "https://evermeet.cx/ffmpeg/ffprobe-$FF_VERSION.zip" -o ffprobe.zip
           unzip -q ffprobe.zip
           mv ffprobe "$INSTALL_DIR/ffprobe"
-
           chmod +x "$INSTALL_DIR/"*
 
         elif [[ "${{ runner.os }}" == "Windows" ]]; then
