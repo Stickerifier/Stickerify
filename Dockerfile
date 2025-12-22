@@ -2,8 +2,8 @@ FROM eclipse-temurin:25-alpine AS builder
 
 WORKDIR /app
 
-# bump: ffmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|~7.0
-COPY --from=mwader/static-ffmpeg:7.0.2 /ff* /usr/bin/
+# bump: ffmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg
+COPY --from=mwader/static-ffmpeg:8.0.1 /ff* /usr/bin/
 
 COPY . .
 RUN --mount=type=cache,target=/root/.gradle ./gradlew check installDist --no-daemon

@@ -18,16 +18,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-15-intel ] # pin macos to latest x64 image
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v6
 
-      - name: Setup FFmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v3
+      - name: Setup FFmpeg and FFprobe
+        uses: ./.github/actions/setup-ffmpeg
         with:
-          # bump: ffmpeg-ci /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg|~7.0
-          ffmpeg-version: '7.0.2'
+          # bump: ffmpeg-ci /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg
+          ffmpeg-version: 8.0.1
 
       - name: Setup Java
         uses: actions/setup-java@v5
