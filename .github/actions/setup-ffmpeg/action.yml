@@ -1,0 +1,50 @@
+name: Setup FFmpeg and FFprobe
+description: Install FFmpeg and FFprobe across Linux, MacOS (Intel), and Windows
+inputs:
+  ffmpeg-version:
+    description: FFmpeg version to install
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Install FFmpeg and FFprobe
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        FF_VERSION="${{ inputs.ffmpeg-version }}"
+        INSTALL_DIR="$HOME/ffmpeg"
+        mkdir -p "$INSTALL_DIR"
+
+        if [[ "${{ runner.os }}" == "Linux" ]]; then
+          docker pull mwader/static-ffmpeg:$FF_VERSION
+          CID=$(docker create mwader/static-ffmpeg:$FF_VERSION)
+          docker cp "$CID:/ffmpeg" "$INSTALL_DIR/ffmpeg"
+          docker cp "$CID:/ffprobe" "$INSTALL_DIR/ffprobe"
+          docker rm "$CID"
+          chmod +x "$INSTALL_DIR/"*
+
+        elif [[ "${{ runner.os }}" == "macOS" ]]; then
+          curl -L "https://evermeet.cx/ffmpeg/ffmpeg-$FF_VERSION.zip" -o ffmpeg.zip
+          unzip -q ffmpeg.zip
+          mv ffmpeg "$INSTALL_DIR/ffmpeg"
+
+          curl -L "https://evermeet.cx/ffmpeg/ffprobe-$FF_VERSION.zip" -o ffprobe.zip
+          unzip -q ffprobe.zip
+          mv ffprobe "$INSTALL_DIR/ffprobe"
+
+          chmod +x "$INSTALL_DIR/"*
+
+        elif [[ "${{ runner.os }}" == "Windows" ]]; then
+          curl -L "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-$FF_VERSION-essentials_build.zip" -o ffmpeg.zip
+          unzip -q ffmpeg.zip
+          find . -type f \( -name ffmpeg.exe -o -name ffprobe.exe \) -exec mv {} "$INSTALL_DIR/" \;
+        fi
+
+        echo "$INSTALL_DIR" >> "$GITHUB_PATH"
+
+    - name: Verify FFmpeg and FFprobe installations
+      shell: bash
+      run: |
+        ffmpeg -version
+        ffprobe -version

@@ -23,46 +23,11 @@ jobs:
       - name: Checkout code changes
         uses: actions/checkout@v6
 
-      - name: Install FFmpeg and FFprobe
-        shell: bash
-        run: |
-          set -euo pipefail
+      - name: Setup FFmpeg and FFprobe
+        uses: ./.github/actions/setup-ffmpeg
+        with:
           # bump: ffmpeg-ci /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg
-          FF_VERSION="8.0.1"
-          INSTALL_DIR="$HOME/ffmpeg"
-          mkdir -p "$INSTALL_DIR"
-
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            docker pull mwader/static-ffmpeg:$FF_VERSION
-            CID=$(docker create mwader/static-ffmpeg:$FF_VERSION)
-            docker cp "$CID:/ffmpeg" "$INSTALL_DIR/ffmpeg"
-            docker cp "$CID:/ffprobe" "$INSTALL_DIR/ffprobe"
-            docker rm "$CID"
-            chmod +x "$INSTALL_DIR/"*
-
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            curl -L https://evermeet.cx/ffmpeg/ffmpeg-$FF_VERSION.zip -o ffmpeg.zip
-            unzip ffmpeg.zip
-            mv ffmpeg "$INSTALL_DIR/ffmpeg"
-            curl -L https://evermeet.cx/ffmpeg/ffprobe-$FF_VERSION.zip -o ffprobe.zip
-            unzip ffprobe.zip
-            mv ffprobe "$INSTALL_DIR/ffprobe"
-            chmod +x "$INSTALL_DIR/"*
-
-          elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-$FF_VERSION-essentials_build.zip -o ffmpeg.zip
-            unzip ffmpeg.zip
-            mv ffmpeg-*/bin/* "$INSTALL_DIR/"
-          fi
-
-          echo "$INSTALL_DIR" >> "$GITHUB_PATH"
-          echo "Installed FFmpeg and FFprobe $FF_VERSION"
-
-      - name: Verify FFmpeg and FFprobe installations
-        shell: bash
-        run: |
-          ffmpeg -version
-          ffprobe -version
+          ffmpeg-version: 8.0.1
 
       - name: Setup Java
         uses: actions/setup-java@v5
