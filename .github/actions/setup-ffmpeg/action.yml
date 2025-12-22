@@ -31,7 +31,9 @@ runs:
           curl -L "https://www.osxexperts.net/ffmpeg${FF_VERSION}arm.zip" -o ffmpeg.zip
           unzip -q ffmpeg.zip
           mv ffmpeg "$INSTALL_DIR/ffmpeg"
-          cp "$INSTALL_DIR/ffmpeg" "$INSTALL_DIR/ffprobe"
+          curl -L "https://www.osxexperts.net/ffprobe${FF_VERSION}arm.zip" -o ffprobe.zip
+          unzip -q ffprobe.zip
+          mv ffprobe "$INSTALL_DIR/ffprobe"
           chmod +x "$INSTALL_DIR/"*
 
         elif [[ "${{ runner.os }}" == "Windows" ]]; then
