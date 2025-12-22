@@ -23,11 +23,11 @@ jobs:
       - name: Checkout code changes
         uses: actions/checkout@v6
 
-      - name: Install FFmpeg
+      - name: Install FFmpeg and FFprobe
         shell: bash
         run: |
           set -euo pipefail
-          # bump: ffmpeg-ci /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg|~8.0
+          # bump: ffmpeg-ci /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg
           FF_VERSION="8.0.1"
           INSTALL_DIR="$HOME/ffmpeg"
           mkdir -p "$INSTALL_DIR"
@@ -56,6 +56,13 @@ jobs:
           fi
 
           echo "$INSTALL_DIR" >> "$GITHUB_PATH"
+          echo "Installed FFmpeg and FFprobe $FF_VERSION"
+
+      - name: Verify FFmpeg and FFprobe installations
+        shell: bash
+        run: |
+          ffmpeg -version
+          ffprobe -version
 
       - name: Setup Java
         uses: actions/setup-java@v5
