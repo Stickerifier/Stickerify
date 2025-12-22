@@ -35,11 +35,13 @@ runs:
           unzip -q ffprobe.zip
           mv ffprobe "$INSTALL_DIR/ffprobe"
           chmod +x "$INSTALL_DIR/"*
+          rm -f ffmpeg.zip ffprobe.zip
 
         elif [[ "${{ runner.os }}" == "Windows" ]]; then
           curl -L "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-$FF_VERSION-essentials_build.zip" -o ffmpeg.zip
           unzip -q ffmpeg.zip
           find . -type f \( -name ffmpeg.exe -o -name ffprobe.exe \) -exec mv {} "$INSTALL_DIR/" \;
+          rm -f ffmpeg.zip
         fi
 
         echo "$INSTALL_DIR" >> "$GITHUB_PATH"
