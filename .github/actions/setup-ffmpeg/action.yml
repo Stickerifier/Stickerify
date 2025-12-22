@@ -16,6 +16,8 @@ runs:
         INSTALL_DIR="$HOME/ffmpeg"
         mkdir -p "$INSTALL_DIR"
 
+        echo "Installing FFmpeg and FFprobe $FF_VERSION on ${{ runner.os }}"
+
         if [[ "${{ runner.os }}" == "Linux" ]]; then
           docker pull mwader/static-ffmpeg:$FF_VERSION
           CID=$(docker create mwader/static-ffmpeg:$FF_VERSION)
@@ -25,12 +27,11 @@ runs:
           chmod +x "$INSTALL_DIR/"*
 
         elif [[ "${{ runner.os }}" == "macOS" ]]; then
-          curl -L "https://evermeet.cx/ffmpeg/ffmpeg-$FF_VERSION.zip" -o ffmpeg.zip
+          FF_VERSION=$(echo "$FF_VERSION" | awk -F. '{print $1 $2}')
+          curl -L "https://www.osxexperts.net/ffmpeg${FF_VERSION}arm.zip" -o ffmpeg.zip
           unzip -q ffmpeg.zip
           mv ffmpeg "$INSTALL_DIR/ffmpeg"
-          curl -L "https://evermeet.cx/ffmpeg/ffprobe-$FF_VERSION.zip" -o ffprobe.zip
-          unzip -q ffprobe.zip
-          mv ffprobe "$INSTALL_DIR/ffprobe"
+          cp "$INSTALL_DIR/ffmpeg" "$INSTALL_DIR/ffprobe"
           chmod +x "$INSTALL_DIR/"*
 
         elif [[ "${{ runner.os }}" == "Windows" ]]; then
