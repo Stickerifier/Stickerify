@@ -26,7 +26,7 @@ jobs:
       - name: Setup FFmpeg and FFprobe
         uses: ./.github/actions/setup-ffmpeg
         with:
-          # bump: ffmpeg-ci /ffmpeg-version: ([\d.]+)/ docker:mwader/static-ffmpeg
+          # bump: ffmpeg-ci /ffmpeg-version: ([\d.]+)/ docker:mwader/static-ffmpeg|/\d+\./|*
           ffmpeg-version: 8.0.1
 
       - name: Setup Java
