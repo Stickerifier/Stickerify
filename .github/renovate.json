@@ -10,14 +10,9 @@
                 "patch"
             ],
             "matchPackageNames": [
-                "*"
+                "*",
+                "!*ffmpeg*"
             ]
-        },
-        {
-            "matchPackageNames": [
-                "*ffmpeg**"
-            ],
-            "enabled": false
         }
     ],
     "extends": [
