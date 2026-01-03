@@ -2,8 +2,11 @@ package com.github.stickerifier.stickerify;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.io.File;
 
+@NullMarked
 public final class ResourceHelper {
 
 	public static File loadResource(String filename) {
