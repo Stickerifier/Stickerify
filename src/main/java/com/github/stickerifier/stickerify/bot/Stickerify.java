@@ -45,7 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * Telegram bot to convert medias in the format required to be used as Telegram stickers.
+ * Telegram bot to convert medias into the format required to be used as Telegram stickers.
  *
  * @author Roberto Cella
  */
