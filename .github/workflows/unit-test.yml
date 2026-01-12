@@ -58,7 +58,6 @@ jobs:
 
   qodana:
     name: Perform Qodana analysis
-    if: ${{ vars.QODANA_ENABLED == 'true' }}
     needs: tests
     runs-on: ubuntu-latest
     permissions:
