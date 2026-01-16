@@ -12,5 +12,4 @@ LICENSE
 .editorconfig
 Dockerfile
 *.dockerfile
-qodana.baseline.json
 Bumpfile
