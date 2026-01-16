@@ -47,15 +47,6 @@ jobs:
         shell: bash
         run: ./gradlew test
 
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v6
-        if: runner.os == 'Linux'
-        with:
-          name: coverage_report
-          path: .qodana/code-coverage/report.xml
-          retention-days: 1
-          if-no-files-found: error
-
   qodana:
     name: Perform Qodana analysis
     needs: tests
@@ -70,18 +61,12 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
-      - name: Download coverage report
-        uses: actions/download-artifact@v7
-        with:
-          name: coverage_report
-          path: .qodana/code-coverage
-
       - name: Execute analysis
         uses: JetBrains/qodana-action@v2025.3
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: '--baseline,qodana.baseline.json'
+          args: --baseline,qodana.baseline.json
           use-caches: false
           post-pr-comment: false
           pr-mode: false
