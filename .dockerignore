@@ -13,3 +13,4 @@ LICENSE
 Dockerfile
 *.dockerfile
 Bumpfile
+qodana.yaml
