@@ -3,7 +3,6 @@ import com.github.stickerifier.stickerify.JlinkTask
 
 plugins {
     id('java')
-    id('jacoco')
     id('application')
     alias(libs.plugins.spring.nullability)
 }
@@ -68,28 +67,9 @@ test {
     javaLauncher = providers.provider { new JlinkJavaLauncher(jlink.get()) }
 
     useJUnitPlatform()
-    finalizedBy(jacocoTestReport)
 
     testLogging {
         events('passed', 'failed', 'skipped')
-    }
-}
-
-jacocoTestReport {
-    reports {
-        html.required = false
-        xml.required = true
-        xml.outputLocation = file('.qodana/code-coverage/report.xml')
-    }
-
-    afterEvaluate {
-        classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: ['**/MediaConstraints.class',
-                                        '**/stickerify/exception/**',
-                                        '**/stickerify/process/**',
-                                        '**/stickerify/runner/**',
-                                        '**/stickerify/telegram/**'])
-        })
     }
 }
 
