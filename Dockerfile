@@ -8,7 +8,7 @@ COPY --from=mwader/static-ffmpeg:8.0.1 /ff* /usr/bin/
 COPY . .
 RUN --mount=type=cache,target=/root/.gradle ./gradlew check installDist --no-daemon
 
-FROM alpine:3.23.2
+FROM alpine:3.23.3
 
 COPY --from=builder /usr/bin/ff* /usr/bin/
 COPY --from=builder /app/build/install/Stickerify/ .
