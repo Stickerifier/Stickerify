@@ -7,7 +7,7 @@ hamcrest = "org.hamcrest:hamcrest:3.0"
 jspecify = "org.jspecify:jspecify:1.0.0"
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
-logback-classic = "ch.qos.logback:logback-classic:1.5.28"
+logback-classic = "ch.qos.logback:logback-classic:1.5.29"
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.3.2"
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:9.3.0"
 tika = "org.apache.tika:tika-core:3.2.3"
