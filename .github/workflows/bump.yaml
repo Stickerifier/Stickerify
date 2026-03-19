@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.BUMP_TOKEN }}
 
       - name: Update dependencies
         uses: wader/bump/action@master
