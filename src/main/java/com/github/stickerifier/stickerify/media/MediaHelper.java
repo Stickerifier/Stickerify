@@ -50,6 +50,7 @@ public final class MediaHelper {
 	private static final int WEBP_CHUNK_TYPE_OFFSET = 12;
 	private static final int WEBP_CHUNK_TYPE_LENGTH = 4;
 	private static final int WEBP_FLAGS_BYTE_OFFSET = 20;
+	private static final int WEBP_HEADER_SIZE = 21;
 	private static final int WEBP_ANIMATION_BIT_MASK = 0x02;
 	private static final String WEBP_EXTENDED_FILE_FORMAT = "VP8X";
 
@@ -320,8 +321,8 @@ public final class MediaHelper {
 	 */
 	private static boolean isAnimatedWebp(File file) {
 		try (var fileInputStream = new FileInputStream(file)) {
-			var header = new byte[WEBP_FLAGS_BYTE_OFFSET + 1];
-			if (fileInputStream.read(header) < 21) {
+			var header = fileInputStream.readNBytes(WEBP_HEADER_SIZE);
+			if (header.length < WEBP_HEADER_SIZE) {
 				return false;
 			}
 
