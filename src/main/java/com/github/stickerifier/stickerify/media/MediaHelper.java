@@ -10,6 +10,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDE
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FRAMES;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.stickerifier.stickerify.exception.CorruptedFileException;
@@ -45,6 +46,12 @@ public final class MediaHelper {
 
 	private static final int IMAGE_KEEP_ASPECT_RATIO = -1;
 	private static final int VIDEO_KEEP_ASPECT_RATIO = -2;
+
+	private static final int WEBP_CHUNK_TYPE_OFFSET = 12;
+	private static final int WEBP_CHUNK_TYPE_LENGTH = 4;
+	private static final int WEBP_FLAGS_BYTE_OFFSET = 20;
+	private static final int WEBP_ANIMATION_BIT_MASK = 0x02;
+	private static final String WEBP_EXTENDED_FILE_FORMAT = "VP8X";
 
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.
@@ -313,15 +320,16 @@ public final class MediaHelper {
 	 */
 	private static boolean isAnimatedWebp(File file) {
 		try (var fileInputStream = new FileInputStream(file)) {
-			var header = new byte[256];
-			int bytesRead = fileInputStream.read(header);
-
-			if (bytesRead < 32) {
+			var header = new byte[WEBP_FLAGS_BYTE_OFFSET + 1];
+			if (fileInputStream.read(header) < 21) {
 				return false;
 			}
 
-			var headerContent = new String(header, UTF_8);
-			return headerContent.contains("ANIM");
+			var chunkHeader = new String(header, WEBP_CHUNK_TYPE_OFFSET, WEBP_CHUNK_TYPE_LENGTH, ISO_8859_1);
+			boolean isExtendedFormat = WEBP_EXTENDED_FILE_FORMAT.equals(chunkHeader);
+			boolean hasAnimationFlag = (header[WEBP_FLAGS_BYTE_OFFSET] & WEBP_ANIMATION_BIT_MASK) != 0;
+
+			return isExtendedFormat && hasAnimationFlag;
 		} catch (IOException e) {
 			LOGGER.atWarn().setCause(e).log("An error occurred checking if the file is an animated WebP");
 			return false;
