@@ -290,6 +290,7 @@ public final class MediaHelper {
 
 	/**
 	 * Checks if the MIME type corresponds to one of the supported image formats.
+	 * If the image file is an animated WebP, {@code false} is returned as they are not currently supported.
 	 *
 	 * @param image the image file to check
 	 * @param mimeType the MIME type to check
