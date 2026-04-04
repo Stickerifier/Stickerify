@@ -260,7 +260,7 @@ class MediaHelperTest {
 		var webpVideo = loadResource("animated.webp");
 
 		var ex = assertThrows(MediaException.class, () -> MediaHelper.convert(webpVideo));
-		assertThat(ex.getMessage(), equalTo("FFmpeg image conversion failed"));
+		assertThat(ex.getMessage(), equalTo("The file with image/webp MIME type is not supported"));
 	}
 
 	@Test

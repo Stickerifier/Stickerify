@@ -73,7 +73,7 @@ public final class MediaHelper {
 				return null;
 			}
 
-			if (mimeType.startsWith("image/")) {
+			if (isSupportedImage(inputFile, mimeType)) {
 				if (isImageCompliant(inputFile, mimeType)) {
 					LOGGER.atInfo().log("The image doesn't need conversion");
 					return null;
@@ -286,6 +286,45 @@ public final class MediaHelper {
 				&& animation.duration() <= MAX_ANIMATION_DURATION_SECONDS
 				&& animation.width() == MAX_SIDE_LENGTH
 				&& animation.height() == MAX_SIDE_LENGTH;
+	}
+
+	/**
+	 * Checks if the MIME type corresponds to one of the supported image formats.
+	 *
+	 * @param image the image file to check
+	 * @param mimeType the MIME type to check
+	 * @return {@code true} if the MIME type is supported
+	 */
+	private static boolean isSupportedImage(File image, String mimeType) {
+		if ("image/webp".equals(mimeType) && isAnimatedWebp(image)) {
+			LOGGER.atInfo().log("The image is an animated WebP");
+			return false;
+		}
+
+		return mimeType.startsWith("image/");
+	}
+
+	/**
+	 * Detects if a WebP file is animated by checking its file header.
+	 *
+	 * @param file the WebP file to check
+	 * @return {@code true} if the file is an animated WebP
+	 */
+	private static boolean isAnimatedWebp(File file) {
+		try (var fileInputStream = new FileInputStream(file)) {
+			var header = new byte[256];
+			int bytesRead = fileInputStream.read(header);
+
+			if (bytesRead < 32) {
+				return false;
+			}
+
+			var headerContent = new String(header, UTF_8);
+			return headerContent.contains("ANIM");
+		} catch (IOException e) {
+			LOGGER.atWarn().setCause(e).log("An error occurred checking if the file is an animated WebP");
+			return false;
+		}
 	}
 
 	/**
