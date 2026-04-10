@@ -72,6 +72,7 @@ public final class ProcessHelper {
 		if (value < 1) {
 			throw new IllegalArgumentException("The environment variable CONCURRENT_PROCESSES must be >= 1 (was " + concurrentProcesses + ")");
 		}
+
 		return value;
 	}
 
