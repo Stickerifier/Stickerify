@@ -247,8 +247,7 @@ public final class MediaHelper {
 			try {
 				var sticker = GSON.fromJson(uncompressedContent, AnimationDetails.class);
 
-				boolean isAnimationCompliant = isAnimationCompliant(sticker);
-				if (isAnimationCompliant) {
+				if (isAnimationCompliant(sticker)) {
 					try {
 						return Files.size(file.toPath()) <= MAX_ANIMATION_FILE_SIZE;
 					} catch (IOException e) {
@@ -504,6 +503,7 @@ public final class MediaHelper {
 		var commands = new String[baseCommand.length + additionalOptions.length];
 		System.arraycopy(baseCommand, 0, commands, 0, baseCommand.length);
 		System.arraycopy(additionalOptions, 0, commands, baseCommand.length, additionalOptions.length);
+
 		return commands;
 	}
 

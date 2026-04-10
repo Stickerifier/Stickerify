@@ -34,9 +34,8 @@ public final class ProcessHelper {
 	 */
 	public static String executeCommand(final String... command) throws ProcessException, InterruptedException {
 		SEMAPHORE.acquire();
-		try {
-			var process = new ProcessBuilder(command).redirectErrorStream(true).start();
 
+		try (var process = new ProcessBuilder(command).redirectErrorStream(true).start()) {
 			var output = new StringJoiner("\n");
 			var readerThread = Thread.ofVirtual().start(() -> {
 				try (var reader = process.inputReader(UTF_8)) {
@@ -73,6 +72,7 @@ public final class ProcessHelper {
 		if (value < 1) {
 			throw new IllegalArgumentException("The environment variable CONCURRENT_PROCESSES must be >= 1 (was " + concurrentProcesses + ")");
 		}
+
 		return value;
 	}
 
