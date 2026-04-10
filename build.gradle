@@ -30,12 +30,12 @@ version = '2.0'
 description = 'Telegram bot to convert medias into the format required to be used as Telegram stickers'
 
 java.toolchain {
-    languageVersion = JavaLanguageVersion.of(25)
+    languageVersion = JavaLanguageVersion.of(26)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
 updateDaemonJvm {
-    languageVersion = JavaLanguageVersion.of(25)
+    languageVersion = JavaLanguageVersion.of(26)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
