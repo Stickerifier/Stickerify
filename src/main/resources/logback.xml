@@ -1,23 +1,14 @@
 <configuration>
-    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
 
-	<conversionRule conversionWord="msg" class="com.github.stickerifier.stickerify.logger.MessageHighlighter"/>
-	<conversionRule conversionWord="ex" class="com.github.stickerifier.stickerify.logger.ExceptionHighlighter"/>
-
-	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%highlight([%d{"dd/MM/YYYY HH:mm:ss.SSS' CET'", CET}] %-5level) %boldCyan([%-10t] %-11logger{0}) %boldYellow(-) %msg%n%red(%ex)</pattern>
-		</encoder>
-	</appender>
-
-	<appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-			<providers>
-				<timestamp>
-					<timeZone>UTC</timeZone>
-				</timestamp>
-				<logLevel/>
-				<threadName/>
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <logLevel/>
+                <threadName/>
                 <pattern>
                     <pattern>
                         {
@@ -25,16 +16,16 @@
                         }
                     </pattern>
                 </pattern>
-				<message/>
+                <message/>
                 <keyValuePairs/>
-				<stackTrace/>
-			</providers>
-		</encoder>
-	</appender>
+                <stackTrace/>
+            </providers>
+        </encoder>
+    </appender>
 
-	<root level="${LOG_LEVEL:-INFO}">
-		<appender-ref ref="JSON_CONSOLE"/>
-	</root>
+    <root level="${LOG_LEVEL:-INFO}">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </root>
 
-	<logger name="org.apache.tika" level="INFO"/>
+    <logger name="org.apache.tika" level="INFO"/>
 </configuration>
