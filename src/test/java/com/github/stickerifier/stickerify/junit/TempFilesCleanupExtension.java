@@ -1,9 +1,7 @@
 package com.github.stickerifier.stickerify.junit;
 
-import com.github.stickerifier.stickerify.logger.StructuredLogger;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.event.Level;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,8 +13,6 @@ import java.nio.file.Path;
  */
 public class TempFilesCleanupExtension implements AfterAllCallback {
 
-	private static final StructuredLogger LOGGER = new StructuredLogger(TempFilesCleanupExtension.class);
-
 	@Override
 	public void afterAll(ExtensionContext context) throws IOException {
 		deleteTempFiles();
@@ -26,23 +22,17 @@ public class TempFilesCleanupExtension implements AfterAllCallback {
 		var tempFolder = System.getProperty("java.io.tmpdir");
 
 		try (var files = Files.list(Path.of(tempFolder))) {
-			files.filter(this::stickerifyFiles).forEach(this::deleteFile);
+			for (var file : files.toList()) {
+				if (isStickerifyFile(file)) {
+					Files.delete(file);
+				}
+			}
 		}
 	}
 
-	private boolean stickerifyFiles(Path path) {
+	private boolean isStickerifyFile(Path path) {
 		var fileName = path.getFileName().toString();
 
 		return Files.isRegularFile(path) && (fileName.startsWith("Stickerify-") || fileName.startsWith("OriginalFile-"));
-	}
-
-	private void deleteFile(Path path) {
-		try {
-			Files.delete(path);
-
-			LOGGER.at(Level.TRACE).addKeyValue("file_name", path.getFileName()).log("The file has been deleted");
-		} catch (IOException e) {
-			LOGGER.at(Level.WARN).setCause(e).addKeyValue("file_name", path.getFileName()).log("The file could not be deleted from the system");
-		}
 	}
 }
