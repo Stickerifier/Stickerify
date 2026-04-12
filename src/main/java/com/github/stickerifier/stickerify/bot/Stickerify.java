@@ -10,10 +10,8 @@ import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
-import com.github.stickerifier.stickerify.exception.BaseException;
 import com.github.stickerifier.stickerify.exception.CorruptedFileException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
-import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.logger.StructuredLogger;
 import com.github.stickerifier.stickerify.media.MediaHelper;
@@ -148,10 +146,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 				execute(answerWithFile);
 			}
-		} catch (TelegramApiException | MediaException e) {
-			processFailure(request, e, fileId);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} catch (Exception e) {
+			processFailure(request, e, fileId);
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
@@ -171,7 +169,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 	}
 
-	private void processFailure(TelegramRequest request, BaseException e, String fileId) {
+	private void processFailure(TelegramRequest request, Exception e, String fileId) {
 		if (e instanceof TelegramApiException telegramException) {
 			processTelegramFailure(telegramException, false);
 		}

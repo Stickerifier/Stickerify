@@ -1,5 +1,6 @@
 package com.github.stickerifier.stickerify.media;
 
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.MIME_TYPE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
@@ -60,12 +61,41 @@ public final class MediaHelper {
 	 *
 	 * @param inputFile the file to convert
 	 * @return a resized and converted file
+	 * @throws Exception either if the file is not supported, if the conversion failed,
+	 * or if the current thread is interrupted while converting a video file
+	 */
+	public static @Nullable File convert(File inputFile) throws Exception {
+		return ScopedValue.where(MIME_TYPE, detectMimeType(inputFile)).call(() -> performConversion(inputFile, MIME_TYPE.get()));
+	}
+
+	/**
+	 * Analyzes the file to detect its media type.
+	 *
+	 * @param file the file sent to the bot
+	 * @return the MIME type of the passed-in file
+	 * @throws MediaException if the file could not be read
+	 */
+	private static String detectMimeType(File file) throws MediaException {
+		try {
+			var mimeType = TIKA.detect(file);
+			LOGGER.at(Level.DEBUG).log("MIME type successfully detected");
+
+			return mimeType;
+		} catch (IOException e) {
+			LOGGER.at(Level.ERROR).addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
+			throw new MediaException(e);
+		}
+	}
+
+	/**
+	 * @param inputFile the file to convert
+	 * @param mimeType the MIME type of the file
+	 * @return a resized and converted file
 	 * @throws MediaException if the file is not supported or if the conversion failed
 	 * @throws InterruptedException if the current thread is interrupted while converting a video file
+	 * @see MediaHelper#convert(File)
 	 */
-	public static @Nullable File convert(File inputFile) throws MediaException, InterruptedException {
-		var mimeType = detectMimeType(inputFile);
-
+	private static @Nullable File performConversion(File inputFile, String mimeType) throws MediaException, InterruptedException {
 		try {
 			if (isSupportedVideo(mimeType)) {
 				if (isVideoCompliant(inputFile)) {
@@ -90,30 +120,11 @@ public final class MediaHelper {
 				return convertToWebp(inputFile);
 			}
 		} catch (MediaException e) {
-			LOGGER.at(Level.WARN).setCause(e).addKeyValue("mime_type", mimeType).log("The file with {} MIME type could not be converted", mimeType);
+			LOGGER.at(Level.WARN).setCause(e).log("The file could not be converted");
 			throw e;
 		}
 
 		throw new MediaException("The file with {} MIME type is not supported", mimeType);
-	}
-
-	/**
-	 * Analyzes the file to detect its media type.
-	 *
-	 * @param file the file sent to the bot
-	 * @return the MIME type of the passed-in file
-	 * @throws MediaException if the file could not be read
-	 */
-	private static String detectMimeType(File file) throws MediaException {
-		try {
-			var mimeType = TIKA.detect(file);
-			LOGGER.at(Level.DEBUG).addKeyValue("mime_type", mimeType).log("MIME type successfully detected");
-
-			return mimeType;
-		} catch (IOException e) {
-			LOGGER.at(Level.ERROR).addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
-			throw new MediaException(e);
-		}
 	}
 
 	/**
