@@ -78,7 +78,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		updates.forEach(update -> executor.execute(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
-				LOGGER.atInfo().log("Received {}", request.getDescription());
+				LOGGER.atInfo().addKeyValue("request_description", request.getDescription()).log("Received request");
 
 				answer(request);
 			}
@@ -89,7 +89,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 	@Override
 	public void onException(TelegramException e) {
-		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
+		LOGGER.atError().addKeyValue("exception_message", e.getMessage()).log("There was an unexpected failure");
 	}
 
 	@Override
@@ -176,7 +176,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 
 		if (e instanceof CorruptedFileException) {
-			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
+			LOGGER.atInfo().addKeyValue("request_description", request.getDescription()).log("Unable to reply to the request: the file is corrupted");
 			answerText(CORRUPTED, request);
 		} else {
 			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", fileId);
@@ -186,11 +186,11 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 	private void processTelegramFailure(String requestDescription, TelegramApiException e, boolean logUnmatchedFailure) {
 		switch (e.getDescription()) {
-			case "Bad Request: message to be replied not found" -> LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", requestDescription);
-			case "Forbidden: bot was blocked by the user" -> LOGGER.atInfo().log("Unable to reply to the {}: the user blocked the bot", requestDescription);
+			case "Bad Request: message to be replied not found" -> LOGGER.atInfo().addKeyValue("request_description", requestDescription).log("Unable to reply to the request: the message sent has been deleted");
+			case "Forbidden: bot was blocked by the user" -> LOGGER.atInfo().addKeyValue("request_description", requestDescription).log("Unable to reply to the request: the user blocked the bot");
 			default -> {
 				if (logUnmatchedFailure) {
-					LOGGER.atError().setCause(e).log("Unable to reply to the {}", requestDescription);
+					LOGGER.atError().setCause(e).addKeyValue("request_description", requestDescription).log("Unable to reply to the request");
 				}
 			}
 		}
@@ -199,7 +199,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	private void answerText(TelegramRequest request) {
 		var message = request.message();
 		if (message.text() == null) {
-			LOGGER.atInfo().log("An unhandled message type has been received: {}", message);
+			LOGGER.atInfo().addKeyValue("request_message", message).log("An unhandled message type has been received");
 		}
 
 		answerText(request.getAnswerMessage(), request);
@@ -234,10 +234,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		for (var path : pathsToDelete) {
 			try {
 				if (!Files.deleteIfExists(path)) {
-					LOGGER.atInfo().log("Unable to delete temp file {}", path);
+					LOGGER.atInfo().addKeyValue("file_path", path).log("Unable to delete temp file");
 				}
 			} catch (IOException e) {
-				LOGGER.atError().setCause(e).log("An error occurred trying to delete temp file {}", path);
+				LOGGER.atError().setCause(e).addKeyValue("file_path", path).log("An error occurred trying to delete temp file");
 			}
 		}
 	}

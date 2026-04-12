@@ -90,7 +90,7 @@ public final class MediaHelper {
 				return convertToWebp(inputFile);
 			}
 		} catch (MediaException e) {
-			LOGGER.atWarn().setCause(e).log("The file with {} MIME type could not be converted", mimeType);
+			LOGGER.atWarn().setCause(e).addKeyValue("mime_type", mimeType).log("The file with {} MIME type could not be converted", mimeType);
 			throw e;
 		}
 
@@ -107,11 +107,11 @@ public final class MediaHelper {
 	private static String detectMimeType(File file) throws MediaException {
 		try {
 			var mimeType = TIKA.detect(file);
-			LOGGER.atDebug().log("The file has {} MIME type", mimeType);
+			LOGGER.atDebug().addKeyValue("mime_type", mimeType).log("MIME type successfully detected");
 
 			return mimeType;
 		} catch (IOException e) {
-			LOGGER.atError().log("Unable to retrieve MIME type for file {}", file.getName());
+			LOGGER.atError().addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
 			throw new MediaException(e);
 		}
 	}
@@ -241,7 +241,7 @@ public final class MediaHelper {
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
 				uncompressedContent = new String(gzipInputStream.readAllBytes(), UTF_8);
 			} catch (IOException _) {
-				LOGGER.atError().log("Unable to retrieve gzip content from file {}", file.getName());
+				LOGGER.atError().addKeyValue("file_name", file.getName()).log("Unable to retrieve gzip content");
 			}
 
 			try {
@@ -255,7 +255,7 @@ public final class MediaHelper {
 					}
 				}
 
-				LOGGER.atWarn().log("The {} doesn't meet Telegram's requirements", sticker);
+				LOGGER.atWarn().addKeyValue("sticker", sticker).log("The animated sticker doesn't meet Telegram's requirements");
 			} catch (JsonSyntaxException _) {
 				LOGGER.atInfo().log("The archive isn't an animated sticker");
 			}
@@ -436,7 +436,7 @@ public final class MediaHelper {
 	private static void deleteFile(File file) throws FileOperationException {
 		try {
 			if (!Files.deleteIfExists(file.toPath())) {
-				LOGGER.atInfo().log("Unable to delete file {}", file.toPath());
+				LOGGER.atInfo().addKeyValue("file_path", file.toPath()).log("Unable to delete file");
 			}
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred deleting the file", e);
@@ -485,7 +485,7 @@ public final class MediaHelper {
 			try {
 				deleteFile(new File(logFileName));
 			} catch (FileOperationException e) {
-				LOGGER.atWarn().setCause(e).log("Could not delete {}", logFileName);
+				LOGGER.atWarn().setCause(e).addKeyValue("file_name", logFileName).log("Could not delete log file");
 			}
 		}
 
