@@ -93,7 +93,7 @@ public record TelegramRequest(Message message) {
 		return description;
 	}
 
-	private Long getUserId() {
+	public Long getUserId() {
 		return message.from().id();
 	}
 
