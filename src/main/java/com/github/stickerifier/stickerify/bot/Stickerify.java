@@ -1,6 +1,6 @@
 package com.github.stickerifier.stickerify.bot;
 
-import static com.github.stickerifier.stickerify.logger.StructuredLogger.USER_ID;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.REQUEST_DETAILS;
 import static com.github.stickerifier.stickerify.telegram.Answer.CORRUPTED;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
@@ -77,7 +77,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		updates.forEach(update -> executor.execute(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
-				ScopedValue.where(USER_ID, request.getUserId()).run(() -> answer(request));
+				ScopedValue.where(REQUEST_DETAILS, request.toRequestDetails()).run(() -> answer(request));
 			}
 		}));
 

@@ -5,6 +5,7 @@ import static com.github.stickerifier.stickerify.telegram.Answer.HELP;
 import static com.github.stickerifier.stickerify.telegram.Answer.PRIVACY_POLICY;
 import static java.util.Comparator.comparing;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.model.Document;
 import com.pengrad.telegrambot.model.Message;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
  * @param message the message to wrap
  */
 public record TelegramRequest(Message message) {
-	public static final String NEW_USER = " (new user)";
+
 	private static final String START_COMMAND = "/start";
 	private static final String HELP_COMMAND = "/help";
 	private static final String PRIVACY_COMMAND = "/privacy";
@@ -77,24 +78,12 @@ public record TelegramRequest(Message message) {
 		return message.messageId();
 	}
 
-	/**
-	 * Creates a String describing the current request,
-	 * writing <b>only</b> the user identifier and if the sender is a new user.
-	 *
-	 * @return the description of the request
-	 */
-	public String getDescription() {
-		var description = "request from user " + getUserId();
-
-		if (START_COMMAND.equals(message.text())) {
-			description += NEW_USER;
-		}
-
-		return description;
+	private Long getUserId() {
+		return message.from().id();
 	}
 
-	public Long getUserId() {
-		return message.from().id();
+	private boolean isNewUser() {
+		return START_COMMAND.equals(message.text());
 	}
 
 	public Answer getAnswerMessage() {
@@ -103,6 +92,10 @@ public record TelegramRequest(Message message) {
 			case PRIVACY_COMMAND -> PRIVACY_POLICY;
 			case null, default -> ABOUT;
 		};
+	}
+
+	public RequestDetails toRequestDetails() {
+		return new RequestDetails(getUserId(), isNewUser());
 	}
 
 	@Override
@@ -123,4 +116,6 @@ public record TelegramRequest(Message message) {
 				? ", " + field + "=" + value
 				: "";
 	}
+
+	public record RequestDetails(@JsonProperty("user_id") Long userId, @JsonProperty("new_user") boolean isNewUser) {}
 }
