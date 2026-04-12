@@ -171,7 +171,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 	private void processFailure(TelegramRequest request, Exception e, String fileId) {
 		if (e instanceof TelegramApiException telegramException) {
-			processTelegramFailure(telegramException, false);
+			boolean replyToUser = processTelegramFailure(telegramException, false);
+			if (!replyToUser) {
+				return;
+			}
 		}
 
 		if (e instanceof CorruptedFileException) {
@@ -183,7 +186,9 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 	}
 
-	private void processTelegramFailure(TelegramApiException e, boolean logUnmatchedFailure) {
+	private boolean processTelegramFailure(TelegramApiException e, boolean logUnmatchedFailure) {
+		boolean replyToUser = false;
+
 		switch (e.getDescription()) {
 			case "Bad Request: message to be replied not found" -> LOGGER.at(Level.INFO).log("Unable to reply to the request: the message sent has been deleted");
 			case "Forbidden: bot was blocked by the user" -> LOGGER.at(Level.INFO).log("Unable to reply to the request: the user blocked the bot");
@@ -191,8 +196,11 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 				if (logUnmatchedFailure) {
 					LOGGER.at(Level.ERROR).setCause(e).log("Unable to reply to the request");
 				}
+				replyToUser = true;
 			}
 		}
+
+		return replyToUser;
 	}
 
 	private void answerText(TelegramRequest request) {
