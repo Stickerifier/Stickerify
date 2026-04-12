@@ -3,8 +3,8 @@ package com.github.stickerifier.stickerify.process;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.stickerifier.stickerify.exception.ProcessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.stickerifier.stickerify.logger.StructuredLogger;
+import org.slf4j.event.Level;
 
 import java.io.IOException;
 import java.util.StringJoiner;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class ProcessHelper {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProcessHelper.class);
+	private static final StructuredLogger LOGGER = new StructuredLogger(ProcessHelper.class);
 	private static final Semaphore SEMAPHORE = new Semaphore(getMaxConcurrentProcesses());
 
 	/**
@@ -41,7 +41,7 @@ public final class ProcessHelper {
 				try (var reader = process.inputReader(UTF_8)) {
 					reader.lines().forEach(output::add);
 				} catch (IOException e) {
-					LOGGER.atError().setCause(e).log("Error while closing process output reader");
+					LOGGER.at(Level.ERROR).setCause(e).log("Error while closing process output reader");
 				}
 			});
 

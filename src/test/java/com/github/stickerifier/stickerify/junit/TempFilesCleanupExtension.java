@@ -1,9 +1,9 @@
 package com.github.stickerifier.stickerify.junit;
 
+import com.github.stickerifier.stickerify.logger.StructuredLogger;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +15,7 @@ import java.nio.file.Path;
  */
 public class TempFilesCleanupExtension implements AfterAllCallback {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TempFilesCleanupExtension.class);
+	private static final StructuredLogger LOGGER = new StructuredLogger(TempFilesCleanupExtension.class);
 
 	@Override
 	public void afterAll(ExtensionContext context) throws IOException {
@@ -40,9 +40,9 @@ public class TempFilesCleanupExtension implements AfterAllCallback {
 		try {
 			Files.delete(path);
 
-			LOGGER.atTrace().addKeyValue("file_name", path.getFileName()).log("The file has been deleted");
+			LOGGER.at(Level.TRACE).addKeyValue("file_name", path.getFileName()).log("The file has been deleted");
 		} catch (IOException e) {
-			LOGGER.atWarn().setCause(e).addKeyValue("file_name", path.getFileName()).log("The file could not be deleted from the system");
+			LOGGER.at(Level.WARN).setCause(e).addKeyValue("file_name", path.getFileName()).log("The file could not be deleted from the system");
 		}
 	}
 }

@@ -17,6 +17,7 @@ import com.github.stickerifier.stickerify.exception.CorruptedFileException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.ProcessException;
+import com.github.stickerifier.stickerify.logger.StructuredLogger;
 import com.github.stickerifier.stickerify.process.OsConstants;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
 import com.google.gson.Gson;
@@ -24,8 +25,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 import org.apache.tika.Tika;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,7 +37,7 @@ import java.util.zip.GZIPInputStream;
 
 public final class MediaHelper {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MediaHelper.class);
+	private static final StructuredLogger LOGGER = new StructuredLogger(MediaHelper.class);
 
 	private static final Tika TIKA = new Tika();
 	private static final Gson GSON = new Gson();
@@ -69,7 +69,7 @@ public final class MediaHelper {
 		try {
 			if (isSupportedVideo(mimeType)) {
 				if (isVideoCompliant(inputFile)) {
-					LOGGER.atInfo().log("The video doesn't need conversion");
+					LOGGER.at(Level.INFO).log("The video doesn't need conversion");
 					return null;
 				}
 
@@ -77,20 +77,20 @@ public final class MediaHelper {
 			}
 
 			if (isAnimatedStickerCompliant(inputFile, mimeType)) {
-				LOGGER.atInfo().log("The animated sticker doesn't need conversion");
+				LOGGER.at(Level.INFO).log("The animated sticker doesn't need conversion");
 				return null;
 			}
 
 			if (isSupportedImage(inputFile, mimeType)) {
 				if (isImageCompliant(inputFile, mimeType)) {
-					LOGGER.atInfo().log("The image doesn't need conversion");
+					LOGGER.at(Level.INFO).log("The image doesn't need conversion");
 					return null;
 				}
 
 				return convertToWebp(inputFile);
 			}
 		} catch (MediaException e) {
-			LOGGER.atWarn().setCause(e).addKeyValue("mime_type", mimeType).log("The file with {} MIME type could not be converted", mimeType);
+			LOGGER.at(Level.WARN).setCause(e).addKeyValue("mime_type", mimeType).log("The file with {} MIME type could not be converted", mimeType);
 			throw e;
 		}
 
@@ -107,11 +107,11 @@ public final class MediaHelper {
 	private static String detectMimeType(File file) throws MediaException {
 		try {
 			var mimeType = TIKA.detect(file);
-			LOGGER.atDebug().addKeyValue("mime_type", mimeType).log("MIME type successfully detected");
+			LOGGER.at(Level.DEBUG).addKeyValue("mime_type", mimeType).log("MIME type successfully detected");
 
 			return mimeType;
 		} catch (IOException e) {
-			LOGGER.atError().addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
+			LOGGER.at(Level.ERROR).addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
 			throw new MediaException(e);
 		}
 	}
@@ -241,7 +241,7 @@ public final class MediaHelper {
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
 				uncompressedContent = new String(gzipInputStream.readAllBytes(), UTF_8);
 			} catch (IOException _) {
-				LOGGER.atError().addKeyValue("file_name", file.getName()).log("Unable to retrieve gzip content");
+				LOGGER.at(Level.ERROR).addKeyValue("file_name", file.getName()).log("Unable to retrieve gzip content");
 			}
 
 			try {
@@ -255,9 +255,9 @@ public final class MediaHelper {
 					}
 				}
 
-				LOGGER.atWarn().addKeyValue("sticker", sticker).log("The animated sticker doesn't meet Telegram's requirements");
+				LOGGER.at(Level.WARN).addKeyValue("sticker", sticker).log("The animated sticker doesn't meet Telegram's requirements");
 			} catch (JsonSyntaxException _) {
-				LOGGER.atInfo().log("The archive isn't an animated sticker");
+				LOGGER.at(Level.INFO).log("The archive isn't an animated sticker");
 			}
 		}
 
@@ -305,7 +305,7 @@ public final class MediaHelper {
 	 */
 	private static boolean isSupportedImage(File image, String mimeType) {
 		if ("image/webp".equals(mimeType) && isAnimatedWebp(image)) {
-			LOGGER.atInfo().log("The image is an animated WebP");
+			LOGGER.at(Level.INFO).log("The image is an animated WebP");
 			return false;
 		}
 
@@ -331,7 +331,7 @@ public final class MediaHelper {
 
 			return isExtendedFormat && hasAnimationFlag;
 		} catch (IOException e) {
-			LOGGER.atWarn().setCause(e).log("An error occurred checking if the file is an animated WebP");
+			LOGGER.at(Level.WARN).setCause(e).log("An error occurred checking if the file is an animated WebP");
 			return false;
 		}
 	}
@@ -436,7 +436,7 @@ public final class MediaHelper {
 	private static void deleteFile(File file) throws FileOperationException {
 		try {
 			if (!Files.deleteIfExists(file.toPath())) {
-				LOGGER.atInfo().addKeyValue("file_path", file.toPath()).log("Unable to delete file");
+				LOGGER.at(Level.INFO).addKeyValue("file_path", file.toPath()).log("Unable to delete file");
 			}
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred deleting the file", e);
@@ -485,7 +485,7 @@ public final class MediaHelper {
 			try {
 				deleteFile(new File(logFileName));
 			} catch (FileOperationException e) {
-				LOGGER.atWarn().setCause(e).addKeyValue("file_name", logFileName).log("Could not delete log file");
+				LOGGER.at(Level.WARN).setCause(e).addKeyValue("file_name", logFileName).log("Could not delete log file");
 			}
 		}
 
