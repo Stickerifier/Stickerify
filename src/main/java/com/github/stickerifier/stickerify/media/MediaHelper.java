@@ -81,7 +81,7 @@ public final class MediaHelper {
 		try {
 			return TIKA.detect(file);
 		} catch (IOException e) {
-			LOGGER.at(Level.ERROR).addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
+			LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
 			throw new MediaException(e);
 		}
 	}
@@ -252,8 +252,8 @@ public final class MediaHelper {
 
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
 				uncompressedContent = new String(gzipInputStream.readAllBytes(), UTF_8);
-			} catch (IOException _) {
-				LOGGER.at(Level.ERROR).addKeyValue("file_name", file.getName()).log("Unable to retrieve gzip content");
+			} catch (IOException e) {
+				LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_name", file.getName()).log("Unable to retrieve gzip content");
 			}
 
 			try {

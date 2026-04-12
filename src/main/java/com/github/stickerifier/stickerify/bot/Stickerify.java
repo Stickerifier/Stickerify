@@ -86,7 +86,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 	@Override
 	public void onException(TelegramException e) {
-		LOGGER.at(Level.ERROR).addKeyValue("exception_message", e.getMessage()).log("There was an unexpected failure");
+		LOGGER.at(Level.ERROR).setCause(e).addKeyValue("exception_message", e.getMessage()).log("An unexpected failure occurred");
 	}
 
 	@Override
