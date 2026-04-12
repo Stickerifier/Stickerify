@@ -65,7 +65,9 @@ public final class MediaHelper {
 	 * or if the current thread is interrupted while converting a video file
 	 */
 	public static @Nullable File convert(File inputFile) throws Exception {
-		return ScopedValue.where(MIME_TYPE, detectMimeType(inputFile)).call(() -> performConversion(inputFile, MIME_TYPE.get()));
+		var mimeType = detectMimeType(inputFile);
+
+		return ScopedValue.where(MIME_TYPE, mimeType).call(() -> performConversion(inputFile, mimeType));
 	}
 
 	/**
@@ -77,10 +79,7 @@ public final class MediaHelper {
 	 */
 	private static String detectMimeType(File file) throws MediaException {
 		try {
-			var mimeType = TIKA.detect(file);
-			LOGGER.at(Level.DEBUG).log("MIME type successfully detected");
-
-			return mimeType;
+			return TIKA.detect(file);
 		} catch (IOException e) {
 			LOGGER.at(Level.ERROR).addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
 			throw new MediaException(e);
@@ -96,6 +95,8 @@ public final class MediaHelper {
 	 * @see MediaHelper#convert(File)
 	 */
 	private static @Nullable File performConversion(File inputFile, String mimeType) throws MediaException, InterruptedException {
+		LOGGER.at(Level.DEBUG).log("MIME type successfully detected");
+
 		try {
 			if (isSupportedVideo(mimeType)) {
 				if (isVideoCompliant(inputFile)) {
