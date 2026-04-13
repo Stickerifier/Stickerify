@@ -1,5 +1,6 @@
 package com.github.stickerifier.stickerify.bot;
 
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.REQUEST_DETAILS;
 import static com.github.stickerifier.stickerify.telegram.Answer.CORRUPTED;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
@@ -9,11 +10,10 @@ import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
-import com.github.stickerifier.stickerify.exception.BaseException;
 import com.github.stickerifier.stickerify.exception.CorruptedFileException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
-import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.TelegramApiException;
+import com.github.stickerifier.stickerify.logger.StructuredLogger;
 import com.github.stickerifier.stickerify.media.MediaHelper;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.github.stickerifier.stickerify.telegram.model.TelegramFile;
@@ -31,8 +31,7 @@ import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +50,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesListener, ExceptionHandler, AutoCloseable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Stickerify.class);
+	private static final StructuredLogger LOGGER = new StructuredLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
 
@@ -78,9 +77,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		updates.forEach(update -> executor.execute(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
-				LOGGER.atInfo().log("Received {}", request.getDescription());
-
-				answer(request);
+				ScopedValue.where(REQUEST_DETAILS, request.toRequestDetails()).run(() -> answer(request));
 			}
 		}));
 
@@ -89,7 +86,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 	@Override
 	public void onException(TelegramException e) {
-		LOGGER.atError().log("There was an unexpected failure: {}", e.getMessage());
+		LOGGER.at(Level.ERROR).setCause(e).addKeyValue("exception_message", e.getMessage()).log("An unexpected failure occurred");
 	}
 
 	@Override
@@ -104,12 +101,14 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	}
 
 	private void answer(TelegramRequest request) {
+		LOGGER.at(Level.INFO).log("Received request");
+
 		var file = request.getFile();
 
-		if (file != null) {
-			answerFile(request, file);
-		} else {
+		if (file == null) {
 			answerText(request);
+		} else {
+			answerFile(request, file);
 		}
 	}
 
@@ -119,7 +118,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		} else if (file.canBeDownloaded()) {
 			answerFile(request, file.id());
 		} else {
-			LOGGER.atInfo().log("Passed-in file is too large");
+			LOGGER.at(Level.INFO).log("Passed-in file is too large");
 
 			answerText(FILE_TOO_LARGE, request);
 		}
@@ -147,10 +146,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 				execute(answerWithFile);
 			}
-		} catch (TelegramApiException | MediaException e) {
-			processFailure(request, e, fileId);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} catch (Exception e) {
+			processFailure(request, e, fileId);
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
@@ -170,36 +169,44 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 	}
 
-	private void processFailure(TelegramRequest request, BaseException e, String fileId) {
+	private void processFailure(TelegramRequest request, Exception e, String fileId) {
 		if (e instanceof TelegramApiException telegramException) {
-			processTelegramFailure(request.getDescription(), telegramException, false);
+			boolean replyToUser = processTelegramFailure(telegramException, false);
+			if (!replyToUser) {
+				return;
+			}
 		}
 
 		if (e instanceof CorruptedFileException) {
-			LOGGER.atInfo().log("Unable to reply to the {}: the file is corrupted", request.getDescription());
+			LOGGER.at(Level.INFO).log("Unable to reply to the request: the file is corrupted");
 			answerText(CORRUPTED, request);
 		} else {
-			LOGGER.atWarn().setCause(e).log("Unable to process the file {}", fileId);
+			LOGGER.at(Level.WARN).setCause(e).addKeyValue("file_id", fileId).log("Unable to process file");
 			answerText(ERROR, request);
 		}
 	}
 
-	private void processTelegramFailure(String requestDescription, TelegramApiException e, boolean logUnmatchedFailure) {
+	private boolean processTelegramFailure(TelegramApiException e, boolean logUnmatchedFailure) {
+		boolean replyToUser = false;
+
 		switch (e.getDescription()) {
-			case "Bad Request: message to be replied not found" -> LOGGER.atInfo().log("Unable to reply to the {}: the message sent has been deleted", requestDescription);
-			case "Forbidden: bot was blocked by the user" -> LOGGER.atInfo().log("Unable to reply to the {}: the user blocked the bot", requestDescription);
+			case "Bad Request: message to be replied not found" -> LOGGER.at(Level.INFO).log("Unable to reply to the request: the message sent has been deleted");
+			case "Forbidden: bot was blocked by the user" -> LOGGER.at(Level.INFO).log("Unable to reply to the request: the user blocked the bot");
 			default -> {
 				if (logUnmatchedFailure) {
-					LOGGER.atError().setCause(e).log("Unable to reply to the {}", requestDescription);
+					LOGGER.at(Level.ERROR).setCause(e).log("Unable to reply to the request");
 				}
+				replyToUser = true;
 			}
 		}
+
+		return replyToUser;
 	}
 
 	private void answerText(TelegramRequest request) {
 		var message = request.message();
 		if (message.text() == null) {
-			LOGGER.atInfo().log("An unhandled message type has been received: {}", message);
+			LOGGER.at(Level.INFO).log("An unhandled message type has been received");
 		}
 
 		answerText(request.getAnswerMessage(), request);
@@ -216,7 +223,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		try {
 			execute(answerWithText);
 		} catch (TelegramApiException e) {
-			processTelegramFailure(request.getDescription(), e, true);
+			processTelegramFailure(e, true);
 		}
 	}
 
@@ -234,10 +241,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		for (var path : pathsToDelete) {
 			try {
 				if (!Files.deleteIfExists(path)) {
-					LOGGER.atInfo().log("Unable to delete temp file {}", path);
+					LOGGER.at(Level.INFO).addKeyValue("file_path", path).log("Unable to delete temp file");
 				}
 			} catch (IOException e) {
-				LOGGER.atError().setCause(e).log("An error occurred trying to delete temp file {}", path);
+				LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_path", path).log("An error occurred trying to delete temp file");
 			}
 		}
 	}

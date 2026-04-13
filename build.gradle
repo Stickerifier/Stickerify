@@ -15,8 +15,13 @@ dependencies {
     compileOnly(libs.jspecify)
     implementation(libs.gson)
     implementation(libs.logback.classic)
+    implementation(libs.logstash.logback.encoder)
     implementation(libs.telegram.bot.api)
     implementation(libs.tika)
+
+    constraints {
+        implementation(libs.jackson.core)
+    }
 
     testCompileOnly(libs.jspecify)
     testImplementation(libs.hamcrest)
