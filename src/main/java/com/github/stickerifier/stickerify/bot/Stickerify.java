@@ -1,10 +1,10 @@
 package com.github.stickerifier.stickerify.bot;
 
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.EXCEPTION_MESSAGE_LOG_KEY;
-import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_ID_LOG_KEY;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_ID_VALUE;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_PATH_LOG_KEY;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.ORIGINAL_REQUEST_LOG_KEY;
-import static com.github.stickerifier.stickerify.logger.StructuredLogger.REQUEST_DETAILS;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.REQUEST_DETAILS_VALUE;
 import static com.github.stickerifier.stickerify.telegram.Answer.CORRUPTED;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
@@ -81,7 +81,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		updates.forEach(update -> executor.execute(() -> {
 			if (update.message() != null) {
 				var request = new TelegramRequest(update.message());
-				ScopedValue.where(REQUEST_DETAILS, request.toRequestDetails()).run(() -> answer(request));
+				ScopedValue.where(REQUEST_DETAILS_VALUE, request.toRequestDetails()).run(() -> answer(request));
 			}
 		}));
 
@@ -123,7 +123,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		if (file == TelegramFile.NOT_SUPPORTED) {
 			answerText(ERROR, request);
 		} else if (file.canBeDownloaded()) {
-			answerFile(request, file.id());
+			ScopedValue.where(FILE_ID_VALUE, file.id()).run(() -> answerFile(request, file.id()));
 		} else {
 			LOGGER.at(Level.INFO).log("Passed-in file is too large");
 
@@ -156,7 +156,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} catch (Exception e) {
-			processFailure(request, e, fileId);
+			processFailure(request, e);
 		} finally {
 			deleteTempFiles(pathsToDelete);
 		}
@@ -176,7 +176,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 	}
 
-	private void processFailure(TelegramRequest request, Exception e, String fileId) {
+	private void processFailure(TelegramRequest request, Exception e) {
 		if (e instanceof TelegramApiException telegramException) {
 			boolean replyToUser = processTelegramFailure(telegramException, false);
 			if (!replyToUser) {
@@ -185,10 +185,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 
 		if (e instanceof CorruptedFileException) {
-			LOGGER.at(Level.WARN).addKeyValue(FILE_ID_LOG_KEY, fileId).log("Unable to reply to the request: the file is corrupted");
+			LOGGER.at(Level.WARN).log("Unable to reply to the request: the file is corrupted");
 			answerText(CORRUPTED, request);
 		} else {
-			LOGGER.at(Level.ERROR).setCause(e).addKeyValue(FILE_ID_LOG_KEY, fileId).log("Unable to process file");
+			LOGGER.at(Level.ERROR).setCause(e).log("Unable to process file");
 			answerText(ERROR, request);
 		}
 	}

@@ -1,7 +1,7 @@
 package com.github.stickerifier.stickerify.media;
 
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_PATH_LOG_KEY;
-import static com.github.stickerifier.stickerify.logger.StructuredLogger.MIME_TYPE;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.MIME_TYPE_VALUE;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.STICKER_LOG_KEY;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
@@ -69,7 +69,7 @@ public final class MediaHelper {
 	public static @Nullable File convert(File inputFile) throws Exception {
 		var mimeType = detectMimeType(inputFile);
 
-		return ScopedValue.where(MIME_TYPE, mimeType).call(() -> performConversion(inputFile, mimeType));
+		return ScopedValue.where(MIME_TYPE_VALUE, mimeType).call(() -> performConversion(inputFile, mimeType));
 	}
 
 	/**
