@@ -178,10 +178,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 
 		if (e instanceof CorruptedFileException) {
-			LOGGER.at(Level.INFO).log("Unable to reply to the request: the file is corrupted");
+			LOGGER.at(Level.WARN).addKeyValue("file_id", fileId).log("Unable to reply to the request: the file is corrupted");
 			answerText(CORRUPTED, request);
 		} else {
-			LOGGER.at(Level.WARN).setCause(e).addKeyValue("file_id", fileId).log("Unable to process file");
+			LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_id", fileId).log("Unable to process file");
 			answerText(ERROR, request);
 		}
 	}
@@ -206,7 +206,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	private void answerText(TelegramRequest request) {
 		var message = request.message();
 		if (message.text() == null) {
-			LOGGER.at(Level.INFO).log("An unhandled message type has been received");
+			LOGGER.at(Level.INFO).addKeyValue("original_request", message).log("An unhandled message type has been received");
 		}
 
 		answerText(request.getAnswerMessage(), request);
