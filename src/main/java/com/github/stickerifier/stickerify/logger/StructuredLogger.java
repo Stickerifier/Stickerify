@@ -11,6 +11,14 @@ public record StructuredLogger(Logger logger) {
 	public static final ScopedValue<RequestDetails> REQUEST_DETAILS = ScopedValue.newInstance();
 	public static final ScopedValue<String> MIME_TYPE = ScopedValue.newInstance();
 
+	private static final String MIME_TYPE_LOG_KEY = "mime_type";
+	private static final String REQUEST_DETAILS_LOG_KEY = "request_details";
+	public static final String EXCEPTION_MESSAGE_LOG_KEY = "exception_message";
+	public static final String FILE_ID_LOG_KEY = "file_id";
+	public static final String ORIGINAL_REQUEST_LOG_KEY = "original_request";
+	public static final String FILE_PATH_LOG_KEY = "file_path";
+	public static final String STICKER_LOG_KEY = "sticker";
+
 	public StructuredLogger(Class<?> clazz) {
 		this(LoggerFactory.getLogger(clazz));
 	}
@@ -25,10 +33,10 @@ public record StructuredLogger(Logger logger) {
 		var logBuilder = logger.atLevel(level);
 
 		if (REQUEST_DETAILS.isBound()) {
-			logBuilder = logBuilder.addKeyValue("request_details", REQUEST_DETAILS.get());
+			logBuilder = logBuilder.addKeyValue(REQUEST_DETAILS_LOG_KEY, REQUEST_DETAILS.get());
 		}
 		if (MIME_TYPE.isBound()) {
-			logBuilder = logBuilder.addKeyValue("mime_type", MIME_TYPE.get());
+			logBuilder = logBuilder.addKeyValue(MIME_TYPE_LOG_KEY, MIME_TYPE.get());
 		}
 
 		return logBuilder;

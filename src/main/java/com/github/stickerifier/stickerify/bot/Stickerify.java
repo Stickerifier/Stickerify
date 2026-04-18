@@ -1,5 +1,9 @@
 package com.github.stickerifier.stickerify.bot;
 
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.EXCEPTION_MESSAGE_LOG_KEY;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_ID_LOG_KEY;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_PATH_LOG_KEY;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.ORIGINAL_REQUEST_LOG_KEY;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.REQUEST_DETAILS;
 import static com.github.stickerifier.stickerify.telegram.Answer.CORRUPTED;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
@@ -86,7 +90,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 	@Override
 	public void onException(TelegramException e) {
-		LOGGER.at(Level.ERROR).setCause(e).addKeyValue("exception_message", e.getMessage()).log("An unexpected failure occurred");
+		LOGGER.at(Level.ERROR)
+				.setCause(e)
+				.addKeyValue(EXCEPTION_MESSAGE_LOG_KEY, e.getMessage())
+				.log("An unexpected failure occurred");
 	}
 
 	@Override
@@ -178,10 +185,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 
 		if (e instanceof CorruptedFileException) {
-			LOGGER.at(Level.WARN).addKeyValue("file_id", fileId).log("Unable to reply to the request: the file is corrupted");
+			LOGGER.at(Level.WARN).addKeyValue(FILE_ID_LOG_KEY, fileId).log("Unable to reply to the request: the file is corrupted");
 			answerText(CORRUPTED, request);
 		} else {
-			LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_id", fileId).log("Unable to process file");
+			LOGGER.at(Level.ERROR).setCause(e).addKeyValue(FILE_ID_LOG_KEY, fileId).log("Unable to process file");
 			answerText(ERROR, request);
 		}
 	}
@@ -206,7 +213,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	private void answerText(TelegramRequest request) {
 		var message = request.message();
 		if (message.text() == null) {
-			LOGGER.at(Level.INFO).addKeyValue("original_request", message).log("An unhandled message type has been received");
+			LOGGER.at(Level.INFO).addKeyValue(ORIGINAL_REQUEST_LOG_KEY, message).log("An unhandled message type has been received");
 		}
 
 		answerText(request.getAnswerMessage(), request);
@@ -241,10 +248,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		for (var path : pathsToDelete) {
 			try {
 				if (!Files.deleteIfExists(path)) {
-					LOGGER.at(Level.INFO).addKeyValue("file_path", path).log("Unable to delete temp file");
+					LOGGER.at(Level.INFO).addKeyValue(FILE_PATH_LOG_KEY, path).log("Unable to delete temp file");
 				}
 			} catch (IOException e) {
-				LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_path", path).log("An error occurred trying to delete temp file");
+				LOGGER.at(Level.ERROR).setCause(e).addKeyValue(FILE_PATH_LOG_KEY, path).log("An error occurred trying to delete temp file");
 			}
 		}
 	}

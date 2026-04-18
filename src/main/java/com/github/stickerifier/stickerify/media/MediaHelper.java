@@ -1,6 +1,8 @@
 package com.github.stickerifier.stickerify.media;
 
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_PATH_LOG_KEY;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.MIME_TYPE;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.STICKER_LOG_KEY;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
@@ -81,7 +83,7 @@ public final class MediaHelper {
 		try {
 			return TIKA.detect(file);
 		} catch (IOException e) {
-			LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
+			LOGGER.at(Level.ERROR).setCause(e).addKeyValue(FILE_PATH_LOG_KEY, file.getPath()).log("Unable to retrieve MIME type");
 			throw new MediaException(e);
 		}
 	}
@@ -253,7 +255,7 @@ public final class MediaHelper {
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
 				uncompressedContent = new String(gzipInputStream.readAllBytes(), UTF_8);
 			} catch (IOException e) {
-				LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_name", file.getName()).log("Unable to retrieve gzip content");
+				LOGGER.at(Level.ERROR).setCause(e).addKeyValue(FILE_PATH_LOG_KEY, file.getPath()).log("Unable to retrieve gzip content");
 			}
 
 			try {
@@ -267,7 +269,7 @@ public final class MediaHelper {
 					}
 				}
 
-				LOGGER.at(Level.WARN).addKeyValue("sticker", sticker).log("The animated sticker doesn't meet Telegram's requirements");
+				LOGGER.at(Level.WARN).addKeyValue(STICKER_LOG_KEY, sticker).log("The animated sticker doesn't meet Telegram's requirements");
 			} catch (JsonSyntaxException _) {
 				LOGGER.at(Level.INFO).log("The archive isn't an animated sticker");
 			}
@@ -448,7 +450,7 @@ public final class MediaHelper {
 	private static void deleteFile(File file) throws FileOperationException {
 		try {
 			if (!Files.deleteIfExists(file.toPath())) {
-				LOGGER.at(Level.INFO).addKeyValue("file_path", file.toPath()).log("Unable to delete file");
+				LOGGER.at(Level.INFO).addKeyValue(FILE_PATH_LOG_KEY, file.toPath()).log("Unable to delete file");
 			}
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred deleting the file", e);
@@ -493,11 +495,11 @@ public final class MediaHelper {
 			}
 			throw new MediaException("FFmpeg two-pass conversion failed", e);
 		} finally {
-			var logFileName = logPrefix + "-0.log";
+			var logFilePath = logPrefix + "-0.log";
 			try {
-				deleteFile(new File(logFileName));
+				deleteFile(new File(logFilePath));
 			} catch (FileOperationException e) {
-				LOGGER.at(Level.WARN).setCause(e).addKeyValue("file_name", logFileName).log("Could not delete log file");
+				LOGGER.at(Level.WARN).setCause(e).addKeyValue(FILE_PATH_LOG_KEY, logFilePath).log("Could not delete log file");
 			}
 		}
 
