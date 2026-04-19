@@ -16,7 +16,6 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODE
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.github.stickerifier.stickerify.exception.CorruptedFileException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.ProcessException;
@@ -146,10 +145,10 @@ public final class MediaHelper {
 	 *
 	 * @param file the file to check
 	 * @return {@code true} if the file is compliant
-	 * @throws FileOperationException if an error occurred retrieving the size of the file
+	 * @throws MediaException if an error occurred retrieving video information
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	private static boolean isVideoCompliant(File file) throws FileOperationException, CorruptedFileException, InterruptedException {
+	private static boolean isVideoCompliant(File file) throws MediaException, InterruptedException {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
 		var formatInfo = mediaInfo.format();
@@ -180,10 +179,10 @@ public final class MediaHelper {
 	 *
 	 * @param file the video to check
 	 * @return passed-in video's multimedia information
-	 * @throws CorruptedFileException if an error occurred retrieving file information
+	 * @throws MediaException if an error occurred retrieving file information
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	static MultimediaInfo retrieveMultimediaInfo(File file) throws CorruptedFileException, InterruptedException {
+	static MultimediaInfo retrieveMultimediaInfo(File file) throws MediaException, InterruptedException {
 		var command = new String[] {
 				"ffprobe",
 				"-hide_banner",
@@ -199,7 +198,7 @@ public final class MediaHelper {
 
 			return GSON.fromJson(output, MultimediaInfo.class);
 		} catch (ProcessException | JsonSyntaxException e) {
-			throw new CorruptedFileException("The file could not be processed successfully", e);
+			throw new MediaException("Unable to retrieve media information", e);
 		}
 	}
 
@@ -356,10 +355,10 @@ public final class MediaHelper {
 	 * @param image the image to check
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
-	 * @throws CorruptedFileException if an error occurred retrieving image information
+	 * @throws MediaException if an error occurred retrieving image information
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	private static boolean isImageCompliant(File image, String mimeType) throws CorruptedFileException, InterruptedException {
+	private static boolean isImageCompliant(File image, String mimeType) throws MediaException, InterruptedException {
 		var mediaInfo = retrieveMultimediaInfo(image);
 
 		var formatInfo = mediaInfo.format();

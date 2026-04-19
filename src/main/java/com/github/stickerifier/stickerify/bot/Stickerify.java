@@ -5,7 +5,6 @@ import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_ID
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_PATH_LOG_KEY;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.ORIGINAL_REQUEST_LOG_KEY;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.REQUEST_DETAILS_VALUE;
-import static com.github.stickerifier.stickerify.telegram.Answer.CORRUPTED;
 import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
@@ -14,7 +13,6 @@ import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
-import com.github.stickerifier.stickerify.exception.CorruptedFileException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
 import com.github.stickerifier.stickerify.exception.TelegramApiException;
 import com.github.stickerifier.stickerify.logger.StructuredLogger;
@@ -184,13 +182,8 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 			}
 		}
 
-		if (e instanceof CorruptedFileException) {
-			LOGGER.at(Level.WARN).log("Unable to reply to the request: the file is corrupted");
-			answerText(CORRUPTED, request);
-		} else {
-			LOGGER.at(Level.ERROR).setCause(e).log("Unable to process file");
-			answerText(ERROR, request);
-		}
+		LOGGER.at(Level.ERROR).setCause(e).log("Unable to process file");
+		answerText(ERROR, request);
 	}
 
 	private boolean processTelegramFailure(TelegramApiException e, boolean logUnmatchedFailure) {

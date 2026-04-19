@@ -295,30 +295,6 @@ public final class MockResponses {
 			}
 			""").build();
 
-	static final MockResponse CORRUPTED_FILE = new MockResponse.Builder().body("""
-			{
-				ok: true,
-				result: [
-					{
-						update_id: 1,
-						message: {
-							message_id: 1,
-							from: {
-								id: 123456
-							},
-							chat: {
-								id: 1
-							},
-							video: {
-								file_id: "corrupted.mp4",
-								file_size: 200000
-							}
-						}
-					}
-				]
-			}
-			""").build();
-
 	static MockResponse fileInfo(String fileName) {
 		return new MockResponse.Builder().body("""
 				{
