@@ -494,11 +494,10 @@ public final class MediaHelper {
 			}
 			throw new MediaException("FFmpeg two-pass conversion failed", e);
 		} finally {
-			var logFilePath = logPrefix + "-0.log";
 			try {
-				deleteFile(new File(logFilePath));
+				deleteFile(new File(logPrefix + "-0.log"));
 			} catch (FileOperationException e) {
-				LOGGER.at(Level.WARN).setCause(e).addKeyValue(FILE_PATH_LOG_KEY, logFilePath).log("Could not delete log file");
+				LOGGER.at(Level.WARN).setCause(e).log("Could not delete log file");
 			}
 		}
 
