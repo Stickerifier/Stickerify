@@ -70,7 +70,7 @@ jobs:
           post-pr-comment: false
           pr-mode: false
           # bump: Qodana /qodana-jvm-community:([\d.]+)/ docker:jetbrains/qodana-jvm-community|/^[\d]{4}\.\d+$/|sort
-          args: --image jetbrains/qodana-jvm-community:2025.3
+          args: --image jetbrains/qodana-jvm-community:2026.1
 
       - name: Upload results to GitHub
         uses: github/codeql-action/upload-sarif@v4
