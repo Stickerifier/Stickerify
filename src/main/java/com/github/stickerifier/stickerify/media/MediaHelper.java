@@ -1,6 +1,8 @@
 package com.github.stickerifier.stickerify.media;
 
-import static com.github.stickerifier.stickerify.logger.StructuredLogger.MIME_TYPE;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_PATH_LOG_KEY;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.MIME_TYPE_VALUE;
+import static com.github.stickerifier.stickerify.logger.StructuredLogger.STICKER_LOG_KEY;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA_FORMAT;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_DURATION_SECONDS;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_ANIMATION_FILE_SIZE;
@@ -14,7 +16,6 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODE
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.github.stickerifier.stickerify.exception.CorruptedFileException;
 import com.github.stickerifier.stickerify.exception.FileOperationException;
 import com.github.stickerifier.stickerify.exception.MediaException;
 import com.github.stickerifier.stickerify.exception.ProcessException;
@@ -67,7 +68,7 @@ public final class MediaHelper {
 	public static @Nullable File convert(File inputFile) throws Exception {
 		var mimeType = detectMimeType(inputFile);
 
-		return ScopedValue.where(MIME_TYPE, mimeType).call(() -> performConversion(inputFile, mimeType));
+		return ScopedValue.where(MIME_TYPE_VALUE, mimeType).call(() -> performConversion(inputFile, mimeType));
 	}
 
 	/**
@@ -81,7 +82,7 @@ public final class MediaHelper {
 		try {
 			return TIKA.detect(file);
 		} catch (IOException e) {
-			LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_name", file.getName()).log("Unable to retrieve MIME type");
+			LOGGER.at(Level.ERROR).setCause(e).addKeyValue(FILE_PATH_LOG_KEY, file.getPath()).log("Unable to retrieve MIME type");
 			throw new MediaException(e);
 		}
 	}
@@ -144,10 +145,10 @@ public final class MediaHelper {
 	 *
 	 * @param file the file to check
 	 * @return {@code true} if the file is compliant
-	 * @throws FileOperationException if an error occurred retrieving the size of the file
+	 * @throws MediaException if an error occurred retrieving video information
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	private static boolean isVideoCompliant(File file) throws FileOperationException, CorruptedFileException, InterruptedException {
+	private static boolean isVideoCompliant(File file) throws MediaException, InterruptedException {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
 		var formatInfo = mediaInfo.format();
@@ -178,10 +179,10 @@ public final class MediaHelper {
 	 *
 	 * @param file the video to check
 	 * @return passed-in video's multimedia information
-	 * @throws CorruptedFileException if an error occurred retrieving file information
+	 * @throws MediaException if an error occurred retrieving file information
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	static MultimediaInfo retrieveMultimediaInfo(File file) throws CorruptedFileException, InterruptedException {
+	static MultimediaInfo retrieveMultimediaInfo(File file) throws MediaException, InterruptedException {
 		var command = new String[] {
 				"ffprobe",
 				"-hide_banner",
@@ -197,7 +198,7 @@ public final class MediaHelper {
 
 			return GSON.fromJson(output, MultimediaInfo.class);
 		} catch (ProcessException | JsonSyntaxException e) {
-			throw new CorruptedFileException("The file could not be processed successfully", e);
+			throw new MediaException("Unable to retrieve media information", e);
 		}
 	}
 
@@ -253,7 +254,7 @@ public final class MediaHelper {
 			try (var gzipInputStream = new GZIPInputStream(new FileInputStream(file))) {
 				uncompressedContent = new String(gzipInputStream.readAllBytes(), UTF_8);
 			} catch (IOException e) {
-				LOGGER.at(Level.ERROR).setCause(e).addKeyValue("file_name", file.getName()).log("Unable to retrieve gzip content");
+				LOGGER.at(Level.ERROR).setCause(e).addKeyValue(FILE_PATH_LOG_KEY, file.getPath()).log("Unable to retrieve gzip content");
 			}
 
 			try {
@@ -267,7 +268,7 @@ public final class MediaHelper {
 					}
 				}
 
-				LOGGER.at(Level.WARN).addKeyValue("sticker", sticker).log("The animated sticker doesn't meet Telegram's requirements");
+				LOGGER.at(Level.WARN).addKeyValue(STICKER_LOG_KEY, sticker).log("The animated sticker doesn't meet Telegram's requirements");
 			} catch (JsonSyntaxException _) {
 				LOGGER.at(Level.INFO).log("The archive isn't an animated sticker");
 			}
@@ -354,10 +355,10 @@ public final class MediaHelper {
 	 * @param image the image to check
 	 * @param mimeType the MIME type of the file
 	 * @return {@code true} if the file is compliant
-	 * @throws CorruptedFileException if an error occurred retrieving image information
+	 * @throws MediaException if an error occurred retrieving image information
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
-	private static boolean isImageCompliant(File image, String mimeType) throws CorruptedFileException, InterruptedException {
+	private static boolean isImageCompliant(File image, String mimeType) throws MediaException, InterruptedException {
 		var mediaInfo = retrieveMultimediaInfo(image);
 
 		var formatInfo = mediaInfo.format();
@@ -448,7 +449,7 @@ public final class MediaHelper {
 	private static void deleteFile(File file) throws FileOperationException {
 		try {
 			if (!Files.deleteIfExists(file.toPath())) {
-				LOGGER.at(Level.INFO).addKeyValue("file_path", file.toPath()).log("Unable to delete file");
+				LOGGER.at(Level.INFO).addKeyValue(FILE_PATH_LOG_KEY, file.toPath()).log("Unable to delete file");
 			}
 		} catch (IOException e) {
 			throw new FileOperationException("An error occurred deleting the file", e);
@@ -493,11 +494,10 @@ public final class MediaHelper {
 			}
 			throw new MediaException("FFmpeg two-pass conversion failed", e);
 		} finally {
-			var logFileName = logPrefix + "-0.log";
 			try {
-				deleteFile(new File(logFileName));
+				deleteFile(new File(logPrefix + "-0.log"));
 			} catch (FileOperationException e) {
-				LOGGER.at(Level.WARN).setCause(e).addKeyValue("file_name", logFileName).log("Could not delete log file");
+				LOGGER.at(Level.WARN).setCause(e).log("Could not delete log file");
 			}
 		}
 
