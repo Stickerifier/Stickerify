@@ -1,6 +1,5 @@
 package com.github.stickerifier.stickerify.bot;
 
-import static com.github.stickerifier.stickerify.logger.StructuredLogger.EXCEPTION_MESSAGE_LOG_KEY;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_ID_VALUE;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.FILE_PATH_LOG_KEY;
 import static com.github.stickerifier.stickerify.logger.StructuredLogger.ORIGINAL_REQUEST_LOG_KEY;
@@ -88,10 +87,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 	@Override
 	public void onException(TelegramException e) {
-		LOGGER.at(Level.ERROR)
-				.setCause(e)
-				.addKeyValue(EXCEPTION_MESSAGE_LOG_KEY, e.getMessage())
-				.log("An unexpected failure occurred");
+		LOGGER.at(Level.ERROR).setCause(e).log("An unexpected failure occurred");
 	}
 
 	@Override

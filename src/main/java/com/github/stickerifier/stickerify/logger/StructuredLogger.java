@@ -15,7 +15,6 @@ public record StructuredLogger(Logger logger) {
 	private static final String REQUEST_DETAILS_LOG_KEY = "request_details";
 	private static final String FILE_ID_LOG_KEY = "file_id";
 	private static final String MIME_TYPE_LOG_KEY = "mime_type";
-	public static final String EXCEPTION_MESSAGE_LOG_KEY = "exception_message";
 	public static final String ORIGINAL_REQUEST_LOG_KEY = "original_request";
 	public static final String FILE_PATH_LOG_KEY = "file_path";
 	public static final String STICKER_LOG_KEY = "sticker";
