@@ -4,5 +4,5 @@ profile:
 include:
   - name: VulnerableLibrariesGlobal
 # bump: Qodana /qodana-jvm-community:([\d.]+)/ docker:jetbrains/qodana-jvm-community|/^[\d]{4}\.\d+$/|sort
-linter: jetbrains/qodana-jvm-community:2025.3
+linter: jetbrains/qodana-jvm-community:2026.1
 projectJDK: temurin-26
