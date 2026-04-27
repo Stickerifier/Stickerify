@@ -15,6 +15,9 @@
                 </pattern>
                 <message/>
                 <keyValuePairs/>
+                <throwableMessage>
+                    <fieldName>exception_message</fieldName>
+                </throwableMessage>
                 <stackTrace/>
             </providers>
         </encoder>
