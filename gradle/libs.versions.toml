@@ -1,5 +1,5 @@
 [versions]
-junit = "6.0.3"
+junit = "6.1.0"
 
 [libraries]
 gson = "com.google.code.gson:gson:2.14.0"
