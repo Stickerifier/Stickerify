@@ -28,17 +28,23 @@ runs:
 
         elif [[ "${{ runner.os }}" == "macOS" ]]; then
           FF_VERSION=$(echo "$FF_VERSION" | awk -F. '{print $1 $2}')
-          curl -L --retry 3 --retry-delay 5 "https://www.osxexperts.net/ffmpeg${FF_VERSION}arm.zip" -o ffmpeg.zip
+          curl -sS -L --retry 3 --retry-delay 5 \
+            "https://www.osxexperts.net/ffmpeg${FF_VERSION}arm.zip" \
+            -o ffmpeg.zip -w "Downloaded FFmpeg from %{url_effective}\n"
           unzip -q ffmpeg.zip
           mv ffmpeg "$INSTALL_DIR/ffmpeg"
-          curl -L --retry 3 --retry-delay 5 "https://www.osxexperts.net/ffprobe${FF_VERSION}arm.zip" -o ffprobe.zip
+          curl -sS -L --retry 3 --retry-delay 5 \
+            "https://www.osxexperts.net/ffprobe${FF_VERSION}arm.zip" \
+            -o ffprobe.zip -w "Downloaded FFprobe from %{url_effective}"
           unzip -q ffprobe.zip
           mv ffprobe "$INSTALL_DIR/ffprobe"
           chmod +x "$INSTALL_DIR/"*
           rm -f ffmpeg.zip ffprobe.zip
 
         elif [[ "${{ runner.os }}" == "Windows" ]]; then
-          curl -L --retry 3 --retry-delay 5 "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-$FF_VERSION-essentials_build.zip" -o ffmpeg.zip
+          curl -sS -L --retry 3 --retry-delay 5 \
+            "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-$FF_VERSION-essentials_build.zip" \
+            -o ffmpeg.zip -w "Downloaded FFmpeg and FFprobe from %{url_effective}"
           unzip -q ffmpeg.zip
           find . -type f \( -name ffmpeg.exe -o -name ffprobe.exe \) -exec mv {} "$INSTALL_DIR/" \;
           rm -f ffmpeg.zip
