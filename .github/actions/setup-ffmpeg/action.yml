@@ -18,6 +18,16 @@ runs:
 
         echo "Installing FFmpeg and FFprobe $FF_VERSION on ${{ runner.os }}"
 
+        download_binary() {
+          local url="$1"
+          local binary_name="${2:-FFmpeg}"
+          local output_file="$(echo "$binary_name" | tr '[:upper:]' '[:lower:]').zip"
+
+          curl -sS -f -L --retry 3 --retry-delay 5 "$url" -o "$output_file" -w "Downloaded $binary_name from %{url_effective}\n"
+          unzip -q "$output_file"
+          rm -f "$output_file"
+        }
+
         if [[ "${{ runner.os }}" == "Linux" ]]; then
           docker pull mwader/static-ffmpeg:$FF_VERSION
           CID=$(docker create mwader/static-ffmpeg:$FF_VERSION)
@@ -28,26 +38,15 @@ runs:
 
         elif [[ "${{ runner.os }}" == "macOS" ]]; then
           FF_VERSION=$(echo "$FF_VERSION" | awk -F. '{print $1 $2}')
-          curl -sS -f -L --retry 3 --retry-delay 5 \
-            "https://www.osxexperts.net/ffmpeg${FF_VERSION}arm.zip" \
-            -o ffmpeg.zip -w "Downloaded FFmpeg from %{url_effective}\n"
-          unzip -q ffmpeg.zip
+          download_binary "https://www.osxexperts.net/ffmpeg${FF_VERSION}arm.zip"
           mv ffmpeg "$INSTALL_DIR/ffmpeg"
-          curl -sS -f -L --retry 3 --retry-delay 5 \
-            "https://www.osxexperts.net/ffprobe${FF_VERSION}arm.zip" \
-            -o ffprobe.zip -w "Downloaded FFprobe from %{url_effective}"
-          unzip -q ffprobe.zip
+          download_binary "https://www.osxexperts.net/ffprobe${FF_VERSION}arm.zip" "FFprobe"
           mv ffprobe "$INSTALL_DIR/ffprobe"
           chmod +x "$INSTALL_DIR/"*
-          rm -f ffmpeg.zip ffprobe.zip
 
         elif [[ "${{ runner.os }}" == "Windows" ]]; then
-          curl -sS -f -L --retry 3 --retry-delay 5 \
-            "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-$FF_VERSION-essentials_build.zip" \
-            -o ffmpeg.zip -w "Downloaded FFmpeg and FFprobe from %{url_effective}"
-          unzip -q ffmpeg.zip
+          download_binary "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-$FF_VERSION-essentials_build.zip"
           find . -type f \( -name ffmpeg.exe -o -name ffprobe.exe \) -exec mv {} "$INSTALL_DIR/" \;
-          rm -f ffmpeg.zip
         fi
 
         echo "$INSTALL_DIR" >> "$GITHUB_PATH"
