@@ -35,11 +35,11 @@ public record TelegramRequest(Message message) {
 	public @Nullable TelegramFile getFile() {
 		return getMessageMedia()
 				.map(media -> switch (media) {
-					case LivePhoto livePhoto -> getLivePhoto(livePhoto);
+					case LivePhoto livePhoto -> new TelegramFile(livePhoto.fileId(), livePhoto.fileSize());
 					case PhotoSize[] photos when photos.length > 0 -> getBestPhoto(photos);
 					case Document document -> new TelegramFile(document.fileId(), document.fileSize());
 					case Sticker sticker -> new TelegramFile(sticker.fileId(), sticker.fileSize());
-					case Video video -> getVideo(video);
+					case Video video -> new TelegramFile(video.fileId(), video.fileSize());
 					case VideoNote videoNote -> new TelegramFile(videoNote.fileId(), videoNote.fileSize());
 					default -> TelegramFile.NOT_SUPPORTED;
 				})
@@ -54,32 +54,12 @@ public record TelegramRequest(Message message) {
 				.findFirst();
 	}
 
-	private TelegramFile getLivePhoto(LivePhoto livePhoto) {
-		var id = livePhoto.fileId();
-		var fileSize = livePhoto.fileSize();
-		return getTelegramFile(id, fileSize);
-	}
-
-	private TelegramFile getTelegramFile(String fileId, @Nullable Long size) {
-		if (size == null) {
-			return new TelegramFile(fileId);
-		} else {
-			return new TelegramFile(fileId, size);
-		}
-	}
-
 	private TelegramFile getBestPhoto(PhotoSize[] photos) {
 		return Arrays.stream(photos)
 				.map(photo -> new TelegramFile(photo.fileId(), photo.fileSize()))
 				.filter(TelegramFile::canBeDownloaded)
-				.max(comparing(TelegramFile::size))
+				.max(comparing(TelegramFile::sizeValue))
 				.orElse(TelegramFile.TOO_LARGE);
-	}
-
-	private TelegramFile getVideo(Video video) {
-		var id = video.fileId();
-		var fileSize = video.fileSize();
-		return getTelegramFile(id, fileSize);
 	}
 
 	public long getChatId() {
