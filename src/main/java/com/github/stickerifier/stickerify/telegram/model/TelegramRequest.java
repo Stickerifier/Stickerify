@@ -8,6 +8,7 @@ import static java.util.Comparator.comparing;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.stickerifier.stickerify.telegram.Answer;
 import com.pengrad.telegrambot.model.Document;
+import com.pengrad.telegrambot.model.LivePhoto;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Sticker;
@@ -34,6 +35,7 @@ public record TelegramRequest(Message message) {
 	public @Nullable TelegramFile getFile() {
 		return getMessageMedia()
 				.map(media -> switch (media) {
+					case LivePhoto livePhoto -> getLivePhoto(livePhoto);
 					case PhotoSize[] photos when photos.length > 0 -> getBestPhoto(photos);
 					case Document document -> new TelegramFile(document.fileId(), document.fileSize());
 					case Sticker sticker -> new TelegramFile(sticker.fileId(), sticker.fileSize());
@@ -45,11 +47,25 @@ public record TelegramRequest(Message message) {
 	}
 
 	private Optional<?> getMessageMedia() {
-		return Stream.of(message.photo(), message.document(), message.sticker(),
+		return Stream.of(message.livePhoto(), message.photo(), message.document(), message.sticker(),
 						message.video(), message.videoNote(),
 						message.audio(), message.voice())
 				.filter(Objects::nonNull)
 				.findFirst();
+	}
+
+	private TelegramFile getLivePhoto(LivePhoto livePhoto) {
+		var id = livePhoto.fileId();
+		var fileSize = livePhoto.fileSize();
+		return getTelegramFile(id, fileSize);
+	}
+
+	private TelegramFile getTelegramFile(String fileId, @Nullable Long size) {
+		if (size == null) {
+			return new TelegramFile(fileId);
+		} else {
+			return new TelegramFile(fileId, size);
+		}
 	}
 
 	private TelegramFile getBestPhoto(PhotoSize[] photos) {
@@ -63,11 +79,7 @@ public record TelegramRequest(Message message) {
 	private TelegramFile getVideo(Video video) {
 		var id = video.fileId();
 		var fileSize = video.fileSize();
-		if (fileSize == null) {
-			return new TelegramFile(id);
-		} else {
-			return new TelegramFile(id, fileSize);
-		}
+		return getTelegramFile(id, fileSize);
 	}
 
 	public long getChatId() {

@@ -261,9 +261,45 @@ public final class MockResponses {
 							chat: {
 								id: 1
 							},
-							sticker: {
+							document: {
 								file_id: "valid.gif",
 								file_size: 200000
+							}
+						}
+					}
+				]
+			}
+			""").build();
+
+	static final MockResponse LIVE_PHOTO_FILE = new MockResponse.Builder().body("""
+			{
+				ok: true,
+				result: [
+					{
+						update_id: 1,
+						message: {
+							message_id: 1,
+							from: {
+								id: 123456
+							},
+							chat: {
+								id: 1
+							},
+							photo: [
+								{
+									file_id: "first_frame",
+									file_size: 200000
+								}
+							],
+							live_photo: {
+								file_id: "valid_live_photo",
+								file_size: 200000,
+								photo: [
+									{
+										file_id: "first_frame",
+										file_size: 200000
+									}
+								]
 							}
 						}
 					}
