@@ -247,6 +247,15 @@ class MediaHelperTest {
 
 	@Test
 	@Tag(Tags.VIDEO)
+	void convertLivePhoto() throws Exception {
+		var livePhoto = loadResource("valid_live_photo");
+		var result = MediaHelper.convert(livePhoto);
+
+		assertVideoConsistency(result, 384, 512, 30F, 2.966F);
+	}
+
+	@Test
+	@Tag(Tags.VIDEO)
 	void noVideoConversionNeeded() throws Exception {
 		var webmVideo = loadResource("no_conversion_needed.webm");
 		var result = MediaHelper.convert(webmVideo);

@@ -268,6 +268,31 @@ class StickerifyTest {
 	}
 
 	@Test
+	void convertedLivePhoto() throws Exception {
+		server.enqueue(MockResponses.LIVE_PHOTO_FILE);
+		server.enqueue(MockResponses.fileInfo("valid_live_photo"));
+		server.enqueue(MockResponses.fileDownload("valid_live_photo"));
+
+		try (var _ = runBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+
+			var getFile = server.takeRequest();
+			assertEquals("/api/token/getFile", getFile.getTarget());
+			assertNotNull(getFile.getBody());
+			assertEquals("file_id=valid_live_photo", getFile.getBody().utf8());
+
+			var download = server.takeRequest();
+			assertEquals("/files/token/valid_live_photo", download.getTarget());
+
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+			assertNotNull(sendDocument.getBody());
+			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
+		}
+	}
+
+	@Test
 	void documentNotSupported() throws Exception {
 		server.enqueue(MockResponses.DOCUMENT);
 		server.enqueue(MockResponses.fileInfo("document.txt"));
