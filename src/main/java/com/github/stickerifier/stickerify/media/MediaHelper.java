@@ -99,7 +99,7 @@ public final class MediaHelper {
 		LOGGER.at(Level.DEBUG).log("MIME type successfully detected");
 
 		try {
-			if (isSupportedVideo(mimeType)) {
+			if (isSupportedVideo(inputFile, mimeType)) {
 				if (isVideoCompliant(inputFile)) {
 					LOGGER.at(Level.INFO).log("The video doesn't need conversion");
 					return null;
@@ -113,7 +113,7 @@ public final class MediaHelper {
 				return null;
 			}
 
-			if (isSupportedImage(inputFile, mimeType)) {
+			if (isSupportedImage(mimeType)) {
 				if (isImageCompliant(inputFile, mimeType)) {
 					LOGGER.at(Level.INFO).log("The image doesn't need conversion");
 					return null;
@@ -132,11 +132,41 @@ public final class MediaHelper {
 	/**
 	 * Checks if the MIME type corresponds to one of the supported video formats.
 	 *
+	 * @param file the file to check
 	 * @param mimeType the MIME type to check
 	 * @return {@code true} if the MIME type is supported
 	 */
-	private static boolean isSupportedVideo(String mimeType) {
-		return SUPPORTED_VIDEOS.contains(mimeType);
+	private static boolean isSupportedVideo(File file, String mimeType) {
+		return SUPPORTED_VIDEOS.contains(mimeType) || isAnimatedWebp(file, mimeType);
+	}
+
+	/**
+	 * Detects if the file is an animated WebP by checking its file header.
+	 *
+	 * @param file the file to check
+	 * @param mimeType the MIME type to check
+	 * @return {@code true} if the file is an animated WebP
+	 */
+	private static boolean isAnimatedWebp(File file, String mimeType) {
+		if ("image/webp".equals(mimeType)) {
+			try (var fileInputStream = new FileInputStream(file)) {
+				var header = fileInputStream.readNBytes(WEBP_HEADER_SIZE);
+				if (header.length < WEBP_HEADER_SIZE) {
+					return false;
+				}
+
+				var chunkHeader = new String(header, WEBP_CHUNK_TYPE_OFFSET, WEBP_CHUNK_TYPE_LENGTH, ISO_8859_1);
+				boolean isExtendedFormat = WEBP_EXTENDED_FILE_FORMAT.equals(chunkHeader);
+				boolean hasAnimationFlag = (header[WEBP_FLAGS_BYTE_OFFSET] & WEBP_ANIMATION_BIT_MASK) != 0;
+
+				return isExtendedFormat && hasAnimationFlag;
+			} catch (IOException e) {
+				LOGGER.at(Level.WARN).setCause(e).log("An error occurred checking if the file is an animated WebP");
+				return false;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -310,43 +340,12 @@ public final class MediaHelper {
 
 	/**
 	 * Checks if the MIME type corresponds to one of the supported image formats.
-	 * If the image file is an animated WebP, {@code false} is returned as they are not currently supported.
 	 *
-	 * @param image the image file to check
 	 * @param mimeType the MIME type to check
 	 * @return {@code true} if the MIME type is supported
 	 */
-	private static boolean isSupportedImage(File image, String mimeType) {
-		if ("image/webp".equals(mimeType) && isAnimatedWebp(image)) {
-			LOGGER.at(Level.INFO).log("The image is an animated WebP");
-			return false;
-		}
-
+	private static boolean isSupportedImage(String mimeType) {
 		return mimeType.startsWith("image/");
-	}
-
-	/**
-	 * Detects if a WebP file is animated by checking its file header.
-	 *
-	 * @param file the WebP file to check
-	 * @return {@code true} if the file is an animated WebP
-	 */
-	private static boolean isAnimatedWebp(File file) {
-		try (var fileInputStream = new FileInputStream(file)) {
-			var header = fileInputStream.readNBytes(WEBP_HEADER_SIZE);
-			if (header.length < WEBP_HEADER_SIZE) {
-				return false;
-			}
-
-			var chunkHeader = new String(header, WEBP_CHUNK_TYPE_OFFSET, WEBP_CHUNK_TYPE_LENGTH, ISO_8859_1);
-			boolean isExtendedFormat = WEBP_EXTENDED_FILE_FORMAT.equals(chunkHeader);
-			boolean hasAnimationFlag = (header[WEBP_FLAGS_BYTE_OFFSET] & WEBP_ANIMATION_BIT_MASK) != 0;
-
-			return isExtendedFormat && hasAnimationFlag;
-		} catch (IOException e) {
-			LOGGER.at(Level.WARN).setCause(e).log("An error occurred checking if the file is an animated WebP");
-			return false;
-		}
 	}
 
 	/**
