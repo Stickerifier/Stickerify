@@ -69,7 +69,7 @@ test {
     useJUnitPlatform()
 
     testLogging {
-        events('passed', 'failed', 'skipped')
+        events('started', 'passed', 'failed', 'skipped')
     }
 }
 
