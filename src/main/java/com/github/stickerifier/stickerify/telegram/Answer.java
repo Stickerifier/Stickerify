@@ -6,60 +6,53 @@ package com.github.stickerifier.stickerify.telegram;
 public enum Answer {
 
 	HELP("""
-			Send me the media you want to convert and I will take care of the rest\\.
+			Send me the media you want to convert and I will take care of the rest.
 
 			Based on what you send, I will answer the following:
-			\\- the converted media, if you sent a supported file \\(images, gifs, standard and video stickers are supported\\)
-			\\- no file, if you sent a media already suiting Telegram's requirements
-			\\- an error message, if you sent either an unsupported or a corrupted file
-			\\- an informative message for any message without a file
+			- the converted media, if you sent a supported file (images, gifs, standard and video stickers are supported)
+			- no file, if you sent a media already suiting Telegram's requirements
+			- an error message, if you sent either an unsupported or a corrupted file
+			- an informative message for any message without a file
 
-			Once the file is ready, head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
+			Once the file is ready, head to [Stickers](https://t.me/Stickers) to create a new sticker.
 			"""),
 	FILE_READY("""
 			Your sticker file is ready\\!
 			Head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
 			"""),
 	FILE_ALREADY_VALID("""
-			The media you sent was already suitable to be a Telegram sticker\\.
-			Send it to [Stickers](https://t.me/Stickers) to add it as a new sticker\\.
+			The media you sent was already suitable to be a Telegram sticker.
+			Send it to [Stickers](https://t.me/Stickers) to add it as a new sticker.
 			"""),
 	FILE_TOO_LARGE("""
-			The file can't be converted because Telegram bots can't handle files larger than 20 MB at the moment: please send a smaller one\\.
+			The file can't be converted because Telegram bots can't handle files larger than 20 MB at the moment: please send a smaller one.
 			"""),
 	ABOUT("""
-			This bot is open source, check it out on [Github](https://github.com/Stickerifier/Stickerify)\\.
+			This bot is open source, check it out on [Github](https://github.com/Stickerifier/Stickerify).
 
-			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)\\!
+			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)!
 			"""),
 	ERROR("""
-			The file conversion was unsuccessful: only images, gifs, standard and video stickers are supported\\.
+			The file conversion was unsuccessful: only images, gifs, standard and video stickers are supported.
 
-			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose)\\.
-			""", true),
+			If you think it should have worked, please report the issue on [Github](https://github.com/Stickerifier/Stickerify/issues/new/choose).
+			"""),
 	PRIVACY_POLICY("""
-			You can view our privacy policy by visiting [this link](https://stickerifier.github.io/Stickerify/PRIVACY_POLICY.html)\\.
+			You can view our privacy policy by visiting [this link](https://stickerifier.github.io/Stickerify/PRIVACY_POLICY.html).
 
-			If you have any questions or concerns, feel free to reach out to us\\.
+			If you have any questions or concerns, feel free to reach out to us.
+			"""),
+	PROCESSING("""
+			<tg-thinking>Processing file...</tg-thinking>
 			""");
 
 	private final String text;
-	private final boolean disableLinkPreview;
 
 	Answer(String text) {
-		this(text, false);
-	}
-
-	Answer(String text, boolean disableLinkPreview) {
 		this.text = text;
-		this.disableLinkPreview = disableLinkPreview;
 	}
 
 	public String getText() {
 		return text;
-	}
-
-	public boolean isDisableLinkPreview() {
-		return disableLinkPreview;
 	}
 }
