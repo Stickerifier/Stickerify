@@ -40,7 +40,7 @@ public enum Answer {
 	PRIVACY_POLICY("""
 			You can view our privacy policy by visiting [this link](https://stickerifier.github.io/Stickerify/PRIVACY_POLICY.html).
 
-			If you have any questions or concerns, feel free to reach out to us.
+			If you have any questions or concerns, feel free to reach out to us at [stickerifier@gmail.com](mailto:stickerifier@gmail.com).
 			"""),
 	PROCESSING("""
 			<tg-thinking>Processing file...</tg-thinking>
