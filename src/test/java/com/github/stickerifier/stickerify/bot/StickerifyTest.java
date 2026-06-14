@@ -207,12 +207,12 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/big.png", download.getTarget());
 
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+
 			var sendRichMessage = server.takeRequest();
 			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
 			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
-
-			var sendDocument = server.takeRequest();
-			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
 		}
 	}
 
@@ -239,12 +239,12 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/static.webp", download.getTarget());
 
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+
 			var sendRichMessage = server.takeRequest();
 			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
 			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
-
-			var sendDocument = server.takeRequest();
-			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
 		}
 	}
 
@@ -271,12 +271,12 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/long.mov", download.getTarget());
 
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+
 			var sendRichMessage = server.takeRequest();
 			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
 			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
-
-			var sendDocument = server.takeRequest();
-			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
 		}
 	}
 
@@ -303,12 +303,12 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/short_low_fps.webm", download.getTarget());
 
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+
 			var sendRichMessage = server.takeRequest();
 			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
 			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
-
-			var sendDocument = server.takeRequest();
-			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
 		}
 	}
 
@@ -335,12 +335,12 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/valid.gif", download.getTarget());
 
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+
 			var sendRichMessage = server.takeRequest();
 			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
 			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
-
-			var sendDocument = server.takeRequest();
-			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
 		}
 	}
 
@@ -367,12 +367,12 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/valid_live_photo", download.getTarget());
 
+			var sendDocument = server.takeRequest();
+			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
+
 			var sendRichMessage = server.takeRequest();
 			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
 			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
-
-			var sendDocument = server.takeRequest();
-			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
 		}
 	}
 
