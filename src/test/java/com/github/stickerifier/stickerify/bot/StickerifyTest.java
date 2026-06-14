@@ -114,6 +114,20 @@ class StickerifyTest {
 	}
 
 	@Test
+	void supportedMessage() throws Exception {
+		server.enqueue(MockResponses.SUPPORTED_MESSAGE);
+
+		try (var _ = runBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+
+			var sendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
+			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.SUPPORTED_FORMATS);
+		}
+	}
+
+	@Test
 	void fileNotSupported() throws Exception {
 		server.enqueue(MockResponses.FILE_NOT_SUPPORTED);
 

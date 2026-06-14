@@ -3,6 +3,7 @@ package com.github.stickerifier.stickerify.telegram.model;
 import static com.github.stickerifier.stickerify.telegram.Answer.ABOUT;
 import static com.github.stickerifier.stickerify.telegram.Answer.HELP;
 import static com.github.stickerifier.stickerify.telegram.Answer.PRIVACY_POLICY;
+import static com.github.stickerifier.stickerify.telegram.Answer.SUPPORTED_FORMATS;
 import static java.util.Comparator.comparing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,6 +32,7 @@ public record TelegramRequest(Message message) {
 	private static final String START_COMMAND = "/start";
 	private static final String HELP_COMMAND = "/help";
 	private static final String PRIVACY_COMMAND = "/privacy";
+	private static final String SUPPORTED_COMMAND = "/supported";
 
 	public @Nullable TelegramFile getFile() {
 		return getMessageMedia()
@@ -82,6 +84,7 @@ public record TelegramRequest(Message message) {
 		return switch (message.text()) {
 			case HELP_COMMAND, START_COMMAND -> HELP;
 			case PRIVACY_COMMAND -> PRIVACY_POLICY;
+			case SUPPORTED_COMMAND -> SUPPORTED_FORMATS;
 			case null, default -> ABOUT;
 		};
 	}
