@@ -15,15 +15,15 @@ public enum Answer {
 			- an informative message for any message without a file
 			- the list of supported files, using the /supported command
 
-			Once the file is ready, head to [Stickers](https://t.me/Stickers) to create a new sticker.
+			Once the file is ready, head to [Stickers bot](https://t.me/Stickers) to create a new sticker.
 			"""),
 	FILE_READY("""
 			Your sticker file is ready\\!
-			Head to [Stickers](https://t.me/Stickers) to create a new sticker\\.
+			Head to [Stickers bot](https://t.me/Stickers) to create a new sticker\\.
 			"""),
 	FILE_ALREADY_VALID("""
 			The media you sent was already suitable to be a Telegram sticker.
-			Send it to [Stickers](https://t.me/Stickers) to add it as a new sticker.
+			Send it to [Stickers bot](https://t.me/Stickers) to add it as a new sticker.
 			"""),
 	FILE_TOO_LARGE("""
 			The file can't be converted because Telegram bots can't handle files larger than 20 MB at the moment: please send a smaller one.
@@ -47,47 +47,11 @@ public enum Answer {
 			<tg-thinking>Processing file...</tg-thinking>
 			"""),
 	SUPPORTED_FORMATS("""
-			### Supported formats
-
-			<details><summary>Images</summary>
-
-				| Format      | Support status |
-				|:------------|:--------------:|
-				| png         |       ✔        |
-				| jpg / jpeg  |       ✔        |
-				| static webp |       ✔        |
-				| tiff        |       ✔        |
-				| ico         |       ✔        |
-				| svg         |       ✔        |
-				| psd         |       ✔        |
-
-			</details>
-
-			<details><summary>Videos</summary>
-
-				| Format        | Support status |
-				|:--------------|:--------------:|
-				| gif           |       ✔        |
-				| mov           |       ✔        |
-				| avi           |       ✔        |
-				| mp4           |       ✔        |
-				| webm          |       ✔        |
-				| m4v           |       ✔        |
-				| mkv           |       ✔        |
-				| live photos   |       ✔        |
-				| animated webp |       ✖        |
-
-			</details>
-
-			<details><summary>Stickers</summary>
-
-				| Format                                                                     | Support status |
-				|:---------------------------------------------------------------------------|:--------------:|
-				| static, for instance [MeminiCustom](https://t.me/addstickers/MeminiCustom) |       ✔        |
-				| video, for instance [VideoMemini](https://t.me/addstickers/VideoMemini)    |       ✔        |
-				| animated, for instance [HotCherry](https://t.me/addstickers/HotCherry)     |       ✔        |
-
-			</details>
+			| Type     | Supported formats                               |
+			|:---------|:------------------------------------------------|
+			| images   | png, jpg, static webp, tiff, ico, svg, psd      |
+			| videos   | gif, mov, avi, mp4, webm, m4v, mkv, live photos |
+			| stickers | static, video, animated                         |
 
 			---
 

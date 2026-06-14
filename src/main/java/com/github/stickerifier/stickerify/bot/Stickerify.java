@@ -215,9 +215,8 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {
-		var answerWithText = new SendRichMessage(request.getChatId(), new InputRichMessage().markdown(answer.getText()))
-				.replyParameters(new ReplyParameters(request.getMessageId()))
-				.disableNotification(true);
+		var message = new InputRichMessage().markdown(answer.getText());
+		var answerWithText = new SendRichMessage(request.getChatId(), message).disableNotification(true);
 
 		try {
 			execute(answerWithText);
