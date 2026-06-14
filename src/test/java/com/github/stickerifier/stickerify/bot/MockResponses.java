@@ -7,7 +7,7 @@ import okio.Okio;
 
 public final class MockResponses {
 
-	static final MockResponse EMPTY_UPDATES = new MockResponse.Builder().body("""
+	static final MockResponse SUCCESS_RESPONSE = new MockResponse.Builder().body("""
 			{
 				ok: true
 			}
@@ -70,6 +70,27 @@ public final class MockResponses {
 								id: 1
 							},
 							text: "/privacy"
+						}
+					}
+				]
+			}
+			""").build();
+
+	static final MockResponse SUPPORTED_MESSAGE = new MockResponse.Builder().body("""
+			{
+				ok: true,
+				result: [
+					{
+						update_id: 1,
+						message: {
+							message_id: 1,
+							from: {
+								id: 123456
+							},
+							chat: {
+								id: 1
+							},
+							text: "/supported"
 						}
 					}
 				]

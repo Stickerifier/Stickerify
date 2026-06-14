@@ -8,7 +8,7 @@ import static com.github.stickerifier.stickerify.telegram.Answer.ERROR;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VALID;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
-import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
+import static com.github.stickerifier.stickerify.telegram.Answer.PROCESSING;
 import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
@@ -23,14 +23,15 @@ import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.TelegramException;
 import com.pengrad.telegrambot.UpdatesListener;
-import com.pengrad.telegrambot.model.LinkPreviewOptions;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ReplyParameters;
+import com.pengrad.telegrambot.model.request.richmessages.InputRichMessage;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.request.SendDocument;
-import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.richmessages.SendRichMessage;
+import com.pengrad.telegrambot.request.richmessages.SendRichMessageDraft;
 import com.pengrad.telegrambot.response.BaseResponse;
 import org.slf4j.event.Level;
 
@@ -54,6 +55,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	private static final StructuredLogger LOGGER = new StructuredLogger(Stickerify.class);
 	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
+	private static final InputRichMessage PROCESSING_MESSAGE = new InputRichMessage().html(PROCESSING.getText());
 
 	/**
 	 * Instantiate the bot processing requests with virtual threads.
@@ -127,8 +129,11 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 	private void answerFile(TelegramRequest request, String fileId) {
 		Set<Path> pathsToDelete = newHashSet(2);
+		var processingMessage = new SendRichMessageDraft(request.getChatId(), 1, PROCESSING_MESSAGE);
 
 		try {
+			execute(processingMessage);
+
 			var originalFile = retrieveFile(fileId);
 			pathsToDelete.add(originalFile.toPath());
 
@@ -141,11 +146,10 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 				var answerWithFile = new SendDocument(request.getChatId(), outputFile)
 						.replyParameters(new ReplyParameters(request.getMessageId()))
-						.disableContentTypeDetection(true)
-						.caption(FILE_READY.getText())
-						.parseMode(MarkdownV2);
+						.disableContentTypeDetection(true);
 
 				execute(answerWithFile);
+				answerText(FILE_READY, request);
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -209,12 +213,8 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	}
 
 	private void answerText(Answer answer, TelegramRequest request) {
-		var previewOptions = new LinkPreviewOptions().isDisabled(answer.isDisableLinkPreview());
-
-		var answerWithText = new SendMessage(request.getChatId(), answer.getText())
-				.replyParameters(new ReplyParameters(request.getMessageId()))
-				.parseMode(MarkdownV2)
-				.linkPreviewOptions(previewOptions);
+		var message = new InputRichMessage().markdown(answer.getText());
+		var answerWithText = new SendRichMessage(request.getChatId(), message).disableNotification(true);
 
 		try {
 			execute(answerWithText);
