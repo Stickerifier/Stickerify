@@ -9,7 +9,6 @@ import static com.github.stickerifier.stickerify.telegram.Answer.FILE_ALREADY_VA
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_READY;
 import static com.github.stickerifier.stickerify.telegram.Answer.FILE_TOO_LARGE;
 import static com.github.stickerifier.stickerify.telegram.Answer.PROCESSING;
-import static com.pengrad.telegrambot.model.request.ParseMode.MarkdownV2;
 import static java.util.HashSet.newHashSet;
 import static java.util.concurrent.Executors.newThreadPerTaskExecutor;
 
@@ -147,10 +146,9 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 				var answerWithFile = new SendDocument(request.getChatId(), outputFile)
 						.replyParameters(new ReplyParameters(request.getMessageId()))
-						.disableContentTypeDetection(true)
-						.caption(FILE_READY.getText())
-						.parseMode(MarkdownV2);
+						.disableContentTypeDetection(true);
 
+				answerText(FILE_READY, request);
 				execute(answerWithFile);
 			}
 		} catch (InterruptedException e) {

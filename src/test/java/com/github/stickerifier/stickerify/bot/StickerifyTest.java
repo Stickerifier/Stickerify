@@ -30,7 +30,7 @@ class StickerifyTest {
 
 	@BeforeEach
 	void setup() {
-		((QueueDispatcher) server.getDispatcher()).setFailFast(MockResponses.EMPTY_RESPONSE);
+		((QueueDispatcher) server.getDispatcher()).setFailFast(MockResponses.SUCCESS_RESPONSE);
 	}
 
 	@Test
@@ -158,7 +158,7 @@ class StickerifyTest {
 	@Test
 	void fileAlreadyValid() throws Exception {
 		server.enqueue(MockResponses.ANIMATED_STICKER);
-		server.enqueue(MockResponses.EMPTY_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
 		server.enqueue(MockResponses.fileInfo("animated_sticker.tgs"));
 		server.enqueue(MockResponses.fileDownload("animated_sticker.tgs"));
 
@@ -187,7 +187,7 @@ class StickerifyTest {
 	@Test
 	void convertedPng() throws Exception {
 		server.enqueue(MockResponses.PNG_FILE);
-		server.enqueue(MockResponses.EMPTY_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
 		server.enqueue(MockResponses.fileInfo("big.png"));
 		server.enqueue(MockResponses.fileDownload("big.png"));
 
@@ -207,17 +207,19 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/big.png", download.getTarget());
 
+			var sendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
+			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
+
 			var sendDocument = server.takeRequest();
 			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-			assertNotNull(sendDocument.getBody());
-			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 		}
 	}
 
 	@Test
 	void convertedWebp() throws Exception {
 		server.enqueue(MockResponses.WEBP_FILE);
-		server.enqueue(MockResponses.EMPTY_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
 		server.enqueue(MockResponses.fileInfo("static.webp"));
 		server.enqueue(MockResponses.fileDownload("static.webp"));
 
@@ -237,17 +239,19 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/static.webp", download.getTarget());
 
+			var sendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
+			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
+
 			var sendDocument = server.takeRequest();
 			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-			assertNotNull(sendDocument.getBody());
-			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 		}
 	}
 
 	@Test
 	void convertedMov() throws Exception {
 		server.enqueue(MockResponses.MOV_FILE);
-		server.enqueue(MockResponses.EMPTY_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
 		server.enqueue(MockResponses.fileInfo("long.mov"));
 		server.enqueue(MockResponses.fileDownload("long.mov"));
 
@@ -267,17 +271,19 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/long.mov", download.getTarget());
 
+			var sendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
+			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
+
 			var sendDocument = server.takeRequest();
 			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-			assertNotNull(sendDocument.getBody());
-			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 		}
 	}
 
 	@Test
 	void convertedWebm() throws Exception {
 		server.enqueue(MockResponses.WEBM_FILE);
-		server.enqueue(MockResponses.EMPTY_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
 		server.enqueue(MockResponses.fileInfo("short_low_fps.webm"));
 		server.enqueue(MockResponses.fileDownload("short_low_fps.webm"));
 
@@ -297,17 +303,19 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/short_low_fps.webm", download.getTarget());
 
+			var sendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
+			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
+
 			var sendDocument = server.takeRequest();
 			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-			assertNotNull(sendDocument.getBody());
-			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 		}
 	}
 
 	@Test
 	void convertedGif() throws Exception {
 		server.enqueue(MockResponses.GIF_FILE);
-		server.enqueue(MockResponses.EMPTY_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
 		server.enqueue(MockResponses.fileInfo("valid.gif"));
 		server.enqueue(MockResponses.fileDownload("valid.gif"));
 
@@ -327,17 +335,19 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/valid.gif", download.getTarget());
 
+			var sendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
+			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
+
 			var sendDocument = server.takeRequest();
 			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-			assertNotNull(sendDocument.getBody());
-			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 		}
 	}
 
 	@Test
 	void convertedLivePhoto() throws Exception {
 		server.enqueue(MockResponses.LIVE_PHOTO_FILE);
-		server.enqueue(MockResponses.EMPTY_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
 		server.enqueue(MockResponses.fileInfo("valid_live_photo"));
 		server.enqueue(MockResponses.fileDownload("valid_live_photo"));
 
@@ -357,17 +367,19 @@ class StickerifyTest {
 			var download = server.takeRequest();
 			assertEquals("/files/token/valid_live_photo", download.getTarget());
 
+			var sendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", sendRichMessage.getTarget());
+			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.FILE_READY);
+
 			var sendDocument = server.takeRequest();
 			assertEquals("/api/token/sendDocument", sendDocument.getTarget());
-			assertNotNull(sendDocument.getBody());
-			assertThat(sendDocument.getBody().utf8(), containsString(Answer.FILE_READY.getText()));
 		}
 	}
 
 	@Test
 	void documentNotSupported() throws Exception {
 		server.enqueue(MockResponses.DOCUMENT);
-		server.enqueue(MockResponses.EMPTY_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
 		server.enqueue(MockResponses.fileInfo("document.txt"));
 		server.enqueue(MockResponses.fileDownload("document.txt"));
 

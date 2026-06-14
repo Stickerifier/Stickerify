@@ -18,8 +18,9 @@ public enum Answer {
 			Once the file is ready, head to [Stickers bot](https://t.me/Stickers) to create a new sticker.
 			"""),
 	FILE_READY("""
-			Your sticker file is ready\\!
-			Head to [Stickers bot](https://t.me/Stickers) to create a new sticker\\.
+			Your sticker file is ready!
+
+			Head to [Stickers bot](https://t.me/Stickers) to create a new sticker.
 			"""),
 	FILE_ALREADY_VALID("""
 			The media you sent was already suitable to be a Telegram sticker.
