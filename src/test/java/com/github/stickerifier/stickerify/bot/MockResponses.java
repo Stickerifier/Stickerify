@@ -7,7 +7,7 @@ import okio.Okio;
 
 public final class MockResponses {
 
-	static final MockResponse EMPTY_UPDATES = new MockResponse.Builder().body("""
+	static final MockResponse EMPTY_RESPONSE = new MockResponse.Builder().body("""
 			{
 				ok: true
 			}
