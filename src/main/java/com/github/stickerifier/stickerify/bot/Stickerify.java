@@ -148,8 +148,8 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 						.replyParameters(new ReplyParameters(request.getMessageId()))
 						.disableContentTypeDetection(true);
 
-				answerText(FILE_READY, request);
 				execute(answerWithFile);
+				answerText(FILE_READY, request);
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
