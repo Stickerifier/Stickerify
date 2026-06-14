@@ -9,11 +9,10 @@ public enum Answer {
 			Send me the media you want to convert and I will take care of the rest.
 
 			Based on what you send, I will answer the following:
-			- the converted media, if you sent a supported file (images, gifs, standard and video stickers are supported)
+			- the converted media, if you sent a supported file (use the **/supported** command to read the full list)
 			- no file, if you sent a media already suiting Telegram's requirements
 			- an error message, if you sent either an unsupported or a corrupted file
 			- an informative message for any message without a file
-			- the list of supported files, using the /supported command
 
 			Once the file is ready, head to [Stickers bot](https://t.me/Stickers) to create a new sticker.
 			"""),
@@ -35,7 +34,7 @@ public enum Answer {
 			Looking for sticker packs? Try [MeminiCustom](https://t.me/addstickers/MeminiCustom) and [VideoMemini](https://t.me/addstickers/VideoMemini)!
 			"""),
 	ERROR("""
-			The file conversion was unsuccessful: only images, gifs, standard and video stickers are supported.
+			The file conversion was unsuccessful: use the **/supported** command to read the full list of supported files.
 
 			If you think it should have worked, please report the issue on [GitHub](https://github.com/Stickerifier/Stickerify/issues/new/choose).
 			"""),
