@@ -9,10 +9,13 @@ type: Task
 ---
 
 **Which file format do you need the bot to support?**
+
 Specify the format.
 
 **Sample file**
+
 If possible, please attach a sample file.
 
 **Additional context**
+
 Add any other context the feature request here.
