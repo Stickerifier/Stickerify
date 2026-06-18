@@ -18,6 +18,6 @@ jobs:
       - name: Update dependencies
         uses: wader/bump/action@master
         with:
-          title_template: [bump] Update {{.Name}} to v{{.Latest}}
+          title_template: "[bump] Update {{.Name}} to v{{.Latest}}"
         env:
           GITHUB_TOKEN: ${{ secrets.BUMP_TOKEN }}
