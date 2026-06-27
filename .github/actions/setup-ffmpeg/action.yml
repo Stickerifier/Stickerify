@@ -23,9 +23,14 @@ runs:
           local binary_name="${2:-FFmpeg}"
           local output_file="$(echo "$binary_name" | tr '[:upper:]' '[:lower:]').zip"
 
-          curl -sS -f -L --retry 3 --retry-delay 5 "$url" -o "$output_file" -w "Downloaded $binary_name from %{url_effective}\n"
-          unzip -q "$output_file"
-          rm -f "$output_file"
+          if curl -sS -f -L --retry 3 --retry-delay 5 "$url" -o "$output_file"; then
+            echo "Downloaded $binary_name from $url"
+            unzip -q "$output_file"
+            rm -f "$output_file"
+          else
+            echo "Failed to download $binary_name from $url"
+            return 1
+          fi
         }
 
         if [[ "${{ runner.os }}" == "Linux" ]]; then
