@@ -231,16 +231,20 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 			return response;
 		}
 
-		try {
-			Thread.sleep(Duration.ofSeconds(15));
+		if (response.parameters() != null && response.parameters().retryAfter() > 0) {
+			var retryDelay = Duration.ofSeconds(response.parameters().retryAfter());
 
-			response = bot.execute(request);
+			try {
+				Thread.sleep(retryDelay);
 
-			if (response.isOk()) {
-				return response;
+				response = bot.execute(request);
+
+				if (response.isOk()) {
+					return response;
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
 		}
 
 		throw new TelegramApiException(request.getMethod(), response.description());
