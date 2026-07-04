@@ -232,18 +232,20 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 
 		if (response.parameters() != null && response.parameters().retryAfter() > 0) {
-			var retryDelay = Duration.ofSeconds(response.parameters().retryAfter());
+			for (int retry = 1; retry <= 3; retry++) {
+				var retryDelay = Duration.ofSeconds(response.parameters().retryAfter());
+				try {
+					Thread.sleep(retryDelay);
 
-			try {
-				Thread.sleep(retryDelay);
+					response = bot.execute(request);
 
-				response = bot.execute(request);
-
-				if (response.isOk()) {
-					return response;
+					if (response.isOk()) {
+						return response;
+					}
+				} catch (InterruptedException _) {
+					Thread.currentThread().interrupt();
+					break;
 				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
 			}
 		}
 
