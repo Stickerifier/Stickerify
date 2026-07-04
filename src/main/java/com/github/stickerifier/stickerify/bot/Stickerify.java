@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -230,7 +231,23 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 			return response;
 		}
 
+		waitFor(Duration.ofSeconds(15));
+
+		response = bot.execute(request);
+
+		if (response.isOk()) {
+			return response;
+		}
+
 		throw new TelegramApiException(request.getMethod(), response.description());
+	}
+
+	private static void waitFor(Duration duration) {
+		try {
+			Thread.sleep(duration);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
