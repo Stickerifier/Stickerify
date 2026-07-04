@@ -231,23 +231,19 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 			return response;
 		}
 
-		waitFor(Duration.ofSeconds(15));
+		try {
+			Thread.sleep(Duration.ofSeconds(15));
 
-		response = bot.execute(request);
+			response = bot.execute(request);
 
-		if (response.isOk()) {
-			return response;
+			if (response.isOk()) {
+				return response;
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 
 		throw new TelegramApiException(request.getMethod(), response.description());
-	}
-
-	private static void waitFor(Duration duration) {
-		try {
-			Thread.sleep(duration);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
