@@ -255,7 +255,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	}
 
 	private static boolean isRetriable(@Nullable ResponseParameters parameters) {
-		return parameters != null && parameters.retryAfter() != null && parameters.retryAfter() >= 0;
+		return parameters != null && parameters.retryAfter() != null;
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
