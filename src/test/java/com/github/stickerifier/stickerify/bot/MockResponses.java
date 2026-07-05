@@ -13,6 +13,17 @@ public final class MockResponses {
 			}
 			""").build();
 
+	static final MockResponse FAILURE_RESPONSE = new MockResponse.Builder().body("""
+			{
+				ok: false,
+				error_code: 429,
+				description: "Too Many Requests: retry after 3",
+				parameters: {
+					retry_after: 3
+				}
+			}
+			""").build();
+
 	static final MockResponse START_MESSAGE = new MockResponse.Builder().body("""
 			{
 				ok: true,

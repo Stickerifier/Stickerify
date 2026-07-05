@@ -23,6 +23,7 @@ import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.TelegramException;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.ResponseParameters;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ReplyParameters;
 import com.pengrad.telegrambot.model.request.richmessages.InputRichMessage;
@@ -33,12 +34,14 @@ import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.richmessages.SendRichMessage;
 import com.pengrad.telegrambot.request.richmessages.SendRichMessageDraft;
 import com.pengrad.telegrambot.response.BaseResponse;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.event.Level;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -230,7 +233,29 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 			return response;
 		}
 
+		for (int retry = 1; retry <= 3 && isRetriable(response.parameters()); retry++) {
+			var retryDelay = response.parameters().retryAfter();
+			LOGGER.at(Level.WARN).log("The {} request failed: retrying in {} seconds", request.getMethod(), retryDelay);
+
+			try {
+				Thread.sleep(Duration.ofSeconds(retryDelay));
+			} catch (InterruptedException _) {
+				Thread.currentThread().interrupt();
+				break;
+			}
+
+			response = bot.execute(request);
+
+			if (response.isOk()) {
+				return response;
+			}
+		}
+
 		throw new TelegramApiException(request.getMethod(), response.description());
+	}
+
+	private static boolean isRetriable(@Nullable ResponseParameters parameters) {
+		return parameters != null && parameters.retryAfter() != null;
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {

@@ -404,4 +404,24 @@ class StickerifyTest {
 			assertResponseContainsMarkdownMessage(sendRichMessage, Answer.ERROR);
 		}
 	}
+
+	@Test
+	void retryApiCall() throws Exception {
+		server.enqueue(MockResponses.HELP_MESSAGE);
+		server.enqueue(MockResponses.FAILURE_RESPONSE);
+		server.enqueue(MockResponses.SUCCESS_RESPONSE);
+
+		try (var _ = runBot()) {
+			var getUpdates = server.takeRequest();
+			assertEquals("/api/token/getUpdates", getUpdates.getTarget());
+
+			var firstSendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", firstSendRichMessage.getTarget());
+
+			var secondSendRichMessage = server.takeRequest();
+			assertEquals("/api/token/sendRichMessage", secondSendRichMessage.getTarget());
+
+			assertResponseContainsMarkdownMessage(secondSendRichMessage, Answer.HELP);
+		}
+	}
 }
