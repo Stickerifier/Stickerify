@@ -235,19 +235,19 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 
 		for (int retry = 1; retry <= 3 && isRetriable(response.parameters()); retry++) {
 			var retryDelay = response.parameters().retryAfter();
-			LOGGER.at(Level.WARN).log("The {} request failed, retrying in {} seconds", request.getMethod(), retryDelay);
+			LOGGER.at(Level.WARN).log("The {} request failed: retrying in {} seconds", request.getMethod(), retryDelay);
 
 			try {
 				Thread.sleep(Duration.ofSeconds(retryDelay));
-
-				response = bot.execute(request);
-
-				if (response.isOk()) {
-					return response;
-				}
 			} catch (InterruptedException _) {
 				Thread.currentThread().interrupt();
 				break;
+			}
+
+			response = bot.execute(request);
+
+			if (response.isOk()) {
+				return response;
 			}
 		}
 
@@ -255,7 +255,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 	}
 
 	private static boolean isRetriable(@Nullable ResponseParameters parameters) {
-		return parameters != null && parameters.retryAfter() != null && parameters.retryAfter() > 0;
+		return parameters != null && parameters.retryAfter() != null && parameters.retryAfter() >= 0;
 	}
 
 	private static void deleteTempFiles(Set<Path> pathsToDelete) {
