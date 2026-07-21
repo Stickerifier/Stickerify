@@ -7,6 +7,7 @@ import com.github.stickerifier.stickerify.logger.StructuredLogger;
 import org.slf4j.event.Level;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.StringJoiner;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -40,8 +41,8 @@ public final class ProcessHelper {
 			var outputThread = Thread.ofVirtual().start(() -> {
 				try (var reader = process.inputReader(UTF_8)) {
 					reader.lines().forEach(standardOutput::add);
-				} catch (IOException e) {
-					LOGGER.at(Level.ERROR).setCause(e).log("Error while closing process output reader");
+				} catch (IOException | UncheckedIOException e) {
+					LOGGER.at(Level.ERROR).setCause(e).log("An error occurred using process output reader");
 				}
 			});
 
@@ -49,8 +50,8 @@ public final class ProcessHelper {
 			var errorThread = Thread.ofVirtual().start(() -> {
 				try (var reader = process.errorReader(UTF_8)) {
 					reader.lines().forEach(standardError::add);
-				} catch (IOException e) {
-					LOGGER.at(Level.ERROR).setCause(e).log("Error while closing process error reader");
+				} catch (IOException | UncheckedIOException e) {
+					LOGGER.at(Level.ERROR).setCause(e).log("An error occurred using process error reader");
 				}
 			});
 
