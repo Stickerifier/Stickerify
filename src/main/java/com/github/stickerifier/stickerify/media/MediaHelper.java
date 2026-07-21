@@ -186,7 +186,7 @@ public final class MediaHelper {
 		var command = new String[] {
 				"ffprobe",
 				"-hide_banner",
-				"-v", "quiet",
+				"-v", "error",
 				"-print_format", "json",
 				"-show_format",
 				"-show_streams",

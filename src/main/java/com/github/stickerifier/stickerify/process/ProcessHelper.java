@@ -22,7 +22,7 @@ public final class ProcessHelper {
 	 * environment variable (defaults to 4).
 	 *
 	 * @param command the command to be executed
-	 * @return the merged stdout/stderr of the command
+	 * @return the standard output of the command
 	 * @throws ProcessException either if:
 	 * <ul>
 	 *     <li>the command was unsuccessful
@@ -35,30 +35,49 @@ public final class ProcessHelper {
 	public static String executeCommand(final String... command) throws ProcessException, InterruptedException {
 		SEMAPHORE.acquire();
 
-		try (var process = new ProcessBuilder(command).redirectErrorStream(true).start()) {
-			var output = new StringJoiner("\n");
-			var readerThread = Thread.ofVirtual().start(() -> {
+		try (var process = new ProcessBuilder(command).start()) {
+			var standardOutput = new StringJoiner("\n");
+			var outputThread = Thread.ofVirtual().start(() -> {
 				try (var reader = process.inputReader(UTF_8)) {
-					reader.lines().forEach(output::add);
+					reader.lines().forEach(standardOutput::add);
 				} catch (IOException e) {
 					LOGGER.at(Level.ERROR).setCause(e).log("Error while closing process output reader");
+				}
+			});
+
+			var standardError = new StringJoiner("\n");
+			var errorThread = Thread.ofVirtual().start(() -> {
+				try (var reader = process.errorReader(UTF_8)) {
+					reader.lines().forEach(standardError::add);
+				} catch (IOException e) {
+					LOGGER.at(Level.ERROR).setCause(e).log("Error while closing process error reader");
 				}
 			});
 
 			var finished = process.waitFor(1, TimeUnit.MINUTES);
 			if (!finished) {
 				process.destroyForcibly();
-				readerThread.join();
-				throw new ProcessException("The command {} timed out after 1m\n{}", command[0], output.toString());
+				outputThread.join();
+				errorThread.join();
+				throw new ProcessException("The command {} timed out after 1m\nStandard output: {}\nStandard error: {}",
+						command[0],
+						standardOutput.toString(),
+						standardError.toString());
 			}
 
-			readerThread.join();
+			outputThread.join();
+			errorThread.join();
+
 			var exitCode = process.exitValue();
 			if (exitCode != 0) {
-				throw new ProcessException("The command {} exited with code {}\n{}", command[0], exitCode, output.toString());
+				throw new ProcessException("The command {} exited with code {}\nStandard output: {}\nStandard error: {}",
+						command[0],
+						exitCode,
+						standardOutput.toString(),
+						standardError.toString());
 			}
 
-			return output.toString();
+			return standardOutput.toString();
 		} catch (IOException e) {
 			throw new ProcessException(e);
 		} finally {
