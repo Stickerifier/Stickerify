@@ -7,6 +7,7 @@ import com.github.stickerifier.stickerify.logger.StructuredLogger;
 import org.slf4j.event.Level;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.StringJoiner;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +23,7 @@ public final class ProcessHelper {
 	 * environment variable (defaults to 4).
 	 *
 	 * @param command the command to be executed
-	 * @return the merged stdout/stderr of the command
+	 * @return the standard output of the command
 	 * @throws ProcessException either if:
 	 * <ul>
 	 *     <li>the command was unsuccessful
@@ -35,30 +36,44 @@ public final class ProcessHelper {
 	public static String executeCommand(final String... command) throws ProcessException, InterruptedException {
 		SEMAPHORE.acquire();
 
-		try (var process = new ProcessBuilder(command).redirectErrorStream(true).start()) {
-			var output = new StringJoiner("\n");
-			var readerThread = Thread.ofVirtual().start(() -> {
+		try (var process = new ProcessBuilder(command).start()) {
+			var standardOutput = new StringJoiner("\n");
+			var outputThread = Thread.ofVirtual().start(() -> {
 				try (var reader = process.inputReader(UTF_8)) {
-					reader.lines().forEach(output::add);
-				} catch (IOException e) {
-					LOGGER.at(Level.ERROR).setCause(e).log("Error while closing process output reader");
+					reader.lines().forEach(standardOutput::add);
+				} catch (IOException | UncheckedIOException e) {
+					LOGGER.at(Level.ERROR).setCause(e).log("An error occurred using process output reader");
+				}
+			});
+
+			var standardError = new StringJoiner("\n");
+			var errorThread = Thread.ofVirtual().start(() -> {
+				try (var reader = process.errorReader(UTF_8)) {
+					reader.lines().forEach(standardError::add);
+				} catch (IOException | UncheckedIOException e) {
+					LOGGER.at(Level.ERROR).setCause(e).log("An error occurred using process error reader");
 				}
 			});
 
 			var finished = process.waitFor(1, TimeUnit.MINUTES);
 			if (!finished) {
 				process.destroyForcibly();
-				readerThread.join();
-				throw new ProcessException("The command {} timed out after 1m\n{}", command[0], output.toString());
+				outputThread.join();
+				errorThread.join();
+				LOGGER.at(Level.WARN).log("The command {} timed out after 1m: {}", command[0], standardError.toString());
+				throw new ProcessException("The command {} timed out after 1m", command[0]);
 			}
 
-			readerThread.join();
+			outputThread.join();
+			errorThread.join();
+
 			var exitCode = process.exitValue();
 			if (exitCode != 0) {
-				throw new ProcessException("The command {} exited with code {}\n{}", command[0], exitCode, output.toString());
+				LOGGER.at(Level.WARN).log("The command {} exited with code {}: {}", command[0], exitCode, standardError.toString());
+				throw new ProcessException("The command {} exited with code {}", command[0], exitCode);
 			}
 
-			return output.toString();
+			return standardOutput.toString();
 		} catch (IOException e) {
 			throw new ProcessException(e);
 		} finally {
