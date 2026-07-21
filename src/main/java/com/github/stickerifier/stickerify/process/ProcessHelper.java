@@ -59,10 +59,8 @@ public final class ProcessHelper {
 				process.destroyForcibly();
 				outputThread.join();
 				errorThread.join();
-				throw new ProcessException("The command {} timed out after 1m\nStandard output: {}\nStandard error: {}",
-						command[0],
-						standardOutput.toString(),
-						standardError.toString());
+				LOGGER.at(Level.WARN).log("The command {} timed out after 1m: {}", command[0], standardError.toString());
+				throw new ProcessException("The command {} timed out after 1m", command[0]);
 			}
 
 			outputThread.join();
@@ -70,11 +68,8 @@ public final class ProcessHelper {
 
 			var exitCode = process.exitValue();
 			if (exitCode != 0) {
-				throw new ProcessException("The command {} exited with code {}\nStandard output: {}\nStandard error: {}",
-						command[0],
-						exitCode,
-						standardOutput.toString(),
-						standardError.toString());
+				LOGGER.at(Level.WARN).log("The command {} exited with code {}: {}", command[0], exitCode, standardError.toString());
+				throw new ProcessException("The command {} exited with code {}", command[0], exitCode);
 			}
 
 			return standardOutput.toString();
