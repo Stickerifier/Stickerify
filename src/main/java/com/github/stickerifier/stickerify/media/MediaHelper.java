@@ -56,7 +56,7 @@ public final class MediaHelper {
 	private static final int WEBP_ANIMATION_BIT_MASK = 0x02;
 	private static final String WEBP_EXTENDED_FILE_FORMAT = "VP8X";
 
-	private static final String VIDEO_BUFFER_SIZE = getVideoBufferSize();
+	private static final String VIDEO_BITRATE_LIMIT = getVideoBitrateLimit();
 
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.
@@ -480,9 +480,9 @@ public final class MediaHelper {
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-row-mt", "1",
 				"-threads", "2",
-				"-b:v", VIDEO_BUFFER_SIZE,
-				"-maxrate", VIDEO_BUFFER_SIZE,
-				"-bufsize", VIDEO_BUFFER_SIZE,
+				"-b:v", VIDEO_BITRATE_LIMIT,
+				"-maxrate", VIDEO_BITRATE_LIMIT,
+				"-bufsize", VIDEO_BITRATE_LIMIT,
 				"-qmin", "25",
 				"-qmax", "63",
 				"-g", "120",
@@ -490,7 +490,7 @@ public final class MediaHelper {
 				"-pix_fmt", "yuv420p",
 				"-t", String.valueOf(MAX_VIDEO_DURATION_SECONDS),
 				"-an",
-				"-enc_time_base", "1/1000", // solves issues related to highly precise fps count
+				"-enc_time_base", "1/1000",
 				"-passlogfile", logPrefix
 		};
 
@@ -530,10 +530,10 @@ public final class MediaHelper {
 		return commands;
 	}
 
-	private static String getVideoBufferSize() {
-		var videoBufferSize = System.getenv("VIDEO_BUFFER_SIZE");
+	private static String getVideoBitrateLimit() {
+		var value = System.getenv("VIDEO_BITRATE_LIMIT");
 
-		return videoBufferSize == null ? "600K" : videoBufferSize;
+		return value == null || value.isBlank() ? "600K" : value;
 	}
 
 	private MediaHelper() {
