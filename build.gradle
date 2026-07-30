@@ -67,6 +67,7 @@ test {
     javaLauncher = providers.provider { new JlinkJavaLauncher(jlink.get()) }
 
     useJUnitPlatform()
+    jvmArgs('--enable-final-field-mutation=ALL-UNNAMED')
 
     testLogging {
         events('started', 'passed', 'failed', 'skipped')
@@ -86,7 +87,7 @@ installDist.mustRunAfter(generateCohArchive)
 
 application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
-    applicationDefaultJvmArgs = ['-XX:+UseCompactObjectHeaders', '-XX:+UseShenandoahGC', '-XX:ShenandoahGCMode=generational']
+    applicationDefaultJvmArgs = ['-XX:+UseCompactObjectHeaders', '-XX:+UseShenandoahGC', '-XX:ShenandoahGCMode=generational', '--enable-final-field-mutation=ALL-UNNAMED']
 }
 
 distributions {

@@ -56,6 +56,8 @@ public final class MediaHelper {
 	private static final int WEBP_ANIMATION_BIT_MASK = 0x02;
 	private static final String WEBP_EXTENDED_FILE_FORMAT = "VP8X";
 
+	private static final String VIDEO_BUFFER_SIZE = getVideoBufferSize();
+
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.
 	 * If no conversion was needed, {@code null} is returned.
@@ -476,16 +478,25 @@ public final class MediaHelper {
 				"-i", file.getAbsolutePath(),
 				"-vf", "scale='if(gt(iw,ih),%1$d,%2$d)':'if(gt(iw,ih),%2$d,%1$d)',fps='min(%3$d,source_fps)'".formatted(MAX_SIDE_LENGTH, VIDEO_KEEP_ASPECT_RATIO, MAX_VIDEO_FRAMES),
 				"-c:v", "libvpx-" + VP9_CODEC,
-				"-b:v", "650K",
+				"-row-mt", "1",
+				"-threads", "2",
+				"-b:v", VIDEO_BUFFER_SIZE,
+				"-maxrate", VIDEO_BUFFER_SIZE,
+				"-bufsize", VIDEO_BUFFER_SIZE,
+				"-qmin", "25",
+				"-qmax", "63",
+				"-g", "120",
+				"-auto-alt-ref", "0",
 				"-pix_fmt", "yuv420p",
 				"-t", String.valueOf(MAX_VIDEO_DURATION_SECONDS),
 				"-an",
+				"-enc_time_base", "1/1000", // solves issues related to highly precise fps count
 				"-passlogfile", logPrefix
 		};
 
 		try {
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "1", "-f", "webm", OsConstants.NULL_FILE));
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "2", webmVideo.getAbsolutePath()));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-cpu-used", "8", "-pass", "1", "-f", "webm", OsConstants.NULL_FILE));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-cpu-used", "4", "-pass", "2", webmVideo.getAbsolutePath()));
 		} catch (ProcessException e) {
 			try {
 				deleteFile(webmVideo);
@@ -517,6 +528,12 @@ public final class MediaHelper {
 		System.arraycopy(additionalOptions, 0, commands, baseCommand.length, additionalOptions.length);
 
 		return commands;
+	}
+
+	private static String getVideoBufferSize() {
+		var videoBufferSize = System.getenv("VIDEO_BUFFER_SIZE");
+
+		return videoBufferSize == null ? "600K" : videoBufferSize;
 	}
 
 	private MediaHelper() {

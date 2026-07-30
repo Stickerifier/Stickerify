@@ -1,4 +1,4 @@
-@rem from https://github.com/gradle/gradle/blob/68744f918ea82142a63c2904d346473799814be6/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/windowsStartScript.txt
+@rem from https://github.com/gradle/gradle/blob/41203b0be36cabf983b0ebe9e402e1f37a67b0cc/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/windowsStartScript.txt
 
 @rem
 @rem Copyright 2015 the original author or authors.
@@ -25,8 +25,8 @@
 @rem
 @rem ##########################################################################
 
-@rem Set local scope for the variables with windows NT shell
-if "%OS%"=="Windows_NT" setlocal
+@rem Set local scope for the variables, and ensure extensions are enabled
+setlocal EnableExtensions
 
 set DIRNAME=%~dp0
 if "%DIRNAME%"=="" set DIRNAME=.\
@@ -57,7 +57,7 @@ echo. 1>&2
 echo Please set the JAVA_HOME variable in your environment to match the 1>&2
 echo location of your Java installation. 1>&2
 
-goto fail
+"%COMSPEC%" /c exit 1
 
 :findJavaFromJavaHome
 set JAVA_HOME=%JAVA_HOME:"=%
@@ -71,7 +71,7 @@ echo. 1>&2
 echo Please set the JAVA_HOME variable in your environment to match the 1>&2
 echo location of your Java installation. 1>&2
 
-goto fail
+"%COMSPEC%" /c exit 1
 
 :execute
 @rem Setup the command line
@@ -82,21 +82,10 @@ set CLASSPATH=$classpath
 <% if ( mainClassName.startsWith('--module ') ) { %>set MODULE_PATH=$modulePath<% } %>
 
 @rem Execute ${applicationName}
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %${optsEnvironmentVar}% <% if ( appNameSystemProperty ) { %>"-D${appNameSystemProperty}=%APP_BASE_NAME%"<% } %><% if ( classpath ) {%> -classpath "%CLASSPATH%"<% } %> <% if ( mainClassName.startsWith('--module ') ) { %>--module-path "%MODULE_PATH%" <% } %>${mainClassName ?: entryPointArgs} %*
+@rem endlocal doesn't take effect until after the line is parsed and variables are expanded
+@rem which allows us to clear the local environment before executing the java command
+endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %${optsEnvironmentVar}% <% if ( appNameSystemProperty ) { %>"-D${appNameSystemProperty}=%APP_BASE_NAME%"<% } %><% if ( classpath ) {%> -classpath "%CLASSPATH%"<% } %> <% if ( mainClassName.startsWith('--module ') ) { %>--module-path "%MODULE_PATH%" <% } %>${mainClassName ?: entryPointArgs} %* & call :exitWithErrorLevel
 
-:end
-@rem End local scope for the variables with windows NT shell
-if %ERRORLEVEL% equ 0 goto mainEnd
-
-:fail
-rem Set variable ${exitEnvironmentVar} if you need the _script_ return code instead of
-rem the _cmd.exe /c_ return code!
-set EXIT_CODE=%ERRORLEVEL%
-if %EXIT_CODE% equ 0 set EXIT_CODE=1
-if not ""=="%${exitEnvironmentVar}%" exit %EXIT_CODE%
-exit /b %EXIT_CODE%
-
-:mainEnd
-if "%OS%"=="Windows_NT" endlocal
-
-:omega
+:exitWithErrorLevel
+@rem Use "%COMSPEC%" /c exit to allow operators to work properly in scripts
+"%COMSPEC%" /c exit %ERRORLEVEL%

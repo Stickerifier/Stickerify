@@ -176,7 +176,7 @@ class MediaHelperTest {
 				() -> assertThat("video's frame rate is not correct", videoInfo.frameRate(), is(equalTo(expectedFrameRate))),
 				() -> assertThat("video must be encoded with the VP9 codec", videoInfo.codec(), is(equalTo(VP9_CODEC))),
 				() -> assertThat("video's duration is not correct", formatInfo.duration(), is(equalTo(expectedDuration))),
-				() -> assertThat("video's format must be matroska", formatInfo.format(), startsWith(MATROSKA_FORMAT)),
+				() -> assertThat("video's format must be Matroska", formatInfo.format(), startsWith(MATROSKA_FORMAT)),
 				() -> assertThat("video must have no audio stream", mediaInfo.audio(), is(nullValue())),
 				() -> assertThat("video size should not exceed 256 KB", formatInfo.size(), is(lessThanOrEqualTo(MAX_VIDEO_FILE_SIZE)))
 		);
@@ -270,6 +270,15 @@ class MediaHelperTest {
 
 		var ex = assertThrows(MediaException.class, () -> MediaHelper.convert(webpVideo));
 		assertThat(ex.getMessage(), equalTo("The file with image/webp MIME type is not supported"));
+	}
+
+	@Test
+	@Tag(Tags.VIDEO)
+	void resizeVideoWithHighlyAccurateFpsCount() throws Exception {
+		var mp4Video = loadResource("highly_accurate_fps_count.mp4");
+		var result = MediaHelper.convert(mp4Video);
+
+		assertVideoConsistency(result, 512, 434, 26F, 2.961F);
 	}
 
 	@Test
