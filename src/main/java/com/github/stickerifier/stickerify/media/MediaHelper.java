@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -55,8 +56,6 @@ public final class MediaHelper {
 	private static final int WEBP_HEADER_SIZE = 21;
 	private static final int WEBP_ANIMATION_BIT_MASK = 0x02;
 	private static final String WEBP_EXTENDED_FILE_FORMAT = "VP8X";
-
-	private static final String VIDEO_BITRATE_LIMIT = getVideoBitrateLimit();
 
 	/**
 	 * Based on the type of passed-in file, it converts it into the proper media.
@@ -185,7 +184,7 @@ public final class MediaHelper {
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
 	static MultimediaInfo retrieveMultimediaInfo(File file) throws MediaException, InterruptedException {
-		var command = new String[] {
+		var command = List.of(
 				"ffprobe",
 				"-hide_banner",
 				"-v", "error",
@@ -193,7 +192,7 @@ public final class MediaHelper {
 				"-show_format",
 				"-show_streams",
 				file.getAbsolutePath()
-		};
+		);
 
 		try {
 			var output = ProcessHelper.executeCommand(command);
@@ -388,7 +387,7 @@ public final class MediaHelper {
 	 */
 	private static File convertToWebp(File file) throws MediaException, InterruptedException {
 		var webpImage = createTempFile("webp");
-		var command = new String[] {
+		var command = List.of(
 				"ffmpeg",
 				"-y",
 				"-hide_banner",
@@ -399,7 +398,7 @@ public final class MediaHelper {
 				"-lossless", "1",
 				"-compression_level", "6",
 				webpImage.getAbsolutePath()
-		};
+		);
 
 		try {
 			ProcessHelper.executeCommand(command);
@@ -468,9 +467,47 @@ public final class MediaHelper {
 	 * @throws InterruptedException if the current thread is interrupted while converting the video file
 	 */
 	private static File convertToWebm(File file) throws MediaException, InterruptedException {
+		var optimisticBitrate = List.of(
+				"-b:v", "650K",
+				"-maxrate", "650K",
+				"-bufsize", "1300K"
+		);
+		var fallbackBitrate = List.of(
+				"-b:v", "250K",
+				"-maxrate", "250K",
+				"-bufsize", "125K",
+				"-qmin", "25"
+		);
+
+		var webmVideo = convertVideoWithBitrate(file, optimisticBitrate);
+		if (webmVideo.exists() && webmVideo.length() <= MAX_VIDEO_FILE_SIZE) {
+			return webmVideo;
+		}
+
+		LOGGER.at(Level.WARN).log("Resulting file was too large (actual size was {} bytes), retrying with lower bitrate", webmVideo.length());
+		try {
+			deleteFile(webmVideo);
+		} catch (FileOperationException e) {
+			LOGGER.at(Level.WARN).setCause(e).log("Could not delete file");
+		}
+
+		return convertVideoWithBitrate(file, fallbackBitrate);
+	}
+
+	/**
+	 * Given a video file and a set of bitrate rules, it converts it to a WebM file of the proper dimension (max 512 x 512),
+	 * based on the requirements specified by <a href="https://core.telegram.org/stickers/webm-vp9-encoding">Telegram documentation</a>.
+	 *
+	 * @param file the file to convert
+	 * @param bitrateCommands the list of bitrate commands to add to the conversion
+	 * @return converted video
+	 * @throws MediaException if file conversion is not successful
+	 * @throws InterruptedException if the current thread is interrupted while converting the video file
+	 */
+	private static File convertVideoWithBitrate(File file, List<String> bitrateCommands) throws MediaException, InterruptedException {
 		var webmVideo = createTempFile("webm");
 		var logPrefix = webmVideo.getAbsolutePath() + "-passlog";
-		var baseCommand = new String[] {
+		var baseCommand = List.of(
 				"ffmpeg",
 				"-y",
 				"-hide_banner",
@@ -480,10 +517,6 @@ public final class MediaHelper {
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-row-mt", "1",
 				"-threads", "2",
-				"-b:v", VIDEO_BITRATE_LIMIT,
-				"-maxrate", VIDEO_BITRATE_LIMIT,
-				"-bufsize", VIDEO_BITRATE_LIMIT,
-				"-qmin", "25",
 				"-qmax", "63",
 				"-g", "120",
 				"-auto-alt-ref", "0",
@@ -492,11 +525,22 @@ public final class MediaHelper {
 				"-an",
 				"-enc_time_base", "1/1000",
 				"-passlogfile", logPrefix
-		};
+		);
+		var firstPass = List.of(
+				"-cpu-used", "8",
+				"-pass", "1",
+				"-f", "webm",
+				OsConstants.NULL_FILE
+		);
+		var secondPass = List.of(
+				"-cpu-used", "4",
+				"-pass", "2",
+				webmVideo.getAbsolutePath()
+		);
 
 		try {
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-cpu-used", "8", "-pass", "1", "-f", "webm", OsConstants.NULL_FILE));
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-cpu-used", "4", "-pass", "2", webmVideo.getAbsolutePath()));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, bitrateCommands, firstPass));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, bitrateCommands, secondPass));
 		} catch (ProcessException e) {
 			try {
 				deleteFile(webmVideo);
@@ -516,24 +560,19 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Builds the ffmpeg command combining a base part with a specific part (useful for 2 pass processing)
+	 * Builds the ffmpeg command combining multiple parts (useful for 2 pass processing)
 	 *
-	 * @param baseCommand the common ffmpeg command
-	 * @param additionalOptions command specific options
+	 * @param commands a series of list containing commands
 	 * @return the complete ffmpeg invocation command
 	 */
-	private static String[] buildFfmpegCommand(String[] baseCommand, String... additionalOptions) {
-		var commands = new String[baseCommand.length + additionalOptions.length];
-		System.arraycopy(baseCommand, 0, commands, 0, baseCommand.length);
-		System.arraycopy(additionalOptions, 0, commands, baseCommand.length, additionalOptions.length);
+	@SafeVarargs
+	private static List<String> buildFfmpegCommand(final List<String>... commands) {
+		var command = new ArrayList<String>();
+		for (List<String> cmd : commands) {
+			command.addAll(cmd);
+		}
 
-		return commands;
-	}
-
-	private static String getVideoBitrateLimit() {
-		var value = System.getenv("VIDEO_BITRATE_LIMIT");
-
-		return value == null || value.isBlank() ? "600K" : value;
+		return command;
 	}
 
 	private MediaHelper() {

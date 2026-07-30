@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -143,7 +144,7 @@ class MediaHelperTest {
 	}
 
 	private static void assumeSvgSupport() throws Exception {
-		var decoders = ProcessHelper.executeCommand("ffmpeg", "-v", "quiet", "-hide_banner", "-decoders");
+		var decoders = ProcessHelper.executeCommand(List.of("ffmpeg", "-v", "quiet", "-hide_banner", "-decoders"));
 		var supportsSvg = decoders.contains("(codec svg)");
 		assumeTrue(supportsSvg, "FFmpeg was not compiled with SVG support");
 	}
