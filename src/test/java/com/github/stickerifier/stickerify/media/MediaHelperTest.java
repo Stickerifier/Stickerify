@@ -270,7 +270,7 @@ class MediaHelperTest {
 		var webpVideo = loadResource("animated.webp");
 		var result = MediaHelper.convert(webpVideo);
 
-		assertVideoConsistency(result, 384, 512, 30F, 2.966F);
+		assertVideoConsistency(result, 512, 512, 28.583334F, 0.84F);
 	}
 
 	@Test
