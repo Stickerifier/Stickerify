@@ -512,26 +512,20 @@ public final class MediaHelper {
 		);
 
 		try {
-			try {
-				ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, firstPass));
-				ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, highQualityBitrate, secondPass));
-			} catch (ProcessException e) {
-				throw twoPassConversionFailed(e, webmVideo);
-			}
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, firstPass));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, highQualityBitrate, secondPass));
 
-			if (webmVideo.length() <= MAX_VIDEO_FILE_SIZE) {
-				return webmVideo;
-			}
-
-			LOGGER.at(Level.WARN).log("Resulting file was too large (actual size was {} bytes), retrying with lower bitrate", webmVideo.length());
-
-			try {
+			if (webmVideo.length() > MAX_VIDEO_FILE_SIZE) {
+				LOGGER.at(Level.WARN).log("Resulting file was too large (actual size was {} bytes), retrying with lower bitrate", webmVideo.length());
 				ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, lowQualityBitrate, secondPass));
-			} catch (ProcessException e) {
-				throw twoPassConversionFailed(e, webmVideo);
 			}
-
-			return webmVideo;
+		} catch (ProcessException e) {
+			try {
+				deleteFile(webmVideo);
+			} catch (FileOperationException ex) {
+				e.addSuppressed(ex);
+			}
+			throw new MediaException("FFmpeg two-pass conversion failed", e);
 		} finally {
 			try {
 				deleteFile(new File(logPrefix + "-0.log"));
@@ -539,6 +533,8 @@ public final class MediaHelper {
 				LOGGER.at(Level.WARN).setCause(e).log("Could not delete log file");
 			}
 		}
+
+		return webmVideo;
 	}
 
 	/**
@@ -552,24 +548,6 @@ public final class MediaHelper {
 		return Stream.of(commands)
 				.flatMap(List::stream)
 				.toList();
-	}
-
-	/**
-	 * Handle a process failure while doing a 2 pass video conversion
-	 * @param e the original ProcessException
-	 * @param webmVideo the output file to clean up
-	 * @return the MediaException to throw
-	 */
-	private static MediaException twoPassConversionFailed(ProcessException e, File webmVideo) {
-		var exception = new MediaException("FFmpeg two-pass conversion failed", e);
-
-		try {
-			deleteFile(webmVideo);
-		} catch (FileOperationException ex) {
-			exception.addSuppressed(ex);
-		}
-
-		return exception;
 	}
 
 	private MediaHelper() {
