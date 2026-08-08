@@ -20,7 +20,7 @@ dependencies {
     implementation(libs.tika)
 
     constraints {
-        implementation(libs.jackson.core)
+        add('implementation', libs.jackson.core)
     }
 
     testCompileOnly(libs.jspecify)
@@ -53,12 +53,10 @@ def jlink = tasks.register('jlink', JlinkTask) {
             'jdk.unsupported'  // for gson
     ]
     includeModulePath = false
-
-    group = 'build'
-    description = 'Generates a minimal JRE for the project.'
+    javaCompiler = javaToolchains.compilerFor(java.toolchain)
 }
 
-tasks.named("compileTestJava") {
+tasks.named(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME, JavaCompile) {
     options.nullability.checking = "tests"
 }
 
@@ -99,7 +97,7 @@ distributions {
     }
 }
 
-tasks.named('startScripts', CreateStartScripts) {
+tasks.named(ApplicationPlugin.TASK_START_SCRIPTS_NAME, CreateStartScripts) {
     unixStartScriptGenerator.template = resources.text.fromFile('src/main/resources/customUnixStartScript.txt')
     windowsStartScriptGenerator.template = resources.text.fromFile('src/main/resources/customWindowsStartScript.txt')
 }

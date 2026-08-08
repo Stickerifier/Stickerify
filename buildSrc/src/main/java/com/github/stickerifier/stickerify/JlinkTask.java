@@ -5,7 +5,6 @@ import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileSystemOperations;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.logging.LogLevel;
-import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -13,7 +12,6 @@ import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaCompiler;
-import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.process.ExecOperations;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +37,7 @@ public abstract class JlinkTask extends DefaultTask {
 	public abstract DirectoryProperty getOutputDirectory();
 
 	@Nested
-	protected abstract Property<@NotNull JavaCompiler> getJavaCompiler();
+	public abstract Property<JavaCompiler> getJavaCompiler();
 
 	@Inject
 	protected abstract FileSystemOperations getFs();
@@ -48,14 +46,14 @@ public abstract class JlinkTask extends DefaultTask {
 	protected abstract ExecOperations getExec();
 
 	@Inject
-	public JlinkTask(ProjectLayout layout, JavaToolchainService javaToolchain) {
+	public JlinkTask(ProjectLayout layout) {
+		setGroup("build");
+		setDescription("Generates a custom Java runtime image using jlink.");
+
 		getOptions().convention(List.of());
 		getModules().convention(List.of("ALL-MODULE-PATH"));
 		getIncludeModulePath().convention(true);
 		getOutputDirectory().convention(layout.getBuildDirectory().dir(getName()));
-
-		var toolchain = getProject().getExtensions().getByType(JavaPluginExtension.class).getToolchain();
-		getJavaCompiler().convention(javaToolchain.compilerFor(toolchain));
 	}
 
 	@TaskAction
