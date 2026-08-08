@@ -512,25 +512,33 @@ public final class MediaHelper {
 		);
 
 		try {
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, firstPass));
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, highQualityBitrate, secondPass));
-		} catch (ProcessException e) {
-			throw twoPassConversionFailed(e, webmVideo, logPrefix);
-		}
+			try {
+				ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, firstPass));
+				ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, highQualityBitrate, secondPass));
+			} catch (ProcessException e) {
+				throw twoPassConversionFailed(e, webmVideo);
+			}
 
-		if (webmVideo.length() <= MAX_VIDEO_FILE_SIZE) {
+			if (webmVideo.length() <= MAX_VIDEO_FILE_SIZE) {
+				return webmVideo;
+			}
+
+			LOGGER.at(Level.WARN).log("Resulting file was too large (actual size was {} bytes), retrying with lower bitrate", webmVideo.length());
+
+			try {
+				ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, lowQualityBitrate, secondPass));
+			} catch (ProcessException e) {
+				throw twoPassConversionFailed(e, webmVideo);
+			}
+
 			return webmVideo;
+		} finally {
+			try {
+				deleteFile(new File(logPrefix + "-0.log"));
+			} catch (FileOperationException e) {
+				LOGGER.at(Level.WARN).setCause(e).log("Could not delete log file");
+			}
 		}
-
-		LOGGER.at(Level.WARN).log("Resulting file was too large (actual size was {} bytes), retrying with lower bitrate", webmVideo.length());
-
-		try {
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, lowQualityBitrate, secondPass));
-		} catch (ProcessException e) {
-			throw twoPassConversionFailed(e, webmVideo, logPrefix);
-		}
-
-		return webmVideo;
 	}
 
 	/**
@@ -550,24 +558,17 @@ public final class MediaHelper {
 	 * Handle a process failure while doing a 2 pass video conversion
 	 * @param e the original ProcessException
 	 * @param webmVideo the output file to clean up
-	 * @param logPrefix the 2 pass logfile prefix to clean up
 	 * @return the MediaException to throw
 	 */
-	private static MediaException twoPassConversionFailed(ProcessException e, File webmVideo, String logPrefix) {
+	private static MediaException twoPassConversionFailed(ProcessException e, File webmVideo) {
 		var exception = new MediaException("FFmpeg two-pass conversion failed", e);
 
 		try {
 			deleteFile(webmVideo);
 		} catch (FileOperationException ex) {
 			exception.addSuppressed(ex);
-		} finally {
-			try {
-				deleteFile(new File(logPrefix + "-0.log"));
-			} catch (FileOperationException ex) {
-				LOGGER.at(Level.WARN).setCause(ex).log("Could not delete log file");
-				exception.addSuppressed(ex);
-			}
 		}
+
 		return exception;
 	}
 
