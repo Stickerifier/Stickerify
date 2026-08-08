@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 public final class MediaHelper {
@@ -183,7 +184,7 @@ public final class MediaHelper {
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
 	static MultimediaInfo retrieveMultimediaInfo(File file) throws MediaException, InterruptedException {
-		var command = new String[] {
+		var command = List.of(
 				"ffprobe",
 				"-hide_banner",
 				"-v", "error",
@@ -191,7 +192,7 @@ public final class MediaHelper {
 				"-show_format",
 				"-show_streams",
 				file.getAbsolutePath()
-		};
+		);
 
 		try {
 			var output = ProcessHelper.executeCommand(command);
@@ -386,7 +387,7 @@ public final class MediaHelper {
 	 */
 	private static File convertToWebp(File file) throws MediaException, InterruptedException {
 		var webpImage = createTempFile("webp");
-		var command = new String[] {
+		var command = List.of(
 				"ffmpeg",
 				"-y",
 				"-hide_banner",
@@ -397,7 +398,7 @@ public final class MediaHelper {
 				"-lossless", "1",
 				"-compression_level", "6",
 				webpImage.getAbsolutePath()
-		};
+		);
 
 		try {
 			ProcessHelper.executeCommand(command);
@@ -468,7 +469,7 @@ public final class MediaHelper {
 	private static File convertToWebm(File file) throws MediaException, InterruptedException {
 		var webmVideo = createTempFile("webm");
 		var logPrefix = webmVideo.getAbsolutePath() + "-passlog";
-		var baseCommand = new String[] {
+		var baseCommand = List.of(
 				"ffmpeg",
 				"-y",
 				"-hide_banner",
@@ -476,16 +477,48 @@ public final class MediaHelper {
 				"-i", file.getAbsolutePath(),
 				"-vf", "scale='if(gt(iw,ih),%1$d,%2$d)':'if(gt(iw,ih),%2$d,%1$d)',fps='min(%3$d,source_fps)'".formatted(MAX_SIDE_LENGTH, VIDEO_KEEP_ASPECT_RATIO, MAX_VIDEO_FRAMES),
 				"-c:v", "libvpx-" + VP9_CODEC,
-				"-b:v", "650K",
+				"-row-mt", "1",
+				"-threads", "2",
+				"-g", "120",
+				"-auto-alt-ref", "0",
 				"-pix_fmt", "yuv420p",
 				"-t", String.valueOf(MAX_VIDEO_DURATION_SECONDS),
 				"-an",
+				"-enc_time_base", "1/1000",
 				"-passlogfile", logPrefix
-		};
+		);
+		var firstPass = List.of(
+				"-cpu-used", "8",
+				"-pass", "1",
+				"-f", "null",
+				OsConstants.NULL_FILE
+		);
+		var secondPass = List.of(
+				"-qmax", "63",
+				"-cpu-used", "4",
+				"-pass", "2",
+				webmVideo.getAbsolutePath()
+		);
+		var highQualityBitrate = List.of(
+				"-b:v", "650K",
+				"-maxrate", "650K",
+				"-bufsize", "1300K"
+		);
+		var lowQualityBitrate = List.of(
+				"-b:v", "250K",
+				"-maxrate", "250K",
+				"-bufsize", "125K",
+				"-qmin", "35"
+		);
 
 		try {
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "1", "-f", "webm", OsConstants.NULL_FILE));
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, "-pass", "2", webmVideo.getAbsolutePath()));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, firstPass));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, highQualityBitrate, secondPass));
+
+			if (webmVideo.length() > MAX_VIDEO_FILE_SIZE) {
+				LOGGER.at(Level.WARN).log("Resulting file was too large (actual size was {} bytes), retrying with lower bitrate", webmVideo.length());
+				ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, lowQualityBitrate, secondPass));
+			}
 		} catch (ProcessException e) {
 			try {
 				deleteFile(webmVideo);
@@ -505,18 +538,16 @@ public final class MediaHelper {
 	}
 
 	/**
-	 * Builds the ffmpeg command combining a base part with a specific part (useful for 2 pass processing)
+	 * Builds the ffmpeg command combining multiple parts.
 	 *
-	 * @param baseCommand the common ffmpeg command
-	 * @param additionalOptions command specific options
+	 * @param commands a series of lists containing commands
 	 * @return the complete ffmpeg invocation command
 	 */
-	private static String[] buildFfmpegCommand(String[] baseCommand, String... additionalOptions) {
-		var commands = new String[baseCommand.length + additionalOptions.length];
-		System.arraycopy(baseCommand, 0, commands, 0, baseCommand.length);
-		System.arraycopy(additionalOptions, 0, commands, baseCommand.length, additionalOptions.length);
-
-		return commands;
+	@SafeVarargs
+	private static List<String> buildFfmpegCommand(final List<String>... commands) {
+		return Stream.of(commands)
+				.flatMap(List::stream)
+				.toList();
 	}
 
 	private MediaHelper() {

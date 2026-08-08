@@ -8,6 +8,7 @@ import org.slf4j.event.Level;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +34,7 @@ public final class ProcessHelper {
 	 * </ul>
 	 * @throws InterruptedException if the current thread is interrupted while waiting for the command to finish
 	 */
-	public static String executeCommand(final String... command) throws ProcessException, InterruptedException {
+	public static String executeCommand(final List<String> command) throws ProcessException, InterruptedException {
 		SEMAPHORE.acquire();
 
 		try (var process = new ProcessBuilder(command).start()) {
@@ -55,13 +56,15 @@ public final class ProcessHelper {
 				}
 			});
 
+			var commandName = command.getFirst();
+
 			var finished = process.waitFor(1, TimeUnit.MINUTES);
 			if (!finished) {
 				process.destroyForcibly();
 				outputThread.join();
 				errorThread.join();
-				LOGGER.at(Level.WARN).log("The command {} timed out after 1m: {}", command[0], standardError.toString());
-				throw new ProcessException("The command {} timed out after 1m", command[0]);
+				LOGGER.at(Level.WARN).log("The command {} timed out after 1m: {}", commandName, standardError.toString());
+				throw new ProcessException("The command {} timed out after 1m", commandName);
 			}
 
 			outputThread.join();
@@ -69,8 +72,8 @@ public final class ProcessHelper {
 
 			var exitCode = process.exitValue();
 			if (exitCode != 0) {
-				LOGGER.at(Level.WARN).log("The command {} exited with code {}: {}", command[0], exitCode, standardError.toString());
-				throw new ProcessException("The command {} exited with code {}", command[0], exitCode);
+				LOGGER.at(Level.WARN).log("The command {} exited with code {}: {}", commandName, exitCode, standardError.toString());
+				throw new ProcessException("The command {} exited with code {}", commandName, exitCode);
 			}
 
 			return standardOutput.toString();
