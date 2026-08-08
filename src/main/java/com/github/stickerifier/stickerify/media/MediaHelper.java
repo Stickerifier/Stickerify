@@ -33,9 +33,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 public final class MediaHelper {
@@ -467,44 +467,6 @@ public final class MediaHelper {
 	 * @throws InterruptedException if the current thread is interrupted while converting the video file
 	 */
 	private static File convertToWebm(File file) throws MediaException, InterruptedException {
-		var optimisticBitrate = List.of(
-				"-b:v", "650K",
-				"-maxrate", "650K",
-				"-bufsize", "1300K"
-		);
-		var fallbackBitrate = List.of(
-				"-b:v", "250K",
-				"-maxrate", "250K",
-				"-bufsize", "125K",
-				"-qmin", "25"
-		);
-
-		var webmVideo = convertVideoWithBitrate(file, optimisticBitrate);
-		if (webmVideo.exists() && webmVideo.length() <= MAX_VIDEO_FILE_SIZE) {
-			return webmVideo;
-		}
-
-		LOGGER.at(Level.WARN).log("Resulting file was too large (actual size was {} bytes), retrying with lower bitrate", webmVideo.length());
-		try {
-			deleteFile(webmVideo);
-		} catch (FileOperationException e) {
-			LOGGER.at(Level.WARN).setCause(e).log("Could not delete file");
-		}
-
-		return convertVideoWithBitrate(file, fallbackBitrate);
-	}
-
-	/**
-	 * Given a video file and a set of bitrate rules, it converts it to a WebM file of the proper dimension (max 512 x 512),
-	 * based on the requirements specified by <a href="https://core.telegram.org/stickers/webm-vp9-encoding">Telegram documentation</a>.
-	 *
-	 * @param file the file to convert
-	 * @param bitrateCommands the list of bitrate commands to add to the conversion
-	 * @return converted video
-	 * @throws MediaException if file conversion is not successful
-	 * @throws InterruptedException if the current thread is interrupted while converting the video file
-	 */
-	private static File convertVideoWithBitrate(File file, List<String> bitrateCommands) throws MediaException, InterruptedException {
 		var webmVideo = createTempFile("webm");
 		var logPrefix = webmVideo.getAbsolutePath() + "-passlog";
 		var baseCommand = List.of(
@@ -517,7 +479,6 @@ public final class MediaHelper {
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-row-mt", "1",
 				"-threads", "2",
-				"-qmax", "63",
 				"-g", "120",
 				"-auto-alt-ref", "0",
 				"-pix_fmt", "yuv420p",
@@ -529,50 +490,85 @@ public final class MediaHelper {
 		var firstPass = List.of(
 				"-cpu-used", "8",
 				"-pass", "1",
-				"-f", "webm",
+				"-f", "null",
 				OsConstants.NULL_FILE
 		);
 		var secondPass = List.of(
+				"-qmax", "63",
 				"-cpu-used", "4",
 				"-pass", "2",
 				webmVideo.getAbsolutePath()
 		);
+		var highQualityBitrate = List.of(
+				"-b:v", "650K",
+				"-maxrate", "650K",
+				"-bufsize", "1300K"
+		);
+		var lowQualityBitrate = List.of(
+				"-b:v", "250K",
+				"-maxrate", "250K",
+				"-bufsize", "125K",
+				"-qmin", "35"
+		);
 
 		try {
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, bitrateCommands, firstPass));
-			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, bitrateCommands, secondPass));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, firstPass));
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, highQualityBitrate, secondPass));
 		} catch (ProcessException e) {
-			try {
-				deleteFile(webmVideo);
-			} catch (FileOperationException ex) {
-				e.addSuppressed(ex);
-			}
-			throw new MediaException("FFmpeg two-pass conversion failed", e);
-		} finally {
-			try {
-				deleteFile(new File(logPrefix + "-0.log"));
-			} catch (FileOperationException e) {
-				LOGGER.at(Level.WARN).setCause(e).log("Could not delete log file");
-			}
+			throw twoPassConversionFailed(e, webmVideo, logPrefix);
+		}
+
+		if (webmVideo.length() <= MAX_VIDEO_FILE_SIZE) {
+			return webmVideo;
+		}
+
+		LOGGER.at(Level.WARN).log("Resulting file was too large (actual size was {} bytes), retrying with lower bitrate", webmVideo.length());
+
+		try {
+			ProcessHelper.executeCommand(buildFfmpegCommand(baseCommand, lowQualityBitrate, secondPass));
+		} catch (ProcessException e) {
+			throw twoPassConversionFailed(e, webmVideo, logPrefix);
 		}
 
 		return webmVideo;
 	}
 
 	/**
-	 * Builds the ffmpeg command combining multiple parts (useful for 2 pass processing)
+	 * Builds the ffmpeg command combining multiple parts.
 	 *
-	 * @param commands a series of list containing commands
+	 * @param commands a series of lists containing commands
 	 * @return the complete ffmpeg invocation command
 	 */
 	@SafeVarargs
 	private static List<String> buildFfmpegCommand(final List<String>... commands) {
-		var command = new ArrayList<String>();
-		for (List<String> cmd : commands) {
-			command.addAll(cmd);
-		}
+		return Stream.of(commands)
+				.flatMap(List::stream)
+				.toList();
+	}
 
-		return command;
+	/**
+	 * Handle a process failure while doing a 2 pass video conversion
+	 * @param e the original ProcessException
+	 * @param webmVideo the output file to clean up
+	 * @param logPrefix the 2 pass logfile prefix to clean up
+	 * @return the MediaException to throw
+	 */
+	private static MediaException twoPassConversionFailed(ProcessException e, File webmVideo, String logPrefix) {
+		var exception = new MediaException("FFmpeg two-pass conversion failed", e);
+
+		try {
+			deleteFile(webmVideo);
+		} catch (FileOperationException ex) {
+			exception.addSuppressed(ex);
+		} finally {
+			try {
+				deleteFile(new File(logPrefix + "-0.log"));
+			} catch (FileOperationException ex) {
+				LOGGER.at(Level.WARN).setCause(ex).log("Could not delete log file");
+				exception.addSuppressed(ex);
+			}
+		}
+		return exception;
 	}
 
 	private MediaHelper() {
