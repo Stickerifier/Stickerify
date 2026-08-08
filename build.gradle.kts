@@ -2,6 +2,7 @@ import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
 import io.spring.gradle.nullability.NullabilityOptions
 import org.gradle.internal.buildconfiguration.DaemonJvmPropertiesConfigurator
+import org.gradle.kotlin.dsl.support.serviceOf
 
 plugins {
     java
@@ -46,7 +47,7 @@ tasks.named<UpdateDaemonJvm>(DaemonJvmPropertiesConfigurator.TASK_NAME) {
 }
 
 val jlink = tasks.register<JlinkTask>("jlink") {
-    description = "Generates a minimal JRE for the project."
+    description = "Generates a minimal JRE for the project with compact object headers archive."
 
     options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime")
     modules = listOf(
@@ -57,6 +58,14 @@ val jlink = tasks.register<JlinkTask>("jlink") {
     )
     includeModulePath = false
     javaCompiler = javaToolchains.compilerFor(java.toolchain)
+
+    val execOps = serviceOf<ExecOperations>()
+    doLast {
+        val javaExe = outputDirectory.file("jre/bin/java").get().asFile.absolutePath
+        execOps.exec {
+            commandLine(javaExe, "-XX:+UseCompactObjectHeaders", "-Xshare:dump")
+        }
+    }
 }
 
 val CompileOptions.nullability: NullabilityOptions
@@ -77,19 +86,6 @@ tasks.test {
         events("started", "passed", "failed", "skipped")
     }
 }
-
-val generateCohArchive = tasks.register<Exec>("generateCohArchive") {
-    description = "Generates compact object headers archive for the jre."
-
-    inputs.dir(jlink.map { it.outputDirectory.get().asFile })
-
-    val java = jlink.map { it.outputDirectory.file("jre/bin/java").get().asFile.absolutePath }
-    doFirst { commandLine(java.get(), "-XX:+UseCompactObjectHeaders", "-Xshare:dump") }
-}
-
-jlink.configure { finalizedBy(generateCohArchive) }
-tasks.test.configure { mustRunAfter(generateCohArchive) }
-tasks.named<Sync>(DistributionPlugin.TASK_INSTALL_NAME).configure { mustRunAfter(generateCohArchive) }
 
 application {
     mainClass = "com.github.stickerifier.stickerify.runner.Main"
