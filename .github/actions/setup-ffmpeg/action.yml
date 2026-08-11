@@ -23,7 +23,7 @@ runs:
           local binary_name="${2:-FFmpeg}"
           local output_file="$(echo "$binary_name" | tr '[:upper:]' '[:lower:]').zip"
 
-          if curl -sS -f -L --retry 3 --retry-delay 5 "$url" -o "$output_file"; then
+          if curl -sS -f -L --retry 3 --retry-delay 8 --retry-all-errors "$url" -o "$output_file"; then
             echo "Downloaded $binary_name from $url"
             unzip -q "$output_file"
             rm -f "$output_file"
@@ -42,7 +42,13 @@ runs:
           chmod +x "$INSTALL_DIR/"*
 
         elif [[ "${{ runner.os }}" == "macOS" ]]; then
-          FF_VERSION=$(echo "$FF_VERSION" | awk -F. '{print $1 $2}')
+          major=$(echo "$FF_VERSION" | cut -d. -f1)
+          minor=$(echo "$FF_VERSION" | cut -d. -f2 | sed 's/^0*//')
+          FF_VERSION="${major}${minor}"
+          if [[ -z "$minor" ]]; then
+            FF_VERSION="$major"
+          fi
+
           download_binary "https://www.osxexperts.net/ffmpeg${FF_VERSION}arm.zip"
           mv ffmpeg "$INSTALL_DIR/ffmpeg"
           download_binary "https://www.osxexperts.net/ffprobe${FF_VERSION}arm.zip" "FFprobe"
