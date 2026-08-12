@@ -47,11 +47,11 @@ public enum Answer {
 			<tg-thinking>Processing file...</tg-thinking>
 			"""),
 	SUPPORTED_FORMATS("""
-			| Type     | Supported formats                               |
-			|:---------|:------------------------------------------------|
-			| images   | png, jpg, static webp, tiff, ico, svg, psd      |
-			| videos   | gif, mov, avi, mp4, webm, m4v, mkv, live photos |
-			| stickers | static, video, animated                         |
+			| Type     | Supported formats                                              |
+			|:---------|:---------------------------------------------------------------|
+			| images   | png, jpg, static webp, tiff, ico, svg, psd                     |
+			| videos   | gif, mov, avi, mp4, webm, m4v, mkv, animated webp, live photos |
+			| stickers | static, video, animated                                        |
 
 			---
 
