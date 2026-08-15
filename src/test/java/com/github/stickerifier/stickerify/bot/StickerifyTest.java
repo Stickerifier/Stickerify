@@ -9,12 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.github.stickerifier.stickerify.junit.ClearTempFiles;
 import com.github.stickerifier.stickerify.junit.Tags;
 import com.github.stickerifier.stickerify.telegram.Answer;
-import com.google.gson.JsonParser;
 import com.pengrad.telegrambot.TelegramBot;
 import mockwebserver3.MockWebServer;
 import mockwebserver3.QueueDispatcher;
 import mockwebserver3.RecordedRequest;
 import mockwebserver3.junit5.StartStop;
+import org.apache.fory.json.ForyJson;
+import org.apache.fory.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,8 @@ import java.net.URLDecoder;
 @Tag(Tags.TELEGRAM_API)
 @ClearTempFiles
 class StickerifyTest {
+
+	private static final ForyJson JSON = ForyJson.builder().build();
 
 	@StartStop
 	private final MockWebServer server = new MockWebServer();
@@ -78,11 +81,12 @@ class StickerifyTest {
 		richMessageEnd = richMessageEnd == -1 ? decodedBody.length() : richMessageEnd;
 		var richMessageJson = decodedBody.substring(richMessageStart + "rich_message=".length(), richMessageEnd);
 
-		var richMessage = JsonParser.parseString(richMessageJson).getAsJsonObject();
-		var actualMessage = richMessage.get(messageFormat).getAsString();
+		var richMessage = JSON.fromJson(richMessageJson, JsonObject.class);
+		var actualMessage = richMessage.get(messageFormat);
 
 		var expectedMessage = answer.getText();
-		assertThat(actualMessage, containsString(expectedMessage));
+		assertNotNull(actualMessage);
+		assertThat(actualMessage.toString(), containsString(expectedMessage));
 	}
 
 	@Test

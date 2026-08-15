@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     compileOnly(libs.jspecify)
-    implementation(libs.gson)
+    implementation(libs.fory)
     implementation(libs.logback.classic)
     implementation(libs.logstash.logback.encoder)
     implementation(libs.telegram.bot.api)
@@ -49,8 +49,7 @@ def jlink = tasks.register('jlink', JlinkTask) {
     modules = [
             'java.instrument', // for junit
             'java.naming',     // for logback
-            'java.sql',        // for tika
-            'jdk.unsupported'  // for gson
+            'java.sql'         // for tika
     ]
     includeModulePath = false
 
@@ -67,7 +66,7 @@ test {
     javaLauncher = providers.provider { new JlinkJavaLauncher(jlink.get()) }
 
     useJUnitPlatform()
-    jvmArgs('--enable-final-field-mutation=ALL-UNNAMED')
+    jvmArgs('--enable-final-field-mutation=ALL-UNNAMED', '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED')
 
     testLogging {
         events('started', 'passed', 'failed', 'skipped')
@@ -87,7 +86,7 @@ installDist.mustRunAfter(generateCohArchive)
 
 application {
     mainClass = 'com.github.stickerifier.stickerify.runner.Main'
-    applicationDefaultJvmArgs = ['-XX:+UseCompactObjectHeaders', '-XX:+UseShenandoahGC', '-XX:ShenandoahGCMode=generational', '--enable-final-field-mutation=ALL-UNNAMED']
+    applicationDefaultJvmArgs = ['-XX:+UseCompactObjectHeaders', '-XX:+UseShenandoahGC', '-XX:ShenandoahGCMode=generational', '--enable-final-field-mutation=ALL-UNNAMED', '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED']
 }
 
 distributions {

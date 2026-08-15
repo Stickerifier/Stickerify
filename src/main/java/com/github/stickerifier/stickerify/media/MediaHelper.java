@@ -22,9 +22,9 @@ import com.github.stickerifier.stickerify.exception.ProcessException;
 import com.github.stickerifier.stickerify.logger.StructuredLogger;
 import com.github.stickerifier.stickerify.process.OsConstants;
 import com.github.stickerifier.stickerify.process.ProcessHelper;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.annotations.SerializedName;
+import org.apache.fory.json.ForyJson;
+import org.apache.fory.json.ForyJsonException;
+import org.apache.fory.json.annotation.JsonProperty;
 import org.apache.tika.Tika;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.event.Level;
@@ -43,7 +43,7 @@ public final class MediaHelper {
 	private static final StructuredLogger LOGGER = new StructuredLogger(MediaHelper.class);
 
 	private static final Tika TIKA = new Tika();
-	private static final Gson GSON = new Gson();
+	private static final ForyJson JSON = ForyJson.builder().build();
 	private static final Set<String> SUPPORTED_VIDEOS = Set.of("image/gif", "video/quicktime", "video/webm",
 			"video/mp4", "video/x-m4v", "application/x-matroska", "video/x-msvideo");
 
@@ -169,10 +169,10 @@ public final class MediaHelper {
 		return isSizeCompliant(videoInfo.width(), videoInfo.height())
 				&& videoInfo.frameRate() <= MAX_VIDEO_FRAMES
 				&& VP9_CODEC.equals(videoInfo.codec())
-				&& formatInfo.duration() <= MAX_VIDEO_DURATION_SECONDS
+				&& Float.parseFloat(formatInfo.duration()) <= MAX_VIDEO_DURATION_SECONDS
 				&& mediaInfo.audio() == null
 				&& formatInfo.format().startsWith(MATROSKA_FORMAT)
-				&& formatInfo.size() <= MAX_VIDEO_FILE_SIZE;
+				&& Long.parseLong(formatInfo.size()) <= MAX_VIDEO_FILE_SIZE;
 	}
 
 	/**
@@ -197,8 +197,8 @@ public final class MediaHelper {
 		try {
 			var output = ProcessHelper.executeCommand(command);
 
-			return GSON.fromJson(output, MultimediaInfo.class);
-		} catch (ProcessException | JsonSyntaxException e) {
+			return JSON.fromJson(output, MultimediaInfo.class);
+		} catch (ProcessException | ForyJsonException e) {
 			throw new MediaException("Unable to retrieve media information", e);
 		}
 	}
@@ -207,7 +207,7 @@ public final class MediaHelper {
 		@Nullable
 		StreamInfo audio() {
 			return streams.stream()
-					.filter(s -> s.type == CodecType.AUDIO)
+					.filter(s -> s.type == CodecType.audio)
 					.findFirst()
 					.orElse(null);
 		}
@@ -215,13 +215,13 @@ public final class MediaHelper {
 		@Nullable
 		StreamInfo video() {
 			return streams.stream()
-					.filter(s -> s.type == CodecType.VIDEO)
+					.filter(s -> s.type == CodecType.video)
 					.findFirst()
 					.orElse(null);
 		}
 	}
 
-	record StreamInfo(@SerializedName("codec_name") String codec, @SerializedName("codec_type") CodecType type, int width, int height, @SerializedName("avg_frame_rate") String frameRateRatio) {
+	record StreamInfo(@JsonProperty("codec_name") String codec, @JsonProperty("codec_type") CodecType type, int width, int height, @JsonProperty("avg_frame_rate") String frameRateRatio) {
 		float frameRate() {
 			if (frameRateRatio.contains("/")) {
 				var ratio = frameRateRatio.split("/");
@@ -233,11 +233,11 @@ public final class MediaHelper {
 	}
 
 	private enum CodecType {
-		@SerializedName("video") VIDEO,
-		@SerializedName("audio") AUDIO
+		video,
+		audio
 	}
 
-	record FormatInfo(@SerializedName("format_name") String format, @Nullable Float duration, long size) {}
+	record FormatInfo(@JsonProperty("format_name") String format, @Nullable String duration, String size) {}
 
 	/**
 	 * Checks if the file is a {@code gzip} archive, then it reads its content and verifies if it's a valid JSON.
@@ -259,7 +259,7 @@ public final class MediaHelper {
 			}
 
 			try {
-				var sticker = GSON.fromJson(uncompressedContent, AnimationDetails.class);
+				var sticker = JSON.fromJson(uncompressedContent, AnimationDetails.class);
 
 				if (isAnimationCompliant(sticker)) {
 					try {
@@ -270,7 +270,7 @@ public final class MediaHelper {
 				}
 
 				LOGGER.at(Level.WARN).addKeyValue(STICKER_LOG_KEY, sticker).log("The animated sticker doesn't meet Telegram's requirements");
-			} catch (JsonSyntaxException _) {
+			} catch (ForyJsonException _) {
 				LOGGER.at(Level.INFO).log("The archive isn't an animated sticker");
 			}
 		}
@@ -278,7 +278,7 @@ public final class MediaHelper {
 		return false;
 	}
 
-	private record AnimationDetails(@SerializedName("w") int width, @SerializedName("h") int height, @SerializedName("fr") int frameRate, @SerializedName("ip") float start, @SerializedName("op") float end) {
+	private record AnimationDetails(@JsonProperty("w") int width, @JsonProperty("h") int height, @JsonProperty("fr") int frameRate, @JsonProperty("ip") float start, @JsonProperty("op") float end) {
 		private float duration() {
 			return (end - start) / frameRate;
 		}
@@ -374,7 +374,7 @@ public final class MediaHelper {
 
 		return ("image/png".equals(mimeType) || "image/webp".equals(mimeType))
 				&& isSizeCompliant(imageInfo.width(), imageInfo.height())
-				&& formatInfo.size() <= MAX_IMAGE_FILE_SIZE;
+				&& Long.parseLong(formatInfo.size()) <= MAX_IMAGE_FILE_SIZE;
 	}
 
 	/**

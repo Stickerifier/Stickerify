@@ -55,13 +55,14 @@ class MediaHelperTest {
 		assertNotNull(imageInfo);
 		var formatInfo = mediaInfo.format();
 		assertNotNull(formatInfo);
+		var size = Long.parseLong(formatInfo.size());
 		var actualExtension = getExtension(image);
 
 		assertAll("Image validation failed",
 				() -> assertThat("image's extension must be webp", actualExtension, is(equalTo(".webp"))),
 				() -> assertThat("image's width is not correct", imageInfo.width(), is(equalTo(expectedWidth))),
 				() -> assertThat("image's height is not correct", imageInfo.height(), is(equalTo(expectedHeight))),
-				() -> assertThat("image size should not exceed 512 KB", formatInfo.size(), is(lessThanOrEqualTo(MAX_IMAGE_FILE_SIZE)))
+				() -> assertThat("image size should not exceed 512 KB", size, is(lessThanOrEqualTo(MAX_IMAGE_FILE_SIZE)))
 		);
 	}
 
@@ -167,6 +168,8 @@ class MediaHelperTest {
 		var formatInfo = mediaInfo.format();
 		assertNotNull(formatInfo);
 		assertNotNull(formatInfo.duration());
+		var duration = Float.parseFloat(formatInfo.duration());
+		var size = Long.parseLong(formatInfo.size());
 
 		var actualExtension = getExtension(video);
 
@@ -176,10 +179,10 @@ class MediaHelperTest {
 				() -> assertThat("video's height is not correct", videoInfo.height(), is(equalTo(expectedHeight))),
 				() -> assertThat("video's frame rate is not correct", videoInfo.frameRate(), is(equalTo(expectedFrameRate))),
 				() -> assertThat("video must be encoded with the VP9 codec", videoInfo.codec(), is(equalTo(VP9_CODEC))),
-				() -> assertThat("video's duration is not correct", formatInfo.duration(), is(equalTo(expectedDuration))),
+				() -> assertThat("video's duration is not correct", duration, is(equalTo(expectedDuration))),
 				() -> assertThat("video's format must be Matroska", formatInfo.format(), startsWith(MATROSKA_FORMAT)),
 				() -> assertThat("video must have no audio stream", mediaInfo.audio(), is(nullValue())),
-				() -> assertThat("video size should not exceed 256 KB", formatInfo.size(), is(lessThanOrEqualTo(MAX_VIDEO_FILE_SIZE)))
+				() -> assertThat("video size should not exceed 256 KB", size, is(lessThanOrEqualTo(MAX_VIDEO_FILE_SIZE)))
 		);
 	}
 
