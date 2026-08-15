@@ -49,7 +49,8 @@ def jlink = tasks.register('jlink', JlinkTask) {
     modules = [
             'java.instrument', // for junit
             'java.naming',     // for logback
-            'java.sql'         // for tika
+            'java.sql',        // for tika
+            'jdk.unsupported'  // for gson
     ]
     includeModulePath = false
 
