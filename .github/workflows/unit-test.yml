@@ -33,7 +33,7 @@ jobs:
 
       - name: Cache FFmpeg binaries
         id: cache-ffmpeg
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/ffmpeg
           key: ffmpeg-static-${{ runner.os }}-${{ env.FF_VERSION }}
