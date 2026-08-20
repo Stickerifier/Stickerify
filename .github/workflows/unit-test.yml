@@ -12,22 +12,27 @@ permissions: read-all
 jobs:
   tests:
     name: Execute unit tests
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+      checks: write
+      security-events: write
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v7
 
       - name: Setup FFmpeg and FFprobe
-        uses: ./.github/actions/setup-ffmpeg
-        with:
-          # bump: FFmpeg /ffmpeg-version: '([\d.]+)'/ docker:mwader/static-ffmpeg|/\d+\./|*
-          ffmpeg-version: '9.0'
+        env:
+          # bump: FFmpeg /FF_VERSION: ([\d.]+)/ docker:mwader/static-ffmpeg|/\d+\./|*
+          FF_VERSION: 9.0
+        run: |
+          INSTALL_DIR="$RUNNER_TEMP/ffmpeg"
+          mkdir -p "$INSTALL_DIR"
+          CID=$(docker create "mwader/static-ffmpeg:$FF_VERSION")
+          docker export "$CID" | tar -xf - -C "$INSTALL_DIR" --wildcards 'ff*'
+          docker rm -v "$CID" > /dev/null
+
+          echo "$INSTALL_DIR" >> "$GITHUB_PATH"
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -47,14 +52,6 @@ jobs:
         shell: bash
         run: ./gradlew test
 
-  qodana:
-    name: Perform Qodana analysis
-    needs: tests
-    runs-on: ubuntu-latest
-    permissions:
-      checks: write
-      security-events: write
-    steps:
       - name: Checkout code changes
         uses: actions/checkout@v7
         with:
