@@ -23,8 +23,8 @@ jobs:
 
       - name: Setup FFmpeg and FFprobe
         env:
-          # bump: FFmpeg /FF_VERSION: ([\d.]+)/ docker:mwader/static-ffmpeg|/\d+\./|*
-          FF_VERSION: 9.0
+          # bump: FFmpeg /FF_VERSION: '([\d.]+)'/ docker:mwader/static-ffmpeg|/\d+\./|*
+          FF_VERSION: '9.0'
         run: |
           INSTALL_DIR="$RUNNER_TEMP/ffmpeg"
           mkdir -p "$INSTALL_DIR"
