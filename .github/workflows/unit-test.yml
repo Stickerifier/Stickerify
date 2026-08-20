@@ -19,17 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      checks: write
-      security-events: write
     env:
       # bump: FFmpeg /FF_VERSION: '([\d.]+)'/ docker:mwader/static-ffmpeg|/\d+\./|*
       FF_VERSION: '9.0'
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 0
 
       - name: Cache FFmpeg binaries
         id: cache-ffmpeg
@@ -66,6 +61,20 @@ jobs:
 
       - name: Execute tests
         run: ./gradlew check
+
+  qodana:
+    name: Perform Qodana analysis
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      security-events: write
+    steps:
+      - name: Checkout code changes
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
       - name: Execute analysis
         uses: JetBrains/qodana-action@v2026.2.0
