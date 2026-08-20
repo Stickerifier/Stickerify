@@ -1,5 +1,6 @@
 import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
+import com.github.stickerifier.stickerify.JunitSeedArgumentProvider
 import io.spring.gradle.nullability.NullabilityOptions
 import org.gradle.internal.buildconfiguration.DaemonJvmPropertiesConfigurator
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -86,14 +87,11 @@ tasks.test {
         events("started", "passed", "failed", "skipped")
     }
 
-    val seedProvider = providers.gradleProperty("junitSeed").orElse(providers.provider { System.nanoTime().toString() })
-    jvmArgumentProviders.add(CommandLineArgumentProvider {
-        val seed = seedProvider.get()
-        listOf("-Djunit.jupiter.execution.order.random.seed=$seed")
-    })
+    val seedProvider = JunitSeedArgumentProvider(providers.gradleProperty("junitSeed"))
+    jvmArgumentProviders.add(seedProvider)
 
     doFirst {
-        println("Test seed: ${seedProvider.get()}")
+        println("Test seed: ${seedProvider.resolveSeed()}")
     }
 }
 
