@@ -7,27 +7,43 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 permissions: read-all
 
 jobs:
   tests:
     name: Execute unit tests
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    env:
+      # bump: FFmpeg /FF_VERSION: '([\d.]+)'/ docker:mwader/static-ffmpeg|/\d+\./|*
+      FF_VERSION: '9.0'
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v7
 
-      - name: Setup FFmpeg and FFprobe
-        uses: ./.github/actions/setup-ffmpeg
+      - name: Cache FFmpeg binaries
+        id: cache-ffmpeg
+        uses: actions/cache@v6
         with:
-          # bump: FFmpeg /ffmpeg-version: ([\d.]+)/ docker:mwader/static-ffmpeg|/\d+\./|*
-          ffmpeg-version: 8.1.2
+          path: ${{ runner.temp }}/ffmpeg
+          key: ffmpeg-static-${{ runner.os }}-${{ env.FF_VERSION }}
+
+      - name: Setup FFmpeg
+        if: steps.cache-ffmpeg.outputs.cache-hit != 'true'
+        run: |
+          INSTALL_DIR="$RUNNER_TEMP/ffmpeg"
+          mkdir -p "$INSTALL_DIR"
+          CID=$(docker create "mwader/static-ffmpeg:$FF_VERSION")
+          docker export "$CID" | tar -xf - -C "$INSTALL_DIR" --wildcards 'ff*'
+          docker rm -v "$CID" > /dev/null
+
+      - name: Add FFmpeg to PATH
+        run: echo "$RUNNER_TEMP/ffmpeg" >> "$GITHUB_PATH"
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -44,8 +60,7 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
 
       - name: Execute tests
-        shell: bash
-        run: ./gradlew test
+        run: ./gradlew check
 
   qodana:
     name: Perform Qodana analysis
@@ -73,6 +88,7 @@ jobs:
           args: --image jetbrains/qodana-jvm-community:2026.2
 
       - name: Upload results to GitHub
+        if: ${{ !cancelled() }}
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
