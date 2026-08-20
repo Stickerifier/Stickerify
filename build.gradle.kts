@@ -85,6 +85,16 @@ tasks.test {
     testLogging {
         events("started", "passed", "failed", "skipped")
     }
+
+    val seedProvider = providers.gradleProperty("junitSeed").orElse(providers.provider { System.nanoTime().toString() })
+    jvmArgumentProviders.add(CommandLineArgumentProvider {
+        val seed = seedProvider.get()
+        listOf("-Djunit.jupiter.execution.order.random.seed=$seed")
+    })
+
+    doFirst {
+        println("Test seed: ${seedProvider.get()}")
+    }
 }
 
 application {
