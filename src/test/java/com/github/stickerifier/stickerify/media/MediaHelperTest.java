@@ -266,11 +266,11 @@ class MediaHelperTest {
 
 	@Test
 	@Tag(Tags.VIDEO)
-	void resizeAnimatedWebpVideo() {
+	void resizeAnimatedWebpVideo() throws Exception {
 		var webpVideo = loadResource("animated.webp");
+		var result = MediaHelper.convert(webpVideo);
 
-		var ex = assertThrows(MediaException.class, () -> MediaHelper.convert(webpVideo));
-		assertThat(ex.getMessage(), equalTo("The file with image/webp MIME type is not supported"));
+		assertVideoConsistency(result, 512, 512, 28.583334F, 0.84F);
 	}
 
 	@Test
@@ -401,6 +401,14 @@ class MediaHelperTest {
 		void concurrentGifVideoConversions() {
 			var gifVideo = loadResource("valid.gif");
 			executeConcurrentConversionsOf(gifVideo);
+		}
+
+		@Test
+		@Tag(Tags.VIDEO)
+		@DisplayName("webp videos")
+		void concurrentWebpVideoConversions() {
+			var webpVideo = loadResource("animated.webp");
+			executeConcurrentConversionsOf(webpVideo);
 		}
 
 		@Test
