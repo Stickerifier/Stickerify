@@ -21,7 +21,7 @@ jobs:
       contents: write
     env:
       # bump: FFmpeg /FF_VERSION: '([\d.]+)'/ docker:mwader/static-ffmpeg|/\d+\./|*
-      FF_VERSION: '9.0'
+      FF_VERSION: '9.0.1'
     steps:
       - name: Checkout code changes
         uses: actions/checkout@v7
