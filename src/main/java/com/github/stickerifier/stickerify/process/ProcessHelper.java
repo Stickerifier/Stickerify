@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.github.stickerifier.stickerify.exception.ProcessException;
 import com.github.stickerifier.stickerify.logger.StructuredLogger;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.slf4j.event.Level;
 
@@ -36,7 +37,7 @@ public final class ProcessHelper {
 	 * @throws InterruptedException if the current thread is interrupted while waiting for the command to finish
 	 */
 	@WithSpan("process.execute")
-	public static String executeCommand(final List<String> command) throws ProcessException, InterruptedException {
+	public static String executeCommand(@SpanAttribute("command") final List<String> command) throws ProcessException, InterruptedException {
 		SEMAPHORE.acquire();
 
 		try (var process = new ProcessBuilder(command).start()) {
