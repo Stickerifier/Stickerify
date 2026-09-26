@@ -17,7 +17,7 @@ ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/release
 COPY --from=builder /usr/bin/ff* /usr/bin/
 COPY --from=builder /app/build/install/Stickerify/ .
 
-ENV OTEL_SDK_ENABLED=false
+ENV OTEL_SDK_DISABLED=true
 ENV JAVA_TOOL_OPTIONS=-javaagent:/app/opentelemetry-agent.jar
 ENV CONCURRENT_PROCESSES=5
 CMD ["./bin/Stickerify"]
