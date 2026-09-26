@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew check installDist :otel-ag
 FROM alpine:3.24.2
 
 # bump: OpenTelemetry /v([\d.]+)/ git:https://github.com/open-telemetry/opentelemetry-java-instrumentation.git|*|sort
-ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.31.1/opentelemetry-javaagent.jar \
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.9.0/opentelemetry-javaagent.jar \
     /app/opentelemetry-agent.jar
 
 COPY --from=builder /usr/bin/ff* /usr/bin/
