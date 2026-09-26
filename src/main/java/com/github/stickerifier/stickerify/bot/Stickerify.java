@@ -120,7 +120,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 	}
 
-	@WithSpan("bot.answer.file")
+	@WithSpan("bot.answer_file")
 	private void answerFile(TelegramRequest request, TelegramFile file) {
 		if (file == TelegramFile.NOT_SUPPORTED) {
 			answerText(ERROR, request);
@@ -210,7 +210,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		return replyToUser;
 	}
 
-	@WithSpan("bot.answer.text")
+	@WithSpan("bot.answer_text")
 	private void answerText(TelegramRequest request) {
 		var message = request.message();
 		if (message.text() == null) {
