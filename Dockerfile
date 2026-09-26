@@ -2,6 +2,10 @@ FROM eclipse-temurin:26-alpine AS builder
 
 WORKDIR /app
 
+# bump: OpenTelemetry /v([\d.]+)/ github:open-telemetry/opentelemetry-java-instrumentation|/^v[\d.]+$/|sort
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.31.1/opentelemetry-javaagent.jar \
+    /app/opentelemetry-agent.jar
+
 # bump: FFmpeg /static-ffmpeg:([\d.]+)/ docker:mwader/static-ffmpeg|/\d+\./|*
 COPY --from=mwader/static-ffmpeg:9.0.2 /ff* /usr/bin/
 
@@ -11,7 +15,10 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew check installDist --no-dae
 FROM alpine:3.24.2
 
 COPY --from=builder /usr/bin/ff* /usr/bin/
+COPY --from=builder /app/opentelemetry-agent.jar /app/opentelemetry-agent.jar
 COPY --from=builder /app/build/install/Stickerify/ .
 
+ENV OTEL_SDK_DISABLED=true
+ENV JAVA_TOOL_OPTIONS=-javaagent:/app/opentelemetry-agent.jar
 ENV CONCURRENT_PROCESSES=5
 CMD ["./bin/Stickerify"]
