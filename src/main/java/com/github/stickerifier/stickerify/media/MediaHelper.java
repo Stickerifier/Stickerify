@@ -25,6 +25,7 @@ import com.github.stickerifier.stickerify.process.ProcessHelper;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.apache.tika.Tika;
 import org.jspecify.annotations.Nullable;
@@ -67,7 +68,6 @@ public final class MediaHelper {
 	 * @throws Exception either if the file is not supported, if the conversion failed,
 	 * or if the current thread is interrupted while converting a video file
 	 */
-	@WithSpan("media.convert")
 	public static @Nullable File convert(File inputFile) throws Exception {
 		var mimeType = detectMimeType(inputFile);
 
@@ -98,7 +98,8 @@ public final class MediaHelper {
 	 * @throws InterruptedException if the current thread is interrupted while converting a video file
 	 * @see MediaHelper#convert(File)
 	 */
-	private static @Nullable File performConversion(File inputFile, String mimeType) throws MediaException, InterruptedException {
+	@WithSpan("media.convert")
+	private static @Nullable File performConversion(File inputFile, @SpanAttribute("mime_type") String mimeType) throws MediaException, InterruptedException {
 		LOGGER.at(Level.DEBUG).log("MIME type successfully detected");
 
 		try {
