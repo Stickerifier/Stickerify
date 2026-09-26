@@ -53,11 +53,11 @@ val jlink = tasks.register<JlinkTask>("jlink") {
 
     options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime")
     modules = listOf(
-            "java.instrument", // for junit
-            "java.naming",     // for logback
+            "java.instrument", // for JUnit
+            "java.naming",     // for Logback
             "java.management", // for OpenTelemetry
-            "java.sql",        // for tika
-            "jdk.unsupported"  // for gson
+            "java.sql",        // for Tika
+            "jdk.unsupported"  // for Gson
     )
     includeModulePath = false
     javaCompiler = javaToolchains.compilerFor(java.toolchain)
