@@ -20,6 +20,7 @@ COPY --from=builder /app/build/install/Stickerify/ .
 ENV OTEL_SDK_DISABLED=true
 ENV OTEL_METRICS_EXPORTER=none
 ENV OTEL_LOGS_EXPORTER=none
+ENV OTEL_JAVAAGENT_LOGGING=none
 ENV JAVA_TOOL_OPTIONS=-javaagent:/app/opentelemetry-agent.jar
 ENV CONCURRENT_PROCESSES=5
 CMD ["./bin/Stickerify"]
