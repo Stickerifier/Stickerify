@@ -25,6 +25,8 @@ import com.github.stickerifier.stickerify.process.ProcessHelper;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.apache.tika.Tika;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.event.Level;
@@ -96,7 +98,8 @@ public final class MediaHelper {
 	 * @throws InterruptedException if the current thread is interrupted while converting a video file
 	 * @see MediaHelper#convert(File)
 	 */
-	private static @Nullable File performConversion(File inputFile, String mimeType) throws MediaException, InterruptedException {
+	@WithSpan("media.convert")
+	private static @Nullable File performConversion(File inputFile, @SpanAttribute("mime_type") String mimeType) throws MediaException, InterruptedException {
 		LOGGER.at(Level.DEBUG).log("MIME type successfully detected");
 
 		try {
@@ -179,6 +182,7 @@ public final class MediaHelper {
 	 * @throws MediaException if an error occurred retrieving video information
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
+	@WithSpan("media.check_video_compliance")
 	private static boolean isVideoCompliant(File file) throws MediaException, InterruptedException {
 		var mediaInfo = retrieveMultimediaInfo(file);
 
@@ -278,6 +282,7 @@ public final class MediaHelper {
 	 * @return {@code true} if the file is compliant
 	 * @throws FileOperationException if an error occurred retrieving the size of the file
 	 */
+	@WithSpan("media.check_animation_compliance")
 	private static boolean isAnimatedStickerCompliant(File file, String mimeType) throws FileOperationException {
 		if ("application/gzip".equals(mimeType)) {
 			var uncompressedContent = "";
@@ -358,6 +363,7 @@ public final class MediaHelper {
 	 * @throws MediaException if an error occurred retrieving image information
 	 * @throws InterruptedException if the current thread is interrupted while retrieving file info
 	 */
+	@WithSpan("media.check_image_compliance")
 	private static boolean isImageCompliant(File image, String mimeType) throws MediaException, InterruptedException {
 		var mediaInfo = retrieveMultimediaInfo(image);
 
@@ -384,6 +390,7 @@ public final class MediaHelper {
 	 * @throws MediaException if an error occurred processing passed-in image
 	 * @throws InterruptedException if the current thread is interrupted while converting the file
 	 */
+	@WithSpan("media.convert_image")
 	private static File convertToWebp(File file) throws MediaException, InterruptedException {
 		var webpImage = createTempFile("webp");
 		var command = List.of(
@@ -465,6 +472,7 @@ public final class MediaHelper {
 	 * @throws MediaException if file conversion is not successful
 	 * @throws InterruptedException if the current thread is interrupted while converting the video file
 	 */
+	@WithSpan("media.convert_video")
 	private static File convertToWebm(File file) throws MediaException, InterruptedException {
 		var webmVideo = createTempFile("webm");
 		var logPrefix = webmVideo.getAbsolutePath() + "-passlog";

@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.jspecify)
     implementation(libs.logback.classic)
     implementation(libs.logstash.logback.encoder)
+    implementation(libs.opentelemetry.instrumentation.annotations)
     implementation(libs.telegram.bot.api)
     implementation(libs.tika)
 
@@ -52,10 +53,11 @@ val jlink = tasks.register<JlinkTask>("jlink") {
 
     options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime")
     modules = listOf(
-            "java.instrument", // for junit
-            "java.naming",     // for logback
-            "java.sql",        // for tika
-            "jdk.unsupported"  // for gson
+            "java.instrument", // for JUnit
+            "java.naming",     // for Logback
+            "java.management", // for OpenTelemetry
+            "java.sql",        // for Tika
+            "jdk.unsupported"  // for Gson
     )
     includeModulePath = false
     javaCompiler = javaToolchains.compilerFor(java.toolchain)

@@ -34,6 +34,7 @@ import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.richmessages.SendRichMessage;
 import com.pengrad.telegrambot.request.richmessages.SendRichMessageDraft;
 import com.pengrad.telegrambot.response.BaseResponse;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.event.Level;
 
@@ -106,6 +107,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		bot.shutdown();
 	}
 
+	@WithSpan("bot.answer")
 	private void answer(TelegramRequest request) {
 		LOGGER.at(Level.INFO).log("Received request");
 
@@ -118,6 +120,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 	}
 
+	@WithSpan("bot.answer_file")
 	private void answerFile(TelegramRequest request, TelegramFile file) {
 		if (file == TelegramFile.NOT_SUPPORTED) {
 			answerText(ERROR, request);
@@ -163,6 +166,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		}
 	}
 
+	@WithSpan("bot.download_file")
 	private File retrieveFile(String fileId) throws TelegramApiException, FileOperationException {
 		var file = execute(new GetFile(fileId)).file();
 
@@ -206,6 +210,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		return replyToUser;
 	}
 
+	@WithSpan("bot.answer_text")
 	private void answerText(TelegramRequest request) {
 		var message = request.message();
 		if (message.text() == null) {
