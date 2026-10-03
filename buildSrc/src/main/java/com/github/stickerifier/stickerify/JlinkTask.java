@@ -21,6 +21,8 @@ import java.util.List;
 
 public abstract class JlinkTask extends DefaultTask {
 
+	public static final String DEFAULT_TASK_NAME = "jlink";
+
 	@Input
 	public abstract ListProperty<@NotNull String> getOptions();
 

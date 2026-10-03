@@ -47,7 +47,7 @@ tasks.named<UpdateDaemonJvm>(DaemonJvmPropertiesConfigurator.TASK_NAME) {
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
-val jlink = tasks.register<JlinkTask>("jlink") {
+val jlink = tasks.register<JlinkTask>(JlinkTask.DEFAULT_TASK_NAME) {
     description = "Generates a minimal JRE for the project with compact object headers archive."
 
     options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime", "--generate-cds-archive")
