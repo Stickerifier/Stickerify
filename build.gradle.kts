@@ -3,7 +3,6 @@ import com.github.stickerifier.stickerify.JlinkTask
 import com.github.stickerifier.stickerify.JunitSeedArgumentProvider
 import io.spring.gradle.nullability.NullabilityOptions
 import org.gradle.internal.buildconfiguration.DaemonJvmPropertiesConfigurator
-import org.gradle.kotlin.dsl.support.serviceOf
 
 plugins {
     java
@@ -39,19 +38,19 @@ version = "2.0"
 description = "Telegram bot to convert medias into the format required to be used as Telegram stickers"
 
 java.toolchain {
-    languageVersion = JavaLanguageVersion.of(26)
+    languageVersion = JavaLanguageVersion.of(27)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
 tasks.named<UpdateDaemonJvm>(DaemonJvmPropertiesConfigurator.TASK_NAME) {
-    languageVersion = JavaLanguageVersion.of(26)
+    languageVersion = JavaLanguageVersion.of(27)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
 val jlink = tasks.register<JlinkTask>("jlink") {
     description = "Generates a minimal JRE for the project with compact object headers archive."
 
-    options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime")
+    options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime", "--generate-cds-archive")
     modules = listOf(
             "java.instrument", // for JUnit
             "java.naming",     // for Logback
@@ -61,14 +60,6 @@ val jlink = tasks.register<JlinkTask>("jlink") {
     )
     includeModulePath = false
     javaCompiler = javaToolchains.compilerFor(java.toolchain)
-
-    val execOps = serviceOf<ExecOperations>()
-    doLast {
-        val javaExe = outputDirectory.file("jre/bin/java").get().asFile.absolutePath
-        execOps.exec {
-            commandLine(javaExe, "-XX:+UseCompactObjectHeaders", "-Xshare:dump")
-        }
-    }
 }
 
 val CompileOptions.nullability: NullabilityOptions
@@ -99,7 +90,7 @@ tasks.test {
 
 application {
     mainClass = "com.github.stickerifier.stickerify.runner.Main"
-    applicationDefaultJvmArgs = listOf("-XX:+UseCompactObjectHeaders", "-XX:+UseShenandoahGC", "-XX:ShenandoahGCMode=generational", "--enable-final-field-mutation=ALL-UNNAMED")
+    applicationDefaultJvmArgs = listOf("--enable-final-field-mutation=ALL-UNNAMED")
 }
 
 distributions {
