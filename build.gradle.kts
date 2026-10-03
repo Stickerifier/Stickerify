@@ -1,3 +1,4 @@
+import com.github.stickerifier.stickerify.DownloadOpenTelemetryAgentTask
 import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
 import com.github.stickerifier.stickerify.JunitSeedArgumentProvider
@@ -97,15 +98,24 @@ tasks.test {
     }
 }
 
+val openTelemetryAgent = tasks.register<DownloadOpenTelemetryAgentTask>(DownloadOpenTelemetryAgentTask.DEFAULT_TASK_NAME) {
+    description = "Downloads the OpenTel Agent for the distribution package."
+
+    version = libs.versions.opentelemetry.get()
+    destinationFile = layout.buildDirectory.file("openTelemetryAgent/opentelemetry-javaagent.jar")
+}
+
 application {
     mainClass = "com.github.stickerifier.stickerify.runner.Main"
-    applicationDefaultJvmArgs = listOf("-XX:+UseCompactObjectHeaders", "-XX:+UseShenandoahGC", "-XX:ShenandoahGCMode=generational", "--enable-final-field-mutation=ALL-UNNAMED")
+    applicationDefaultJvmArgs = listOf("-XX:+UseCompactObjectHeaders", "-XX:+UseShenandoahGC", "-XX:ShenandoahGCMode=generational",
+        "--enable-final-field-mutation=ALL-UNNAMED", "-javaagent:" + openTelemetryAgent.get().destinationFile.get().asFile.name)
 }
 
 distributions {
     main {
         contents {
             from(jlink)
+            from(openTelemetryAgent)
         }
     }
 }

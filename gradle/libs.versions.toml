@@ -1,5 +1,6 @@
 [versions]
 junit = "6.1.3"
+opentelemetry = "2.31.1"
 
 [libraries]
 gson = "com.google.code.gson:gson:2.14.0"
@@ -11,7 +12,7 @@ junit-platform = { module = "org.junit.platform:junit-platform-launcher", versio
 logback-classic = "ch.qos.logback:logback-classic:1.6.5"
 logstash-logback-encoder = "net.logstash.logback:logstash-logback-encoder:9.0"
 mockwebserver = "com.squareup.okhttp3:mockwebserver3-junit5:5.5.0"
-opentelemetry-instrumentation-annotations = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.31.1"
+opentelemetry-instrumentation-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations", version.ref = "opentelemetry" }
 telegram-bot-api = "com.github.pengrad:java-telegram-bot-api:10.3.0"
 tika = "org.apache.tika:tika-core:4.1.0"
 
