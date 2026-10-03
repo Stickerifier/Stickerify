@@ -62,11 +62,20 @@ val jlink = tasks.register<JlinkTask>(JlinkTask.DEFAULT_TASK_NAME) {
     javaCompiler = javaToolchains.compilerFor(java.toolchain)
 }
 
+nullability {
+    jspecify {
+        experimental = true
+    }
+}
+
 val CompileOptions.nullability: NullabilityOptions
-    get() = (this as ExtensionAware).extensions["nullability"] as NullabilityOptions
+    get() = (this as ExtensionAware).extensions.getByName("nullability") as NullabilityOptions
 
 tasks.named<JavaCompile>(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME) {
     options.nullability.checking = "tests"
+    options.nullability.jspecify {
+        experimental = true
+    }
 }
 
 tasks.test {

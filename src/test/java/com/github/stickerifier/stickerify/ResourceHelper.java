@@ -10,7 +10,10 @@ import java.io.File;
 public final class ResourceHelper {
 
 	public static File loadResource(String filename) {
-		var resource = ResourceHelper.class.getClassLoader().getResource(filename);
+		var cl = ResourceHelper.class.getClassLoader();
+		assertNotNull(cl, "Classloader not found");
+
+		var resource = cl.getResource(filename);
 		assertNotNull(resource, "Test resource [%s] not found.".formatted(filename));
 
 		return new File(resource.getFile());

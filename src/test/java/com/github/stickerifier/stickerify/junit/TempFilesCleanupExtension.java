@@ -20,6 +20,7 @@ public class TempFilesCleanupExtension implements AfterAllCallback {
 
 	private void deleteTempFiles() throws IOException {
 		var tempFolder = System.getProperty("java.io.tmpdir");
+		if (tempFolder == null) return;
 
 		try (var files = Files.list(Path.of(tempFolder))) {
 			for (var file : files.toList()) {
@@ -31,7 +32,9 @@ public class TempFilesCleanupExtension implements AfterAllCallback {
 	}
 
 	private boolean isStickerifyFile(Path path) {
-		var fileName = path.getFileName().toString();
+		var file = path.getFileName();
+		if (file == null) return false;
+		var fileName = file.toString();
 
 		return Files.isRegularFile(path) && (fileName.startsWith("Stickerify-") || fileName.startsWith("OriginalFile-"));
 	}
