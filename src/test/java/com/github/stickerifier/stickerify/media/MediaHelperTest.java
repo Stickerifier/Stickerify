@@ -5,6 +5,7 @@ import static com.github.stickerifier.stickerify.media.MediaConstraints.MATROSKA
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_IMAGE_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.MAX_VIDEO_FILE_SIZE;
 import static com.github.stickerifier.stickerify.media.MediaConstraints.VP9_CODEC;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -352,7 +353,7 @@ class MediaHelperTest {
 						MediaHelper.convert(inputFile);
 					} catch (Throwable e) {
 						failedConversions.incrementAndGet();
-						failureReasons.add(e.getMessage());
+						failureReasons.add(requireNonNullElse(e.getMessage(), e.getClass().getSimpleName()));
 					}
 				}));
 			}

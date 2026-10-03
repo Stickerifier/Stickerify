@@ -1,4 +1,4 @@
-FROM eclipse-temurin:26-alpine AS builder
+FROM eclipse-temurin:27-alpine AS builder
 
 WORKDIR /app
 

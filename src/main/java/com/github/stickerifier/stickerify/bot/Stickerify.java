@@ -57,7 +57,7 @@ import java.util.concurrent.ThreadFactory;
 public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesListener, ExceptionHandler, AutoCloseable {
 
 	private static final StructuredLogger LOGGER = new StructuredLogger(Stickerify.class);
-	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
+	private static final @Nullable String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
 	private static final InputRichMessage PROCESSING_MESSAGE = new InputRichMessage().html(PROCESSING.getText());
 

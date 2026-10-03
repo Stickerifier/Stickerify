@@ -49,7 +49,7 @@ jobs:
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: 26
+          java-version: 27
 
       - name: Setup project and upload dependency graph
         uses: gradle/actions/setup-gradle@v6
