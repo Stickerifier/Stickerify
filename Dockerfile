@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew check installDist --no-dae
 FROM alpine:3.24.2
 
 # bump: OpenTelemetry /opentelemetry-java-instrumentation\/releases\/download\/v([\d.]+)/ git:https://github.com/open-telemetry/opentelemetry-java-instrumentation.git|/\d+\./|*
-ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.31.1/opentelemetry-javaagent.jar \
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.32.0/opentelemetry-javaagent.jar \
     /app/opentelemetry-agent.jar
 
 COPY --from=builder /usr/bin/ff* /usr/bin/
