@@ -34,6 +34,7 @@ import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.richmessages.SendRichMessage;
 import com.pengrad.telegrambot.request.richmessages.SendRichMessageDraft;
 import com.pengrad.telegrambot.response.BaseResponse;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.event.Level;
@@ -107,7 +108,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		bot.shutdown();
 	}
 
-	@WithSpan("bot.answer")
+	@WithSpan(value = "bot.answer", kind = SpanKind.CONSUMER)
 	private void answer(TelegramRequest request) {
 		LOGGER.at(Level.INFO).log("Received request");
 

@@ -54,8 +54,8 @@ val jlink = tasks.register<JlinkTask>(JlinkTask.DEFAULT_TASK_NAME) {
     options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime", "--generate-cds-archive")
     modules = listOf(
             "java.instrument", // for JUnit
-            "java.naming",     // for Logback
             "java.management", // for OpenTelemetry
+            "java.naming",     // for Logback
             "java.sql",        // for Tika
             "jdk.unsupported"  // for Gson
     )
