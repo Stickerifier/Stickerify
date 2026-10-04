@@ -7,4 +7,3 @@ buildNumber.properties
 .idea/
 src/main/resources/*.png
 .gradle/
-.qodana
