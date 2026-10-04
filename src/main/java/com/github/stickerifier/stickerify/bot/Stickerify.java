@@ -34,6 +34,7 @@ import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.richmessages.SendRichMessage;
 import com.pengrad.telegrambot.request.richmessages.SendRichMessageDraft;
 import com.pengrad.telegrambot.response.BaseResponse;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.event.Level;
@@ -57,7 +58,7 @@ import java.util.concurrent.ThreadFactory;
 public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesListener, ExceptionHandler, AutoCloseable {
 
 	private static final StructuredLogger LOGGER = new StructuredLogger(Stickerify.class);
-	private static final String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
+	private static final @Nullable String BOT_TOKEN = System.getenv("STICKERIFY_TOKEN");
 	private static final ThreadFactory VIRTUAL_THREAD_FACTORY = Thread.ofVirtual().name("Virtual-", 0).factory();
 	private static final InputRichMessage PROCESSING_MESSAGE = new InputRichMessage().html(PROCESSING.getText());
 
@@ -107,7 +108,7 @@ public record Stickerify(TelegramBot bot, Executor executor) implements UpdatesL
 		bot.shutdown();
 	}
 
-	@WithSpan("bot.answer")
+	@WithSpan(value = "bot.answer", kind = SpanKind.CONSUMER)
 	private void answer(TelegramRequest request) {
 		LOGGER.at(Level.INFO).log("Received request");
 

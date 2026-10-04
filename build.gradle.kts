@@ -1,9 +1,9 @@
+import com.github.stickerifier.stickerify.DownloadOpenTelemetryAgentTask
 import com.github.stickerifier.stickerify.JlinkJavaLauncher
 import com.github.stickerifier.stickerify.JlinkTask
 import com.github.stickerifier.stickerify.JunitSeedArgumentProvider
 import io.spring.gradle.nullability.NullabilityOptions
 import org.gradle.internal.buildconfiguration.DaemonJvmPropertiesConfigurator
-import org.gradle.kotlin.dsl.support.serviceOf
 
 plugins {
     java
@@ -39,43 +39,44 @@ version = "2.0"
 description = "Telegram bot to convert medias into the format required to be used as Telegram stickers"
 
 java.toolchain {
-    languageVersion = JavaLanguageVersion.of(26)
+    languageVersion = JavaLanguageVersion.of(27)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
 tasks.named<UpdateDaemonJvm>(DaemonJvmPropertiesConfigurator.TASK_NAME) {
-    languageVersion = JavaLanguageVersion.of(26)
+    languageVersion = JavaLanguageVersion.of(27)
     vendor = JvmVendorSpec.ADOPTIUM
 }
 
-val jlink = tasks.register<JlinkTask>("jlink") {
+val jlink = tasks.register<JlinkTask>(JlinkTask.DEFAULT_TASK_NAME) {
     description = "Generates a minimal JRE for the project with compact object headers archive."
 
-    options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime")
+    options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime", "--generate-cds-archive")
     modules = listOf(
-            "java.instrument", // for JUnit
-            "java.naming",     // for Logback
-            "java.management", // for OpenTelemetry
-            "java.sql",        // for Tika
-            "jdk.unsupported"  // for Gson
+        "java.instrument", // for JUnit
+        "java.management", // for OpenTelemetry
+        "java.naming",     // for Logback
+        "java.sql",        // for Tika
+        "jdk.unsupported"  // for Gson
     )
     includeModulePath = false
     javaCompiler = javaToolchains.compilerFor(java.toolchain)
+}
 
-    val execOps = serviceOf<ExecOperations>()
-    doLast {
-        val javaExe = outputDirectory.file("jre/bin/java").get().asFile.absolutePath
-        execOps.exec {
-            commandLine(javaExe, "-XX:+UseCompactObjectHeaders", "-Xshare:dump")
-        }
+nullability {
+    jspecify {
+        experimental = true
     }
 }
 
 val CompileOptions.nullability: NullabilityOptions
-    get() = (this as ExtensionAware).extensions["nullability"] as NullabilityOptions
+    get() = (this as ExtensionAware).extensions.getByName("nullability") as NullabilityOptions
 
 tasks.named<JavaCompile>(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME) {
     options.nullability.checking = "tests"
+    options.nullability.jspecify {
+        experimental = true
+    }
 }
 
 tasks.test {
@@ -99,18 +100,29 @@ tasks.test {
 
 application {
     mainClass = "com.github.stickerifier.stickerify.runner.Main"
-    applicationDefaultJvmArgs = listOf("-XX:+UseCompactObjectHeaders", "-XX:+UseShenandoahGC", "-XX:ShenandoahGCMode=generational", "--enable-final-field-mutation=ALL-UNNAMED")
+    applicationDefaultJvmArgs = listOf("--enable-final-field-mutation=ALL-UNNAMED")
+}
+
+val openTelemetryAgent = tasks.register<DownloadOpenTelemetryAgentTask>(DownloadOpenTelemetryAgentTask.DEFAULT_TASK_NAME) {
+    description = "Downloads the OpenTelemetry agent for the distribution package."
+
+    version = libs.versions.opentelemetry.get()
+    destinationFile = layout.buildDirectory.file("openTelemetryAgent/opentelemetry-javaagent.jar")
+}
+
+tasks.named<CreateStartScripts>(ApplicationPlugin.TASK_START_SCRIPTS_NAME) {
+    val agentJarName = openTelemetryAgent.get().destinationFile.get().asFile.name
+    defaultJvmOpts = (defaultJvmOpts ?: emptyList()) + "-javaagent:$agentJarName"
+
+    (unixStartScriptGenerator as TemplateBasedScriptGenerator).template = resources.text.fromFile("src/main/resources/customUnixStartScript.txt")
+    (windowsStartScriptGenerator as TemplateBasedScriptGenerator).template = resources.text.fromFile("src/main/resources/customWindowsStartScript.txt")
 }
 
 distributions {
     main {
         contents {
             from(jlink)
+            from(openTelemetryAgent)
         }
     }
-}
-
-tasks.named<CreateStartScripts>(ApplicationPlugin.TASK_START_SCRIPTS_NAME) {
-    (unixStartScriptGenerator as TemplateBasedScriptGenerator).template = resources.text.fromFile("src/main/resources/customUnixStartScript.txt")
-    (windowsStartScriptGenerator as TemplateBasedScriptGenerator).template = resources.text.fromFile("src/main/resources/customWindowsStartScript.txt")
 }

@@ -486,6 +486,7 @@ public final class MediaHelper {
 				"-c:v", "libvpx-" + VP9_CODEC,
 				"-row-mt", "1",
 				"-threads", "2",
+				"-filter_threads", "1",
 				"-g", "120",
 				"-auto-alt-ref", "0",
 				"-pix_fmt", "yuv420p",
