@@ -21,6 +21,9 @@ public abstract class DownloadOpenTelemetryAgentTask extends DefaultTask {
 	@Input
 	public abstract Property<@NotNull String> getVersion();
 
+	@Input
+	public abstract Property<@NotNull Integer> getDownloadTimeoutMillis();
+
 	@OutputFile
 	public abstract RegularFileProperty getDestinationFile();
 
@@ -28,6 +31,8 @@ public abstract class DownloadOpenTelemetryAgentTask extends DefaultTask {
 	public DownloadOpenTelemetryAgentTask() {
 		setGroup("distribution");
 		setDescription("Downloads OpenTelemetry agent jar.");
+
+		getDownloadTimeoutMillis().convention(12000);
 	}
 
 	@TaskAction
@@ -37,7 +42,13 @@ public abstract class DownloadOpenTelemetryAgentTask extends DefaultTask {
 		var targetFile = getDestinationFile().get().getAsFile();
 
 		var _ = targetFile.getParentFile().mkdirs();
-		try (var inputStream = URI.create(urlString).toURL().openStream()) {
+
+		var connection = URI.create(urlString).toURL().openConnection();
+		int timeoutMillis = getDownloadTimeoutMillis().get();
+		connection.setConnectTimeout(timeoutMillis);
+		connection.setReadTimeout(timeoutMillis);
+
+		try (var inputStream = connection.getInputStream()) {
 			Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}

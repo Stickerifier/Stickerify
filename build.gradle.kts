@@ -53,11 +53,11 @@ val jlink = tasks.register<JlinkTask>(JlinkTask.DEFAULT_TASK_NAME) {
 
     options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime", "--generate-cds-archive")
     modules = listOf(
-            "java.instrument", // for JUnit
-            "java.management", // for OpenTelemetry
-            "java.naming",     // for Logback
-            "java.sql",        // for Tika
-            "jdk.unsupported"  // for Gson
+        "java.instrument", // for JUnit
+        "java.management", // for OpenTelemetry
+        "java.naming",     // for Logback
+        "java.sql",        // for Tika
+        "jdk.unsupported"  // for Gson
     )
     includeModulePath = false
     javaCompiler = javaToolchains.compilerFor(java.toolchain)
@@ -98,6 +98,11 @@ tasks.test {
     }
 }
 
+application {
+    mainClass = "com.github.stickerifier.stickerify.runner.Main"
+    applicationDefaultJvmArgs = listOf("--enable-final-field-mutation=ALL-UNNAMED")
+}
+
 val openTelemetryAgent = tasks.register<DownloadOpenTelemetryAgentTask>(DownloadOpenTelemetryAgentTask.DEFAULT_TASK_NAME) {
     description = "Downloads the OpenTelemetry agent for the distribution package."
 
@@ -105,9 +110,12 @@ val openTelemetryAgent = tasks.register<DownloadOpenTelemetryAgentTask>(Download
     destinationFile = layout.buildDirectory.file("openTelemetryAgent/opentelemetry-javaagent.jar")
 }
 
-application {
-    mainClass = "com.github.stickerifier.stickerify.runner.Main"
-    applicationDefaultJvmArgs = listOf("--enable-final-field-mutation=ALL-UNNAMED", "-javaagent:" + openTelemetryAgent.get().destinationFile.get().asFile.name)
+tasks.named<CreateStartScripts>(ApplicationPlugin.TASK_START_SCRIPTS_NAME) {
+    val agentJarName = openTelemetryAgent.get().destinationFile.get().asFile.name
+    defaultJvmOpts = (defaultJvmOpts ?: emptyList()) + "-javaagent:$agentJarName"
+
+    (unixStartScriptGenerator as TemplateBasedScriptGenerator).template = resources.text.fromFile("src/main/resources/customUnixStartScript.txt")
+    (windowsStartScriptGenerator as TemplateBasedScriptGenerator).template = resources.text.fromFile("src/main/resources/customWindowsStartScript.txt")
 }
 
 distributions {
@@ -117,9 +125,4 @@ distributions {
             from(openTelemetryAgent)
         }
     }
-}
-
-tasks.named<CreateStartScripts>(ApplicationPlugin.TASK_START_SCRIPTS_NAME) {
-    (unixStartScriptGenerator as TemplateBasedScriptGenerator).template = resources.text.fromFile("src/main/resources/customUnixStartScript.txt")
-    (windowsStartScriptGenerator as TemplateBasedScriptGenerator).template = resources.text.fromFile("src/main/resources/customWindowsStartScript.txt")
 }
