@@ -107,8 +107,12 @@ tasks.test {
 application {
     mainClass = "com.github.stickerifier.stickerify.runner.Main"
     applicationDefaultJvmArgs = listOf(
+        "-Xms64m",
+        "-Xmx320m",
         "-XX:G1PeriodicGCInterval=10000",
         "-XX:G1PeriodicGCSystemLoadThreshold=0",
+        "-XX:MaxHeapFreeRatio=20",
+        "-XX:MinHeapFreeRatio=10",
         "-XX:-ShrinkHeapInSteps",
         "--enable-final-field-mutation=ALL-UNNAMED"
     )
