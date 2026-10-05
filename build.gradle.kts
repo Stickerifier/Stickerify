@@ -51,7 +51,13 @@ tasks.named<UpdateDaemonJvm>(DaemonJvmPropertiesConfigurator.TASK_NAME) {
 val jlink = tasks.register<JlinkTask>(JlinkTask.DEFAULT_TASK_NAME) {
     description = "Generates a minimal JRE for the project with compact object headers archive."
 
-    options = listOf("--strip-debug", "--no-header-files", "--no-man-pages", "--ignore-modified-runtime", "--generate-cds-archive")
+    options = listOf(
+        "--strip-debug",
+        "--no-header-files",
+        "--no-man-pages",
+        "--ignore-modified-runtime",
+        "--generate-cds-archive"
+    )
     modules = listOf(
         "java.instrument", // for JUnit
         "java.management", // for OpenTelemetry
@@ -100,7 +106,12 @@ tasks.test {
 
 application {
     mainClass = "com.github.stickerifier.stickerify.runner.Main"
-    applicationDefaultJvmArgs = listOf("--enable-final-field-mutation=ALL-UNNAMED")
+    applicationDefaultJvmArgs = listOf(
+        "-XX:G1PeriodicGCInterval=10000",
+        "-XX:G1PeriodicGCSystemLoadThreshold=0",
+        "-XX:-ShrinkHeapInSteps",
+        "--enable-final-field-mutation=ALL-UNNAMED"
+    )
 }
 
 val openTelemetryAgent = tasks.register<DownloadOpenTelemetryAgentTask>(DownloadOpenTelemetryAgentTask.DEFAULT_TASK_NAME) {
